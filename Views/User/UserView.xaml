@@ -1,0 +1,217 @@
+﻿<UserControl x:Class="GymManagement.Views.User.UserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:GymManagement.ViewModels.User"
+             mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200"
+             FontFamily="Segoe UI">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Style cho RadioButton Danh Mục (Nhìn giống thẻ Tab dọc) -->
+            <Style x:Key="CategoryTabStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Height" Value="60"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Grid>
+                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="0,10,10,0" Margin="0,0,10,0"/>
+                                <!-- Chỉ báo màu (Thanh dọc bên trái) -->
+                                <Rectangle x:Name="indicator" HorizontalAlignment="Left" Width="4" Fill="Transparent" RadiusX="2" RadiusY="2" Margin="0,10"/>
+
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" Margin="20,0,0,0"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="#10FFFFFF"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="#203B82F6"/>
+                                    <Setter TargetName="indicator" Property="Fill" Value="#3B82F6"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource MainBackgroundGradient}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <!-- Cột Menu Trái -->
+            <ColumnDefinition Width="*"/>
+            <!-- Cột Món Ăn -->
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
+            <RowDefinition Height="80"/>
+            <!-- Bottom Cart -->
+        </Grid.RowDefinitions>
+
+        <!-- ========================== -->
+        <!-- 1. LOGO & MENU DANH MỤC (TRÁI) -->
+        <!-- ========================== -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0,0,1,0">
+            <StackPanel>
+                <!-- Logo Khu vực -->
+                <StackPanel Orientation="Horizontal" Margin="20,25">
+                    <Border Width="40" Height="40" CornerRadius="10" Background="{StaticResource AccentGradient}">
+                        <TextBlock Text="POS" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock Text="MÌ CAY" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="Sasin" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Text="DANH MỤC" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,10" Opacity="0.7"/>
+
+                <!-- Danh sách loại món -->
+                <RadioButton Content="🔥 Mì Cay &amp; Lẩu" Style="{StaticResource CategoryTabStyle}" IsChecked="True" Click="Filter_Click" Tag="Mì Cay"/>
+                <RadioButton Content="🥟 Ăn Vặt" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ Chiên"/>
+                <RadioButton Content="🥤 Nước Uống" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Nước Uống"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ========================== -->
+        <!-- 2. HEADER (PHẢI) -->
+        <!-- ========================== -->
+        <Grid Grid.Row="0" Grid.Column="1" Margin="20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Search Box -->
+            <TextBox Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}" ToolTip="Tìm món ăn (Ví dụ: Bò, Kim chi...)" Width="400" Height="45" HorizontalAlignment="Left"/>
+
+            <!-- Cụm nút chức năng -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <!-- Nút Gọi Nhân Viên -->
+                <Button Style="{StaticResource GlassButtonStyle}" Width="45" Height="45" Margin="0,0,10,0" Background="#20F59E0B" Click="BtnGoiNhanVien_Click" ToolTip="Gọi phục vụ">
+                    <TextBlock Text="🔔" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+
+                <!-- Info Bàn -->
+                <Border Background="#20FFFFFF" CornerRadius="12" Height="45" Padding="15,0" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Bàn:" Foreground="{StaticResource TextSecondary}" Margin="0,0,5,0"/>
+                        <TextBlock Text="01" Foreground="White" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- [MỚI] Nút Đăng Xuất -->
+                <Button Style="{StaticResource GlassButtonStyle}" Width="45" Height="45" Background="#20EF4444" Click="BtnDangXuat_Click" ToolTip="Đăng xuất / Đổi bàn">
+                    <Path Data="{StaticResource IconLogoutGeo}" Fill="White" Stretch="Uniform" Width="16"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ========================== -->
+        <!-- 3. DANH SÁCH MÓN ĂN (GIỮA) -->
+        <!-- ========================== -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="20,0,20,0" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="ItemsControlMenu" ItemsSource="{Binding MenuHienThi}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Thẻ món ăn -->
+                        <Button Style="{StaticResource NavButtonStyle}" Width="200" Height="240" Margin="0,0,15,15" Padding="0" Click="Product_Click" Tag="{Binding}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#25FFFFFF" CornerRadius="15" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Cursor="Hand">
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="MouseOver">
+                                                    <Storyboard>
+                                                        <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#40FFFFFF" Duration="0:0:0.1"/>
+                                                    </Storyboard>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="140"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Ảnh -->
+                                            <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
+                                                <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
+                                            </Border>
+
+                                            <!-- Thông tin -->
+                                            <StackPanel Grid.Row="1" Margin="12">
+                                                <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
+                                                <Grid Margin="0,5,0,0" VerticalAlignment="Bottom">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                                        <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
+                                                        <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
+                                                    </StackPanel>
+                                                    <!-- Nút Cộng Tròn -->
+                                                    <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource AccentGradient}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
+                                                        <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,-2,0,0"/>
+                                                    </Border>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- ========================== -->
+        <!-- 4. FOOTER GIỎ HÀNG -->
+        <!-- ========================== -->
+        <Border Grid.Row="2" Grid.Column="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0,1,0,0" Padding="20,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{StaticResource AccentGradient}" CornerRadius="25" Width="50" Height="50" Margin="0,0,15,0">
+                        <TextBlock Text="🛒" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TongSoLuong, StringFormat='{}Đã chọn {0} món'}" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Tạm tính: " Foreground="White"/>
+                            <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="XEM GIỎ HÀNG &amp; THANH TOÁN" Click="BtnThanhToan_Click" Style="{StaticResource GlassButtonStyle}" Width="250" Background="{StaticResource SuccessGreen}" FontSize="15" FontWeight="Bold"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

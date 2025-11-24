@@ -1,0 +1,144 @@
+﻿<UserControl x:Class="GymManagement.Views.Admin.QuanLyBanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:GymManagement.ViewModels"
+             xmlns:helpers="clr-namespace:GymManagement.Helpers" 
+             mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Khai báo Converter -->
+            <helpers:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource MainBackgroundGradient}">
+        <Grid Margin="25">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1.2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- CỘT 1: SƠ ĐỒ BÀN -->
+            <Grid Grid.Column="0" Margin="0,0,20,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="SƠ ĐỒ BÀN ĂN" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
+
+                <ScrollViewer Grid.Row="1">
+                    <ItemsControl ItemsSource="{Binding DanhSachBan}">
+                        <!-- [ĐÃ SỬA LỖI CÚ PHÁP TẠI ĐÂY] -->
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SelectTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Width="130" Height="130" Margin="8"
+                                        Style="{StaticResource NavButtonStyle}" Padding="0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bdr" CornerRadius="20" BorderThickness="2" Background="#10FFFFFF" BorderBrush="#50FFFFFF" Cursor="Hand">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="Bold" FontSize="18"/>
+                                                    <TextBlock x:Name="txtStatus" Text="{Binding TrangThai}" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Có Khách">
+                                                    <Setter TargetName="bdr" Property="Background" Value="#20EF4444"/>
+                                                    <Setter TargetName="bdr" Property="BorderBrush" Value="{StaticResource DangerRed}"/>
+                                                    <Setter TargetName="txtStatus" Property="Foreground" Value="#EF4444"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã Đặt">
+                                                    <Setter TargetName="bdr" Property="Background" Value="#20F59E0B"/>
+                                                    <Setter TargetName="bdr" Property="BorderBrush" Value="{StaticResource WarningYellow}"/>
+                                                    <Setter TargetName="txtStatus" Property="Foreground" Value="{StaticResource WarningYellow}"/>
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- CỘT 2: CHI TIẾT HÓA ĐƠN -->
+            <Border Grid.Column="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header Hóa Đơn -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="CHI TIẾT ĐƠN HÀNG" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="{Binding SelectedBan.TenBan, TargetNullValue='Chưa chọn bàn'}" Foreground="{StaticResource TextSecondary}" FontSize="14" Margin="0,5,0,0"/>
+                        <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,15"/>
+                    </StackPanel>
+
+                    <!-- Danh sách món -->
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding ChiTietDonHang}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding TenMonHienThi}" Foreground="White" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding GhiChu}" Foreground="#94A3B8" FontSize="11" FontStyle="Italic" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding ThanhTien, StringFormat='N0'}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding SoLuong, StringFormat='x{0}'}" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Footer Thanh Toán -->
+                    <StackPanel Grid.Row="2" Margin="0,15,0,0">
+                        <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,0,0,15"/>
+                        <Grid>
+                            <TextBlock Text="TỔNG CỘNG:" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Text="{Binding TongTienCanThu, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Nút Thanh Toán (Đã gán Converter) -->
+                        <Button Content="THANH TOÁN &amp; TRẢ BÀN" 
+                                Command="{Binding CheckoutCommand}"
+                                Style="{StaticResource GlassButtonStyle}" 
+                                Background="{StaticResource SuccessGreen}" 
+                                Height="50" Margin="0,15,0,0" FontSize="14" FontWeight="Bold"
+                                IsEnabled="{Binding ChiTietDonHang, Converter={StaticResource NullToBoolConverter}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

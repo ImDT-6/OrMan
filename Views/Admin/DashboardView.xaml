@@ -1,0 +1,129 @@
+﻿<UserControl x:Class="GymManagement.Views.Admin.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GymManagement.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             FontFamily="Segoe UI">
+
+    <!-- Sử dụng Resources từ InputStyles đã được nạp ở AdminView -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="1.2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- CỘT TRÁI: SƠ ĐỒ BÀN (Tùy chỉnh Mì Cay) -->
+        <Border Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="25" Margin="0,0,20,0" Padding="25">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Tiêu đề & Chú thích -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <TextBlock Text="SƠ ĐỒ BÀN ĂN &amp; TRẠNG THÁI" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Ellipse Width="10" Height="10" Fill="{StaticResource GlassBorder}" Margin="0,0,5,0"/>
+                        <TextBlock Text="Trống" Foreground="#CCC" Margin="0,0,15,0"/>
+                        <Ellipse Width="10" Height="10" Fill="{StaticResource DangerRed}" Margin="0,0,5,0"/>
+                        <TextBlock Text="Đang Ăn" Foreground="#CCC" Margin="0,0,15,0"/>
+                        <Ellipse Width="10" Height="10" Fill="{StaticResource WarningYellow}" Margin="0,0,5,0"/>
+                        <TextBlock Text="Đã Đặt" Foreground="#CCC"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Vùng cuộn chứa các bàn (Giả lập) -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <WrapPanel HorizontalAlignment="Left">
+                        <Border Width="140" Height="140" CornerRadius="20" Background="#20EF4444" BorderBrush="{StaticResource DangerRed}" BorderThickness="2" Margin="10">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="Bàn 01" Foreground="White" FontWeight="Bold" FontSize="20"/>
+                                <TextBlock Text="Level 4 🔥" Foreground="#EF4444" FontSize="16" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                                <TextBlock Text="00:45" Foreground="#CCC" FontSize="12" Margin="0,2,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Width="140" Height="140" CornerRadius="20" Background="#10FFFFFF" BorderBrush="#50FFFFFF" BorderThickness="1" Margin="10" Opacity="0.8">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="Bàn 02" Foreground="White" FontWeight="SemiBold" FontSize="20"/>
+                                <TextBlock Text="Trống" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Width="140" Height="140" CornerRadius="20" Background="#20F59E0B" BorderBrush="{StaticResource WarningYellow}" BorderThickness="2" Margin="10">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="Bàn 03" Foreground="White" FontWeight="Bold" FontSize="20"/>
+                                <TextBlock Text="Đặt - Level 7" Foreground="{StaticResource WarningYellow}" FontSize="14" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                                <TextBlock Text="18:30" Foreground="#CCC" FontSize="12" Margin="0,2,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- CỘT PHẢI: THỐNG KÊ NHANH (Bindings từ AdminViewModel) -->
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="THỐNG KÊ MÌ CAY" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
+
+            <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Margin="0,0,0,15" Padding="20">
+                <Grid>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                            <Border Width="40" Height="40" CornerRadius="12" Background="#203B82F6">
+                                <Path Data="{StaticResource IconTableGeo}" Fill="#3B82F6" Width="20" Stretch="Uniform"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Bàn Đang Dùng" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding BanDaDat}" Foreground="White" FontWeight="Bold" FontSize="36"/>
+                            <TextBlock Text="/30" Foreground="{StaticResource TextSecondary}" FontSize="20" VerticalAlignment="Bottom" Margin="5,0,0,6"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Margin="0,0,0,15" Padding="20">
+                <Grid>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                            <Border Width="40" Height="40" CornerRadius="12" Background="#2010B981">
+                                <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Width="20" Stretch="Uniform"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Doanh Thu Ngày" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
+                        <TextBlock Text="{Binding DoanhThu}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="36"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
+                <Grid>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                            <Border Width="40" Height="40" CornerRadius="12" Background="#20EF4444">
+                                <TextBlock Text="🌶️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Mức Cay Phổ Biến" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
+                        <TextBlock Text="Level 3" Foreground="{StaticResource DangerRed}" FontWeight="Bold" FontSize="36"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Margin="0,30,0,0" Padding="15" Background="#10FFFFFF" CornerRadius="15">
+                <TextBlock Text="💡 Tip: Bấm vào bàn để xem chi tiết hóa đơn hoặc gọi món." Foreground="#94A3B8" TextWrapping="Wrap" FontStyle="Italic"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>

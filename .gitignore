@@ -1,0 +1,25 @@
+# Build outputs
+bin/
+obj/
+Debug/
+Release/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio workspace
+.vs/
+
+# NuGet packages
+*.nupkg
+packages/
+*.nuget.cache
+
+# Logs and temp
+*.log
+*.tlog
+_ReSharper*/
+*.DotSettings.user
