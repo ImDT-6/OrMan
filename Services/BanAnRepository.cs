@@ -92,5 +92,18 @@ namespace GymManagement.Services
 
             _context.SaveChanges();
         }
+
+        public void ResolvePaymentRequest(int soBan)
+        {
+            using (var context = new MenuContext())
+            {
+                var ban = context.BanAns.Find(soBan);
+                if (ban != null)
+                {
+                    ban.YeuCauThanhToan = false; // Tắt yêu cầu
+                    context.SaveChanges();
+                }
+            }
+        }
     }
 }

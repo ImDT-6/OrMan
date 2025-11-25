@@ -70,10 +70,26 @@ namespace GymManagement.ViewModels.User
             }
         }
 
+        // [SỬA LOGIC GỘP ĐƠN TẠI ĐÂY]
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
-            var item = new CartItem(mon, sl, capDo, ghiChu);
-            GioHang.Add(item);
+            // 1. Tìm xem món này đã có trong giỏ chưa (Khớp Mã, Cấp độ và Ghi chú)
+            var itemDaCo = GioHang.FirstOrDefault(x => x.MonAn.MaMon == mon.MaMon
+                                                    && x.CapDoCay == capDo
+                                                    && x.GhiChu == ghiChu);
+
+            if (itemDaCo != null)
+            {
+                // 2. Nếu có rồi -> Cộng dồn số lượng
+                itemDaCo.SoLuong += sl;
+            }
+            else
+            {
+                // 3. Nếu chưa có -> Tạo mới và thêm vào
+                var item = new CartItem(mon, sl, capDo, ghiChu);
+                GioHang.Add(item);
+            }
+
             UpdateCartInfo();
         }
 

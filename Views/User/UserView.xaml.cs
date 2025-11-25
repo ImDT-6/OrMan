@@ -40,15 +40,13 @@ namespace GymManagement.Views.User
         {
             if (sender is Button btn && btn.Tag is MonAn monAn)
             {
-                // [SỬA QUAN TRỌNG] Kiểm tra trạng thái hết hàng trước
                 if (monAn.IsSoldOut)
                 {
                     MessageBox.Show($"Món '{monAn.TenMon}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!", "Rất tiếc", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return; // Dừng lại, không mở popup
+                    return;
                 }
 
                 var popup = new ChiTietMonWindow(monAn);
-
                 var mainWindow = Application.Current.MainWindow;
                 if (mainWindow != null) mainWindow.Opacity = 0.4;
 
@@ -61,6 +59,7 @@ namespace GymManagement.Views.User
             }
         }
 
+        // [SỬA] Mở cửa sổ xem giỏ hàng trước khi gửi
         private void BtnThanhToan_Click(object sender, RoutedEventArgs e)
         {
             if (_vm.GioHang.Count == 0)
@@ -69,13 +68,22 @@ namespace GymManagement.Views.User
                 return;
             }
 
-            if (MessageBox.Show($"Xác nhận gửi đơn hàng?\nTổng tiền: {_vm.TongTienCart:N0} VNĐ", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            // Mở cửa sổ Giỏ Hàng
+            var cartWindow = new GioHangWindow(_vm);
+
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null) mainWindow.Opacity = 0.4;
+
+            // Nếu khách bấm "Gửi Đơn" trong cửa sổ kia (DialogResult == true)
+            if (cartWindow.ShowDialog() == true)
             {
                 if (_vm.SubmitOrder())
                 {
                     MessageBox.Show("Đã gửi đơn xuống bếp thành công!\nVui lòng đợi trong giây lát.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
+
+            if (mainWindow != null) mainWindow.Opacity = 1;
         }
 
         private void BtnDangXuat_Click(object sender, RoutedEventArgs e)

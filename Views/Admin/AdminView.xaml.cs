@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
+using GymManagement.Models;
 using GymManagement.ViewModels;
 
 namespace GymManagement.Views.Admin
@@ -19,6 +21,24 @@ namespace GymManagement.Views.Admin
 
             // Mặc định vào là hiện Dashboard
             ChuyenSangChucNang("Tổng Quan");
+        }
+
+        // [MỚI] Hàm công khai để Dashboard gọi
+        public void ChuyenDenBanCanXuLy(BanAn ban)
+        {
+            // 1. Chuyển sang màn hình Quản Lý Bàn
+            ChuyenSangChucNang("Quản Lý Bàn");
+
+            // 2. Chọn đúng cái bàn cần xử lý trong ViewModel của màn hình đó
+            if (_banView != null && _banView.DataContext is QuanLyBanViewModel vm)
+            {
+                // Tìm bàn trong danh sách của ViewModel (để đảm bảo object reference đúng)
+                var banTrongList = vm.DanhSachBan.FirstOrDefault(b => b.SoBan == ban.SoBan);
+                if (banTrongList != null)
+                {
+                    vm.SelectedBan = banTrongList;
+                }
+            }
         }
 
         // Hàm trung tâm xử lý việc chuyển đổi
