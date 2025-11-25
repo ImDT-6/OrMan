@@ -1,8 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using GymManagement.Data; // [QUAN TRỌNG] Đã thêm using Data
+using GymManagement.Data;
 using GymManagement.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System;
 
@@ -22,6 +21,18 @@ namespace GymManagement.Services
         {
             var list = _context.MonAns.ToList();
             return new ObservableCollection<MonAn>(list);
+        }
+
+        // [SỬA] Trả về TOÀN BỘ món ăn (kể cả món hết hàng) để hiển thị cho User
+        // Nhưng nhớ dùng context mới để lấy dữ liệu mới nhất
+        public ObservableCollection<MonAn> GetAvailableMenu()
+        {
+            using (var freshContext = new MenuContext())
+            {
+                // Lấy hết, không lọc IsSoldOut nữa
+                var list = freshContext.MonAns.ToList();
+                return new ObservableCollection<MonAn>(list);
+            }
         }
 
         public void Add(MonAn monAn)
@@ -49,6 +60,17 @@ namespace GymManagement.Services
                 item.GiaBan = monAn.GiaBan;
                 item.DonViTinh = monAn.DonViTinh;
                 item.HinhAnhUrl = monAn.HinhAnhUrl;
+                item.IsSoldOut = monAn.IsSoldOut;
+                _context.SaveChanges();
+            }
+        }
+
+        public void ToggleSoldOut(string maMon)
+        {
+            var item = _context.MonAns.Find(maMon);
+            if (item != null)
+            {
+                item.IsSoldOut = !item.IsSoldOut;
                 _context.SaveChanges();
             }
         }
@@ -56,7 +78,6 @@ namespace GymManagement.Services
         public void CreateOrder(int soBan, decimal tongTien, string ghiChu, IEnumerable<CartItem> gioHang)
         {
             string maHD = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
-
             var hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan);
             _context.HoaDons.Add(hoaDon);
 
@@ -75,8 +96,8 @@ namespace GymManagement.Services
             else
             {
                 ban.TrangThai = "Có Khách";
+                ban.YeuCauThanhToan = false;
             }
-
             _context.SaveChanges();
         }
     }

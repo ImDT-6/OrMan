@@ -1,21 +1,34 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.ComponentModel.DataAnnotations; // Thêm dòng này
-using System.ComponentModel.DataAnnotations.Schema; // Thêm dòng này
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GymManagement.Models
 {
-    // Class cha
     public class MonAn : INotifyPropertyChanged
     {
-        [Key] // Đánh dấu đây là Khóa chính
+        [Key]
         public string MaMon { get; set; }
         public string TenMon { get; set; }
         public decimal GiaBan { get; set; }
         public string DonViTinh { get; set; }
         public string HinhAnhUrl { get; set; }
 
-        // [BẮT BUỘC] Constructor rỗng cho Entity Framework
+        // [SỬA] Chuyển thành Property đầy đủ
+        private bool _isSoldOut;
+        public bool IsSoldOut
+        {
+            get => _isSoldOut;
+            set
+            {
+                if (_isSoldOut != value)
+                {
+                    _isSoldOut = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         protected MonAn() { }
 
         public MonAn(string maMon, string tenMon, decimal giaBan, string donViTinh)
@@ -24,6 +37,7 @@ namespace GymManagement.Models
             TenMon = tenMon;
             GiaBan = giaBan;
             DonViTinh = donViTinh;
+            IsSoldOut = false;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -38,10 +52,7 @@ namespace GymManagement.Models
         public int CapDoCayMin { get; set; }
         public int CapDoCayMax { get; set; }
         public string LoaiMi { get; set; }
-
-        // Constructor rỗng
         protected MonMiCay() { }
-
         public MonMiCay(string maMon, string tenMon, decimal giaBan, string loaiMi, int min, int max)
             : base(maMon, tenMon, giaBan, "Tô")
         {
@@ -54,10 +65,7 @@ namespace GymManagement.Models
     public class MonPhu : MonAn
     {
         public string TheLoai { get; set; }
-
-        // Constructor rỗng
         protected MonPhu() { }
-
         public MonPhu(string maMon, string tenMon, decimal giaBan, string donViTinh, string theLoai)
             : base(maMon, tenMon, giaBan, donViTinh)
         {

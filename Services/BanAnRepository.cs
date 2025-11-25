@@ -2,14 +2,13 @@
 using System.Linq;
 using GymManagement.Data;
 using GymManagement.Models;
-using Microsoft.EntityFrameworkCore; // Cần cho Include/Where
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace GymManagement.Services
 {
     public class BanAnRepository
     {
-        // [QUAN TRỌNG] Chỉ khai báo biến _context MỘT LẦN duy nhất ở đây
         private readonly MenuContext _context;
 
         public BanAnRepository()
@@ -18,14 +17,16 @@ namespace GymManagement.Services
             _context.Database.EnsureCreated();
         }
 
-        // 1. Lấy danh sách tất cả bàn
+        // [SỬA QUAN TRỌNG] Dùng context mới mỗi khi gọi để đảm bảo dữ liệu Real-time chính xác nhất
         public ObservableCollection<BanAn> GetAll()
         {
-            var list = _context.BanAns.OrderBy(b => b.SoBan).ToList();
-            return new ObservableCollection<BanAn>(list);
+            using (var freshContext = new MenuContext())
+            {
+                var list = freshContext.BanAns.OrderBy(b => b.SoBan).ToList();
+                return new ObservableCollection<BanAn>(list);
+            }
         }
 
-        // 2. Khởi tạo bàn mẫu (nếu chưa có)
         public void InitTables()
         {
             if (!_context.BanAns.Any())
@@ -38,10 +39,9 @@ namespace GymManagement.Services
             }
         }
 
-        // 3. Cập nhật trạng thái bàn
-        public void UpdateStatus(BanAn ban, string status)
+        public void UpdateStatus(int soBan, string status)
         {
-            var item = _context.BanAns.Find(ban.SoBan);
+            var item = _context.BanAns.Find(soBan);
             if (item != null)
             {
                 item.TrangThai = status;
@@ -49,17 +49,28 @@ namespace GymManagement.Services
             }
         }
 
-        // 4. Lấy hóa đơn CHƯA THANH TOÁN của một bàn cụ thể (Cho Admin xem)
+        public void RequestPayment(int soBan)
+        {
+            // Dùng context mới để đảm bảo User update được ngay dù Admin đang mở
+            using (var context = new MenuContext())
+            {
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.YeuCauThanhToan = true;
+                    context.SaveChanges();
+                }
+            }
+        }
+
         public HoaDon GetActiveOrder(int soBan)
         {
-            // Tìm hóa đơn mới nhất của bàn này mà chưa thanh toán
             return _context.HoaDons
                            .Where(h => h.SoBan == soBan && !h.DaThanhToan)
                            .OrderByDescending(h => h.NgayTao)
                            .FirstOrDefault();
         }
 
-        // 5. Lấy chi tiết món ăn của hóa đơn đó
         public List<ChiTietHoaDon> GetOrderDetails(string maHoaDon)
         {
             return _context.ChiTietHoaDons
@@ -67,16 +78,17 @@ namespace GymManagement.Services
                            .ToList();
         }
 
-        // 6. Thanh toán hóa đơn & Trả bàn
         public void CheckoutTable(int soBan, string maHoaDon)
         {
-            // Đánh dấu hóa đơn đã thanh toán
             var hd = _context.HoaDons.Find(maHoaDon);
             if (hd != null) hd.DaThanhToan = true;
 
-            // Trả bàn về trạng thái Trống
             var ban = _context.BanAns.Find(soBan);
-            if (ban != null) ban.TrangThai = "Trống";
+            if (ban != null)
+            {
+                ban.TrangThai = "Trống";
+                ban.YeuCauThanhToan = false;
+            }
 
             _context.SaveChanges();
         }

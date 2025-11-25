@@ -12,9 +12,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Khai báo Converter -->
             <helpers:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -25,7 +24,6 @@
                 <ColumnDefinition Width="1.2*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- CỘT 1: SƠ ĐỒ BÀN -->
             <Grid Grid.Column="0" Margin="0,0,20,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -36,7 +34,6 @@
 
                 <ScrollViewer Grid.Row="1">
                     <ItemsControl ItemsSource="{Binding DanhSachBan}">
-                        <!-- [ĐÃ SỬA LỖI CÚ PHÁP TẠI ĐÂY] -->
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
@@ -52,22 +49,29 @@
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="bdr" CornerRadius="20" BorderThickness="2" Background="#10FFFFFF" BorderBrush="#50FFFFFF" Cursor="Hand">
-                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                    <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="Bold" FontSize="18"/>
-                                                    <TextBlock x:Name="txtStatus" Text="{Binding TrangThai}" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0"/>
-                                                </StackPanel>
+                                                <Grid>
+                                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="Bold" FontSize="18"/>
+                                                        <TextBlock x:Name="txtStatus" Text="{Binding TrangThai}" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0"/>
+                                                    </StackPanel>
+
+                                                    <Border x:Name="PaymentAlert" Background="#AAEF4444" CornerRadius="18" Visibility="Collapsed">
+                                                        <TextBlock Text="Cần&#10;Thanh&#10;Toán" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+                                                    </Border>
+                                                </Grid>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <DataTrigger Binding="{Binding TrangThai}" Value="Có Khách">
-                                                    <Setter TargetName="bdr" Property="Background" Value="#20EF4444"/>
+                                                    <Setter TargetName="bdr" Property="Background" Value="#203B82F6"/>
+                                                    <Setter TargetName="bdr" Property="BorderBrush" Value="#3B82F6"/>
+                                                    <Setter TargetName="txtStatus" Property="Foreground" Value="#3B82F6"/>
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding YeuCauThanhToan}" Value="True">
+                                                    <Setter TargetName="PaymentAlert" Property="Visibility" Value="Visible"/>
                                                     <Setter TargetName="bdr" Property="BorderBrush" Value="{StaticResource DangerRed}"/>
-                                                    <Setter TargetName="txtStatus" Property="Foreground" Value="#EF4444"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding TrangThai}" Value="Đã Đặt">
-                                                    <Setter TargetName="bdr" Property="Background" Value="#20F59E0B"/>
-                                                    <Setter TargetName="bdr" Property="BorderBrush" Value="{StaticResource WarningYellow}"/>
-                                                    <Setter TargetName="txtStatus" Property="Foreground" Value="{StaticResource WarningYellow}"/>
-                                                </DataTrigger>
+
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
                                                 </Trigger>
@@ -81,24 +85,40 @@
                 </ScrollViewer>
             </Grid>
 
-            <!-- CỘT 2: CHI TIẾT HÓA ĐƠN -->
             <Border Grid.Column="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Header Hóa Đơn -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
                         <TextBlock Text="CHI TIẾT ĐƠN HÀNG" FontSize="18" FontWeight="Bold" Foreground="White"/>
                         <TextBlock Text="{Binding SelectedBan.TenBan, TargetNullValue='Chưa chọn bàn'}" Foreground="{StaticResource TextSecondary}" FontSize="14" Margin="0,5,0,0"/>
                         <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,15"/>
                     </StackPanel>
 
-                    <!-- Danh sách món -->
-                    <ScrollViewer Grid.Row="1">
+                    <Button Grid.Row="1" Content="Dắt Khách Vào Bàn Này" 
+                            Command="{Binding AssignTableCommand}"
+                            Background="{StaticResource AccentGradient}" Height="40" FontSize="14" Margin="0,0,0,15">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource GlassButtonStyle}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding SelectedBan.TrangThai}" Value="Trống"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <ScrollViewer Grid.Row="2">
                         <ItemsControl ItemsSource="{Binding ChiTietDonHang}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -121,21 +141,19 @@
                         </ItemsControl>
                     </ScrollViewer>
 
-                    <!-- Footer Thanh Toán -->
-                    <StackPanel Grid.Row="2" Margin="0,15,0,0">
+                    <StackPanel Grid.Row="3" Margin="0,15,0,0">
                         <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,0,0,15"/>
                         <Grid>
                             <TextBlock Text="TỔNG CỘNG:" Foreground="White" FontWeight="Bold" FontSize="16"/>
                             <TextBlock Text="{Binding TongTienCanThu, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>
                         </Grid>
 
-                        <!-- Nút Thanh Toán (Đã gán Converter) -->
                         <Button Content="THANH TOÁN &amp; TRẢ BÀN" 
                                 Command="{Binding CheckoutCommand}"
                                 Style="{StaticResource GlassButtonStyle}" 
                                 Background="{StaticResource SuccessGreen}" 
                                 Height="50" Margin="0,15,0,0" FontSize="14" FontWeight="Bold"
-                                IsEnabled="{Binding ChiTietDonHang, Converter={StaticResource NullToBoolConverter}}"/>
+                                IsEnabled="{Binding SelectedBan, Converter={StaticResource NullToBoolConverter}}"/>
                     </StackPanel>
                 </Grid>
             </Border>

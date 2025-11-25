@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:vm="clr-namespace:GymManagement.ViewModels"
+             
+             xmlns:vm="clr-namespace:GymManagement.ViewModels.Admin" 
+             
              d:DataContext="{d:DesignInstance Type=vm:ThucDonViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100"
@@ -15,7 +17,64 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Style TabItem (Giữ nguyên) -->
+            <!-- Khai báo Converter chuẩn của WPF -->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+            <DataTemplate x:Key="FoodCardTemplate">
+                <Border Width="220" Height="330" Margin="10" 
+                        Background="#25FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
+                            <Grid>
+                                <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
+                                <Border Background="#AA000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="SOLD OUT" Foreground="Red" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                        <TextBlock.RenderTransform>
+                                            <RotateTransform Angle="-30"/>
+                                        </TextBlock.RenderTransform>
+                                    </TextBlock>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Row="1" Margin="15,10,15,0">
+                            <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding MaMon}" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,2,0,5"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="14" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <CheckBox Grid.Row="2" Content="Báo Hết Hàng" 
+                                  IsChecked="{Binding IsSoldOut}"
+                                  Command="{Binding DataContext.ToggleSoldOutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  CommandParameter="{Binding}"
+                                  Foreground="White" Margin="15,5"/>
+
+                        <Border Grid.Row="3" Background="#10000000" CornerRadius="0,0,15,15" Padding="10">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Sửa" 
+                                        Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Margin="0,0,5,0" Background="#203B82F6"/>
+                                <Button Content="Xóa" 
+                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Background="#20EF4444" Foreground="#EF4444"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
             <Style TargetType="TabItem">
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                 <Setter Property="Background" Value="Transparent"/>
@@ -45,60 +104,6 @@
                 </Setter>
             </Style>
 
-            <!-- Template Thẻ Món Ăn (Giữ nguyên) -->
-            <DataTemplate x:Key="FoodCardTemplate">
-                <Border Width="220" Height="290" Margin="10" 
-                        Background="#25FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15">
-                    <!-- ... (Phần hiển thị ảnh/thông tin giữ nguyên) ... -->
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="140"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- ... (Phần Ảnh và Info giữ nguyên) ... -->
-                        <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
-                            <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
-                        </Border>
-                        <!-- Badge -->
-                        <Border Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Background="#CCEF4444" CornerRadius="8" Padding="8,4">
-                            <!-- Dùng FallbackValue để tránh lỗi nếu không phải Mì Cay -->
-                            <TextBlock Text="{Binding CapDoCayMin, StringFormat='Lv{0}', FallbackValue=''}" Foreground="White" FontWeight="Bold" FontSize="12"/>
-                        </Border>
-
-                        <StackPanel Grid.Row="1" Margin="15,10,15,0">
-                            <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="Bold" FontSize="16" TextWrapping="Wrap" MaxHeight="42" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding MaMon}" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,2,0,5"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                                <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="18"/>
-                                <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="14" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
-                                <TextBlock Text="/" Foreground="{StaticResource TextSecondary}" Margin="5,0,5,3" VerticalAlignment="Bottom"/>
-                                <TextBlock Text="{Binding DonViTinh}" Foreground="{StaticResource TextSecondary}" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- [SỬA ĐOẠN NÀY] Nút Thao Tác -->
-                        <Border Grid.Row="2" Background="#10000000" CornerRadius="0,0,15,15" Padding="10">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- Nút Sửa: Binding Command tìm lên UserControl cha -->
-                                <Button Content="Sửa" 
-                                        Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Margin="0,0,5,0" Background="#203B82F6"/>
-
-                                <!-- Nút Xóa: Tương tự -->
-                                <Button Content="Xóa" 
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Background="#20EF4444" Foreground="#EF4444"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </Border>
-            </DataTemplate>
-
-            <!-- Style ListBox (Giữ nguyên) -->
             <Style TargetType="ListBox">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
@@ -133,7 +138,6 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -141,67 +145,42 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- Header -->
                 <RowDefinition Height="*"/>
-                <!-- Content -->
             </Grid.RowDefinitions>
 
-            <!-- HEADER -->
             <StackPanel Grid.Row="0" Margin="25,25,25,0">
                 <TextBlock Text="QUẢN LÝ THỰC ĐƠN" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-
                 <Grid Margin="0,15,0,30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <TextBox Grid.Column="0" 
                              ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
                              Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}"
                              TextChanged="TextBox_TextChanged"
                              Style="{StaticResource SearchTextBoxStyle}" 
-                             Height="45" 
-                             VerticalContentAlignment="Center" 
-                             Margin="0,0,20,0"/>
-
-                    <!-- [ĐÃ SỬA] Thêm Command="{Binding AddCommand}" -->
-                    <Button Grid.Column="1" 
-                            Command="{Binding AddCommand}"
-                            Content="+ Thêm Món" 
-                            Style="{StaticResource GlassButtonStyle}" 
-                            Height="45" 
-                            Padding="25,0" 
-                            Background="{StaticResource SuccessGreen}" 
-                            FontSize="15"/>
+                             Height="45" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
+                    <Button Grid.Column="1" Command="{Binding AddCommand}" Content="+ Thêm Món" Style="{StaticResource GlassButtonStyle}" Height="45" Padding="25,0" Background="{StaticResource SuccessGreen}" FontSize="15"/>
                 </Grid>
             </StackPanel>
 
-            <!-- TAB CONTROL -->
             <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="25,0,25,25" x:Name="MenuTabControl" SelectionChanged="MenuTabControl_SelectionChanged">
-
-                <!-- TAB 1: MÌ CAY -->
                 <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
-                        <!-- Thêm margin top cho nội dung -->
                         <ListBox x:Name="ListBoxMiCay" ItemTemplate="{StaticResource FoodCardTemplate}"/>
                     </ScrollViewer>
                 </TabItem>
-
-                <!-- TAB 2: ĐỒ CHIÊN -->
                 <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
                         <ListBox x:Name="ListBoxDoChien" ItemTemplate="{StaticResource FoodCardTemplate}"/>
                     </ScrollViewer>
                 </TabItem>
-
-                <!-- TAB 3: NƯỚC UỐNG -->
                 <TabItem Header="🥤 NƯỚC UỐNG" Tag="Nước Uống">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
                         <ListBox x:Name="ListBoxNuocUong" ItemTemplate="{StaticResource FoodCardTemplate}"/>
                     </ScrollViewer>
                 </TabItem>
-
             </TabControl>
         </Grid>
     </Border>

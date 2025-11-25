@@ -7,14 +7,13 @@ using System.Windows.Input;
 using GymManagement.Helpers;
 using GymManagement.Models;
 using GymManagement.Services;
-using GymManagement.Views.Admin; // [QUAN TRỌNG] để gọi ThemSuaMonWindow
+using GymManagement.Views.Admin;
 
-namespace GymManagement.ViewModels.Admin // Namespace đúng
+namespace GymManagement.ViewModels.Admin
 {
     public class ThucDonViewModel : INotifyPropertyChanged
     {
         private readonly ThucDonRepository _repository;
-
         private ObservableCollection<MonAn> _danhSachGoc;
         private string _tuKhoaTimKiem;
         private string _currentTabTag = "Mì Cay";
@@ -22,6 +21,7 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
         public ICommand EditCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
         public ICommand AddCommand { get; private set; }
+        public ICommand ToggleSoldOutCommand { get; private set; }
 
         public ThucDonViewModel()
         {
@@ -31,12 +31,12 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
             DeleteCommand = new RelayCommand<MonAn>(DeleteMonAn);
             EditCommand = new RelayCommand<MonAn>(EditMonAn);
             AddCommand = new RelayCommand<object>(AddMonAn);
+            ToggleSoldOutCommand = new RelayCommand<MonAn>(ToggleSoldOut);
         }
 
         private void LoadDataFromDb()
         {
             _danhSachGoc = _repository.GetAll();
-
             if (_danhSachGoc.Count == 0)
             {
                 AddSampleData();
@@ -47,10 +47,20 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
         private void AddSampleData()
         {
             _repository.Add(new MonMiCay("MC001", "Mì Cay Bò Mỹ", 65000, "Bò", 1, 7) { HinhAnhUrl = "/Images/mi_bo.png" });
-            _repository.Add(new MonPhu("PC001", "Tokbokki", 35000, "Phần", "Đồ Chiên") { HinhAnhUrl = "/Images/tokbokki.png" });
         }
 
-        // --- CÁC HÀM THAO TÁC (GỌI XUỐNG DB) ---
+        private void ToggleSoldOut(MonAn mon)
+        {
+            if (mon == null) return;
+
+            // [SỬA QUAN TRỌNG]
+            // Vì CheckBox đã tự đổi trạng thái IsSoldOut trên giao diện rồi,
+            // nên ở đây ta chỉ cần gọi Update để lưu trạng thái đó xuống DB.
+            // Không gọi ToggleSoldOut (đảo ngược) nữa.
+            _repository.Update(mon);
+
+            OnPropertyChanged("DataUpdated");
+        }
 
         private void DeleteMonAn(MonAn mon)
         {
@@ -68,13 +78,11 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
             if (window.ShowDialog() == true && window.MonAnResult != null)
             {
                 var monMoi = window.MonAnResult;
-
                 if (_danhSachGoc.Any(x => x.MaMon == monMoi.MaMon))
                 {
                     MessageBox.Show("Mã món này đã tồn tại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-
                 _repository.Add(monMoi);
                 _danhSachGoc.Add(monMoi);
                 RefeshList();
@@ -90,13 +98,11 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
                 mon.GiaBan = window.MonAnResult.GiaBan;
                 mon.DonViTinh = window.MonAnResult.DonViTinh;
                 mon.HinhAnhUrl = window.MonAnResult.HinhAnhUrl;
-
                 _repository.Update(mon);
                 RefeshList();
             }
         }
 
-        // --- LOGIC LỌC ---
         public string TuKhoaTimKiem
         {
             get => _tuKhoaTimKiem;
@@ -112,7 +118,6 @@ namespace GymManagement.ViewModels.Admin // Namespace đúng
         public ObservableCollection<MonAn> GetFilteredList()
         {
             if (_danhSachGoc == null) return new ObservableCollection<MonAn>();
-
             var query = _danhSachGoc.AsEnumerable();
 
             if (_currentTabTag == "Mì Cay") query = query.Where(x => x is MonMiCay);
