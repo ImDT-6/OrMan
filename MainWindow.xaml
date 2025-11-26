@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Gym Management System" Height="600" Width="900"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        
+        Icon="/AppIcon.ico">
+    <!-- [ĐÃ THÊM ICON MỚI] -->
 
     <Grid>
         <!-- Đây là nơi các màn hình (Đăng nhập, Admin, Học viên) sẽ hiện ra -->
