@@ -13,6 +13,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -30,7 +31,6 @@
                 <TextBlock Text="RESTAURANT" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                 <TextBlock Text="MANAGEMENT SYSTEM" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,35" Opacity="0.8"/>
 
-                <!-- TEXTBOX: Thêm x:Name và PreviewKeyDown -->
                 <TextBox x:Name="txtUser"
                          PreviewKeyDown="txtUser_PreviewKeyDown" 
                          Style="{StaticResource GlassTextBox}"
@@ -39,17 +39,59 @@
                          ToolTip="Tên đăng nhập" 
                          Margin="0,0,0,10"/>
 
-                <!-- PASSWORDBOX: Thêm PreviewKeyDown -->
-                <PasswordBox x:Name="pwdBox"
-                             PreviewKeyDown="pwdBox_PreviewKeyDown"
-                             Style="{StaticResource GlassPasswordBox}"
-                             local:PasswordBoxHelper.BindPassword="True"
-                             local:PasswordBoxHelper.BoundPassword="{Binding MatKhau, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                             Tag="{StaticResource IconLock}"
-                             ToolTip="Mật khẩu"
-                             Margin="0,0,0,25"/>
+                <Grid Margin="0,0,0,25">
 
-                <!-- BUTTON: Thêm IsDefault="True" -->
+                    <TextBox x:Name="txtVisiblePass"
+                             Style="{StaticResource GlassTextBox}"
+                             Text="{Binding MatKhau, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             Tag="{StaticResource IconLockVisible}"
+                             ToolTip="Mật khẩu"
+                             Visibility="{Binding ElementName=btnEye, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <PasswordBox x:Name="pwdBox"
+                                 PreviewKeyDown="pwdBox_PreviewKeyDown"
+                                 local:PasswordBoxHelper.BindPassword="True"
+                                 local:PasswordBoxHelper.BoundPassword="{Binding MatKhau, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                 Tag="{StaticResource IconLock}"
+                                 ToolTip="Mật khẩu">
+                        <PasswordBox.Style>
+                            <Style TargetType="PasswordBox" BasedOn="{StaticResource GlassPasswordBox}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=btnEye, Path=IsChecked}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </PasswordBox.Style>
+                    </PasswordBox>
+
+                    <ToggleButton x:Name="btnEye"
+                                  Width="30" Height="30"
+                                  HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Margin="0,0,10,0"
+                                  Background="Transparent" BorderThickness="0" Cursor="Hand">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Grid Background="Transparent">
+                                    <Path x:Name="IconEyeClosed" 
+                                          Data="M12,7c-2.48,0-4.5,2.02-4.5,4.5S9.52,16,12,16s4.5-2.02,4.5-4.5S14.48,7,12,7z M12,14.2c-1.49,0-2.7-1.21-2.7-2.7 c0-1.49,1.21-2.7,2.7-2.7s2.7,1.21,2.7,2.7C14.7,12.99,13.49,14.2,12,14.2z M12,4C7,4,2.73,7.11,1,11.5C2.73,15.89,7,19,12,19 s9.27-3.11,11-7.5C21.27,7.11,17,4,12,4z M12,17c-3.79,0-7.17-2.13-8.82-5.5C4.83,8.13,8.21,6,12,6s7.17,2.13,8.82,5.5 C19.17,14.87,15.79,17,12,17z"
+                                          Fill="{StaticResource TextSecondary}" Stretch="Uniform" Width="18"/>
+
+                                    <Path x:Name="IconEyeOpen" 
+                                          Data="M12,4.5C7,4.5,2.73,7.61,1,12c1.73,4.39,6,7.5,11,7.5s9.27-3.11,11-7.5C21.27,7.61,17,4.5,12,4.5z M12,17 c-2.76,0-5-2.24-5-5s2.24-5,5-5s5,2.24,5,5S14.76,17,12,17z M12,9c-1.66,0-3,1.34-3,3s1.34,3,3,3s3-1.34,3-3S13.66,9,12,9z" 
+                                          Fill="{StaticResource AccentGradient}" Stretch="Uniform" Width="18" Visibility="Collapsed"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="IconEyeClosed" Property="Visibility" Value="Collapsed"/>
+                                        <Setter TargetName="IconEyeOpen" Property="Visibility" Value="Visible"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                    </ToggleButton>
+                </Grid>
+
                 <Button Content="ĐĂNG NHẬP" 
                         IsDefault="True" 
                         Click="Button_Click" 
