@@ -1,13 +1,24 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using GymManagement.Models;
-
+using Microsoft.Win32;
 namespace GymManagement.Views.Admin
 {
     public partial class ThemSuaMonWindow : Window
     {
         public MonAn MonAnResult { get; private set; }
+        private void btnBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            // Chỉ cho chọn file ảnh
+            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
 
+            if (openFileDialog.ShowDialog() == true)
+            {
+                // Gán đường dẫn file đã chọn vào TextBox
+                txtHinhAnh.Text = openFileDialog.FileName;
+            }
+        }
         public ThemSuaMonWindow(MonAn monAnEdit = null)
         {
             InitializeComponent();

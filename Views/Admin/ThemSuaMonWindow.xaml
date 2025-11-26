@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Thông Tin Món Ăn" Height="550" Width="400"
+        Title="Thông Tin Món Ăn" Height="600" Width="420"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
@@ -21,44 +21,50 @@
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- Tiêu đề -->
                 <RowDefinition Height="*"/>
-                <!-- Form nhập -->
                 <RowDefinition Height="Auto"/>
-                <!-- Nút bấm -->
             </Grid.RowDefinitions>
 
-            <!-- 1. Tiêu đề -->
             <TextBlock x:Name="txtTitle" Text="THÊM MÓN MỚI" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-            <!-- 2. Form Nhập -->
-            <StackPanel Grid.Row="1">
-                <!-- [MỚI] Chọn Loại Món -->
-                <TextBlock Text="Loại Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                <ComboBox x:Name="cboLoaiMon" Height="40" Margin="0,0,0,15" Padding="10,0" VerticalContentAlignment="Center" FontSize="14">
-                    <ComboBoxItem Content="Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
-                    <ComboBoxItem Content="Đồ Chiên &amp; Topping" Tag="Đồ Chiên"/>
-                    <ComboBoxItem Content="Nước Uống" Tag="Nước Uống"/>
-                </ComboBox>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                <StackPanel>
+                    <TextBlock Text="Loại Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="cboLoaiMon" Height="40" Margin="0,0,0,15" Padding="10,0" VerticalContentAlignment="Center" FontSize="14">
+                        <ComboBoxItem Content="Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
+                        <ComboBoxItem Content="Đồ Chiên &amp; Topping" Tag="Đồ Chiên"/>
+                        <ComboBoxItem Content="Nước Uống" Tag="Nước Uống"/>
+                    </ComboBox>
 
-                <!-- Mã Món -->
-                <TextBox x:Name="txtMaMon" ToolTip="Mã món (VD: MC001)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBlock Text="Mã Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtMaMon" ToolTip="Mã món (VD: MC001)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
 
-                <!-- Tên Món -->
-                <TextBox x:Name="txtTenMon" ToolTip="Tên món ăn" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBlock Text="Tên Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtTenMon" ToolTip="Tên món ăn" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
 
-                <!-- Giá Bán -->
-                <TextBox x:Name="txtGiaBan" ToolTip="Giá bán (VNĐ)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBlock Text="Giá Bán:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtGiaBan" ToolTip="Giá bán (VNĐ)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
 
-                <!-- Đơn Vị -->
-                <TextBox x:Name="txtDonVi" ToolTip="Thành phần" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBlock Text="Đơn Vị:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtDonVi" ToolTip="Thành phần" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
 
-                <!-- URL Ảnh -->
-                <TextBox x:Name="txtHinhAnh" ToolTip="Đường dẫn ảnh (/Images/...)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
-            </StackPanel>
+                    <TextBlock Text="Hình Ảnh:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-            <!-- 3. Nút Bấm -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <TextBox x:Name="txtHinhAnh" ToolTip="Đường dẫn ảnh" Style="{StaticResource GlassTextBox}"/>
+
+                        <Button Content="..." Grid.Column="1" Click="btnBrowse_Click" 
+                                Style="{StaticResource GlassButtonStyle}" Width="40" Margin="5,0,0,0"
+                                ToolTip="Chọn ảnh từ máy tính"/>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
                 <Button Content="Lưu Lại" Click="btnSave_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource SuccessGreen}" Margin="0,0,10,0"/>
                 <Button Content="Hủy Bỏ" Click="btnCancel_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource DangerRed}"/>
             </StackPanel>
