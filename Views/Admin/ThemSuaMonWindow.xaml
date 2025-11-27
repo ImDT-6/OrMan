@@ -25,8 +25,10 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- 1. Tiêu đề -->
             <TextBlock x:Name="txtTitle" Text="THÊM MÓN MỚI" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
+            <!-- 2. Form Nhập (Tự động nhận Style Scroll đẹp từ InputStyles.xaml) -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                 <StackPanel>
                     <TextBlock Text="Loại Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
@@ -64,6 +66,7 @@
                 </StackPanel>
             </ScrollViewer>
 
+            <!-- 3. Nút Bấm -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
                 <Button Content="Lưu Lại" Click="btnSave_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource SuccessGreen}" Margin="0,0,10,0"/>
                 <Button Content="Hủy Bỏ" Click="btnCancel_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource DangerRed}"/>
