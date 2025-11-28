@@ -8,7 +8,6 @@ namespace GymManagement.Views.User
     public partial class UserView : UserControl
     {
         private UserViewModel _vm;
-        private const int CurrentTable = 1; // Giả định số bàn hiện tại
 
         public UserView()
         {
@@ -16,6 +15,7 @@ namespace GymManagement.Views.User
             _vm = new UserViewModel();
             this.DataContext = _vm;
 
+            // Mặc định chọn tab đầu tiên
             FilterByTag("Mì Cay");
         }
 
@@ -29,18 +29,12 @@ namespace GymManagement.Views.User
 
         private void FilterByTag(string tag)
         {
-            // [SỬA LỖI] CHỈ cần gọi ViewModel để lọc, không cần gán ItemsSource thủ công.
-            // ItemsSource sẽ tự động cập nhật qua Binding và PropertyChanged của MenuHienThi.
             _vm.FilterMenu(tag);
-
-            // Xóa đoạn code sau, vì nó là nguyên nhân gây lỗi hoặc là code thủ công không cần thiết:
-            /*
             var itemsControl = this.FindName("ItemsControlMenu") as ItemsControl;
             if (itemsControl != null)
             {
                 itemsControl.ItemsSource = _vm.MenuHienThi;
             }
-            */
         }
 
         private void Product_Click(object sender, RoutedEventArgs e)
@@ -51,6 +45,19 @@ namespace GymManagement.Views.User
                 {
                     MessageBox.Show($"Món '{monAn.TenMon}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!", "Rất tiếc", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
+                }
+
+                // Kiểm tra đã chọn bàn chưa trước khi cho order
+                if (_vm.CurrentTable <= 0)
+                {
+                    // Nếu chưa chọn bàn -> Gọi lệnh chọn bàn trong ViewModel
+                    if (_vm.ChonBanCommand.CanExecute(null))
+                    {
+                        _vm.ChonBanCommand.Execute(null);
+                    }
+
+                    // Nếu sau khi hiện bảng chọn mà vẫn chưa chọn (tắt đi) -> Thoát
+                    if (_vm.CurrentTable <= 0) return;
                 }
 
                 var popup = new ChiTietMonWindow(monAn);
@@ -66,39 +73,6 @@ namespace GymManagement.Views.User
             }
         }
 
-        // [MỚI] Hàm xử lý khi bấm nút "GỌI PHỤC VỤ"
-        private void BtnCallStaff_Click(object sender, RoutedEventArgs e)
-        {
-            // 1. Kiểm tra xem bàn có đơn hàng đang hoạt động không
-            bool hasActiveOrder = _vm.HasActiveOrder(CurrentTable);
-
-            // 2. Mở Pop-up cho khách hàng chọn
-            var requestWindow = new SupportRequestWindow(hasActiveOrder);
-
-            var mainWindow = Application.Current.MainWindow;
-            if (mainWindow != null) mainWindow.Opacity = 0.4;
-
-            if (requestWindow.ShowDialog() == true)
-            {
-                if (requestWindow.SelectedRequest == RequestType.Checkout)
-                {
-                    // Yêu cầu Thanh toán (Chỉ gọi khi có đơn)
-                    _vm.RequestCheckout(CurrentTable);
-                    MessageBox.Show("Đã gửi yêu cầu THANH TOÁN tới Admin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else if (requestWindow.SelectedRequest == RequestType.Support)
-                {
-                    // Yêu cầu Hỗ trợ/Phục vụ
-                    _vm.RequestSupport(CurrentTable);
-                    MessageBox.Show("Đã gửi yêu cầu GỌI PHỤC VỤ tới Admin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-
-            if (mainWindow != null) mainWindow.Opacity = 1;
-        }
-
-
-        // [SỬA TÊN] Đổi tên hàm từ BtnThanhToan_Click thành BtnGuiDon_Click cho đúng ngữ nghĩa
         private void BtnThanhToan_Click(object sender, RoutedEventArgs e)
         {
             if (_vm.GioHang.Count == 0)

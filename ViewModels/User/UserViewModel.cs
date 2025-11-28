@@ -7,6 +7,7 @@ using System.Windows.Input;
 using GymManagement.Helpers;
 using GymManagement.Models;
 using GymManagement.Services;
+using GymManagement.Views.User; // Để mở cửa sổ chọn bàn
 
 namespace GymManagement.ViewModels.User
 {
@@ -16,7 +17,16 @@ namespace GymManagement.ViewModels.User
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
 
-        // [FIX LỖI] Đã thêm Property MenuHienThi
+        // [MỚI] Biến lưu bàn hiện tại
+        private int _currentTable;
+        public int CurrentTable
+        {
+            get => _currentTable;
+            set { _currentTable = value; OnPropertyChanged(); OnPropertyChanged(nameof(TableDisplayText)); }
+        }
+
+        public string TableDisplayText => _currentTable > 0 ? $"{_currentTable:00}" : "--";
+
         private ObservableCollection<MonAn> _menuHienThi;
         public ObservableCollection<MonAn> MenuHienThi
         {
@@ -41,6 +51,7 @@ namespace GymManagement.ViewModels.User
         }
 
         public ICommand CallStaffCommand { get; private set; }
+        public ICommand ChonBanCommand { get; private set; } // [MỚI]
 
         public UserViewModel()
         {
@@ -48,7 +59,18 @@ namespace GymManagement.ViewModels.User
             _banRepo = new BanAnRepository();
             LoadData();
 
-            CallStaffCommand = new RelayCommand<object>(_ => { /* Not used directly for now */ });
+            CallStaffCommand = new RelayCommand<object>(CallStaff);
+            ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow); // [MỚI]
+        }
+
+        // [MỚI] Hàm mở cửa sổ chọn bàn
+        private void OpenChonBanWindow(object obj)
+        {
+            var wd = new ChonBanWindow();
+            if (wd.ShowDialog() == true)
+            {
+                CurrentTable = wd.SelectedTableId;
+            }
         }
 
         private void LoadData()
@@ -63,31 +85,26 @@ namespace GymManagement.ViewModels.User
 
             if (loai == "Mì Cay")
             {
-                // Gán giá trị và gọi OnPropertyChanged()
                 MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
             }
             else
             {
-                // Gán giá trị và gọi OnPropertyChanged()
                 MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
             }
         }
 
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
-            // 1. Tìm xem món này đã có trong giỏ chưa (Khớp Mã, Cấp độ và Ghi chú)
             var itemDaCo = GioHang.FirstOrDefault(x => x.MonAn.MaMon == mon.MaMon
                                                     && x.CapDoCay == capDo
                                                     && x.GhiChu == ghiChu);
 
             if (itemDaCo != null)
             {
-                // 2. Nếu có rồi -> Cộng dồn số lượng
                 itemDaCo.SoLuong += sl;
             }
             else
             {
-                // 3. Nếu chưa có -> Tạo mới và thêm vào
                 var item = new CartItem(mon, sl, capDo, ghiChu);
                 GioHang.Add(item);
             }
@@ -101,19 +118,17 @@ namespace GymManagement.ViewModels.User
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
-        public bool HasActiveOrder(int soBan)
+        private void CallStaff(object obj)
         {
-            return _banRepo.GetActiveOrder(soBan) != null;
-        }
+            // [MỚI] Kiểm tra đã chọn bàn chưa
+            if (CurrentTable <= 0)
+            {
+                OpenChonBanWindow(null);
+                if (CurrentTable <= 0) return; // Nếu vẫn chưa chọn thì thôi
+            }
 
-        public void RequestCheckout(int soBan)
-        {
-            _banRepo.RequestPayment(soBan);
-        }
-
-        public void RequestSupport(int soBan)
-        {
-            _banRepo.RequestPayment(soBan);
+            _banRepo.RequestPayment(CurrentTable);
+            MessageBox.Show($"Đã gửi yêu cầu từ Bàn {CurrentTable} tới Admin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -124,8 +139,16 @@ namespace GymManagement.ViewModels.User
         {
             if (GioHang.Count == 0) return false;
 
-            _repo.CreateOrder(1, TongTienCart, "Đơn từ Tablet", GioHang);
+            // [MỚI] Bắt buộc chọn bàn trước khi gửi đơn
+            if (CurrentTable <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!", "Chưa chọn bàn", MessageBoxButton.OK, MessageBoxImage.Warning);
+                OpenChonBanWindow(null);
+                if (CurrentTable <= 0) return false; // Khách hủy chọn bàn
+            }
 
+            // Gửi đơn với số bàn thực tế
+            _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
             GioHang.Clear();
             UpdateCartInfo();
             return true;

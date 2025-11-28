@@ -228,6 +228,9 @@
     <Compile Include="Views\User\GioHangWindow.xaml.cs">
       <DependentUpon>GioHangWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\User\ChonBanWindow.xaml.cs">
+      <DependentUpon>ChonBanWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\User\SupportRequestWindow.xaml.cs">
       <DependentUpon>SupportRequestWindow.xaml</DependentUpon>
     </Compile>
@@ -284,6 +287,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\User\GioHangWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\User\ChonBanWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
