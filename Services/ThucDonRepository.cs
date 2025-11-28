@@ -4,6 +4,7 @@ using GymManagement.Data;
 using GymManagement.Models;
 using System.Collections.Generic;
 using System;
+using Microsoft.EntityFrameworkCore; // Cần thêm dòng này
 
 namespace GymManagement.Services
 {
@@ -17,7 +18,7 @@ namespace GymManagement.Services
             _context.Database.EnsureCreated();
         }
 
-        // ... (Giữ nguyên các hàm GetAll, Add, Delete, Update, ToggleSoldOut cũ) ...
+        // ... (Giữ nguyên các hàm GetAll, Add, Update, ToggleSoldOut cũ) ...
 
         public ObservableCollection<MonAn> GetAll()
         {
@@ -35,12 +36,30 @@ namespace GymManagement.Services
         }
 
         public void Add(MonAn monAn) { _context.MonAns.Add(monAn); _context.SaveChanges(); }
-        public void Delete(MonAn monAn) { /*...*/ } // Giữ nguyên code cũ
-        public void Update(MonAn monAn) { /*...*/ } // Giữ nguyên code cũ
+
+        // [SỬA LỖI QUAN TRỌNG] Triển khai hàm Delete
+        public void Delete(MonAn monAn)
+        {
+            // Tìm món ăn trong Context và xóa
+            var monCanXoa = _context.MonAns.Find(monAn.MaMon);
+            if (monCanXoa != null)
+            {
+                _context.MonAns.Remove(monCanXoa);
+                _context.SaveChanges();
+            }
+        }
+
+        public void Update(MonAn monAn)
+        {
+            _context.Entry(monAn).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
         public void ToggleSoldOut(string maMon) { /*...*/ } // Giữ nguyên code cũ
+
         public void CreateOrder(int soBan, decimal tongTien, string ghiChu, IEnumerable<CartItem> gioHang)
         {
-            // ... (Giữ nguyên code tạo hóa đơn cũ)
+            // ... (Logic CreateOrder giữ nguyên)
             string maHD = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
             var hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan);
             _context.HoaDons.Add(hoaDon);
@@ -57,15 +76,13 @@ namespace GymManagement.Services
             _context.SaveChanges();
         }
 
-        // [MỚI] Lấy Top món bán chạy nhất dựa trên số lượng bán trong ChiTietHoaDon
-        // Trả về Dictionary: Key = MonAn, Value = Số lượng đã bán
         public Dictionary<MonAn, int> GetTopSellingFoods(int topCount)
         {
             using (var context = new MenuContext())
             {
                 // 1. Group theo Mã Món và tính tổng số lượng
                 var topList = context.ChiTietHoaDons
-                                     .AsEnumerable() // Chuyển về xử lý client nếu EF Core gặp khó với GroupBy phức tạp
+                                     .AsEnumerable()
                                      .GroupBy(ct => ct.MaMon)
                                      .Select(g => new { MaMon = g.Key, TongSoLuong = g.Sum(x => x.SoLuong) })
                                      .OrderByDescending(x => x.TongSoLuong)

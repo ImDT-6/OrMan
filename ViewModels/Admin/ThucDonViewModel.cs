@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -40,6 +41,7 @@ namespace GymManagement.ViewModels.Admin
             if (_danhSachGoc.Count == 0)
             {
                 AddSampleData();
+                // [FIX LỖI] Reload data sau khi thêm mẫu để đảm bảo dữ liệu mới được load lại
                 _danhSachGoc = _repository.GetAll();
             }
         }
@@ -64,11 +66,24 @@ namespace GymManagement.ViewModels.Admin
 
         private void DeleteMonAn(MonAn mon)
         {
-            if (MessageBox.Show($"Xóa món '{mon.TenMon}'?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (mon == null) return;
+
+            if (MessageBox.Show($"Xác nhận xóa món '{mon.TenMon}'? Thao tác này không thể hoàn tác!", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                _repository.Delete(mon);
-                _danhSachGoc.Remove(mon);
-                RefeshList();
+                try
+                {
+                    // 1. Xóa trong DB
+                    _repository.Delete(mon);
+                    // 2. Xóa khỏi danh sách gốc trong bộ nhớ
+                    _danhSachGoc.Remove(mon);
+                    // 3. Cập nhật lại UI
+                    RefeshList();
+                    MessageBox.Show("Xóa món thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xóa món: {ex.Message}", "Lỗi Database", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

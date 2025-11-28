@@ -16,8 +16,8 @@
             <!-- Khai báo Converter để dùng cho Visibility -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
+            <!-- STYLE CHO CÁC TAB DANH MỤC (Giữ nguyên) -->
             <Style x:Key="CategoryTabStyle" TargetType="RadioButton">
-                <!-- (Giữ nguyên Style cũ) -->
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                 <Setter Property="FontSize" Value="15"/>
@@ -44,6 +44,62 @@
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- [FIX LỖI TRIỆT ĐỂ] STYLE CHO FOOD CARD - DÙNG BasedOn ĐỂ KẾ THỪA -->
+            <Style x:Key="FoodCardButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+                <!-- Đã xóa Setter Property="Style" và thay bằng BasedOn -->
+                <Setter Property="Width" Value="200"/>
+                <Setter Property="Height" Value="240"/>
+                <Setter Property="Margin" Value="0,0,15,15"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="#25FFFFFF" CornerRadius="15" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Cursor="Hand">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- ẢNH MÓN ĂN -->
+                                    <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
+                                        <Grid>
+                                            <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
+
+                                            <!-- Lớp phủ HẾT HÀNG -->
+                                            <Border Background="#AA000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="HẾT HÀNG" Foreground="#FF5555" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock.RenderTransform>
+                                                        <RotateTransform Angle="-30"/>
+                                                    </TextBlock.RenderTransform>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- THÔNG TIN -->
+                                    <StackPanel Grid.Row="1" Margin="12">
+                                        <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
+                                        <Grid Margin="0,5,0,0" VerticalAlignment="Bottom">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                                <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
+                                                <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
+                                            </StackPanel>
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource AccentGradient}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
+                                                <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,-2,0,0"/>
+                                            </Border>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Lớp phủ mờ toàn bộ thẻ nếu Hết hàng -->
+                                    <Border Grid.RowSpan="2" Background="#50000000" CornerRadius="15" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}" IsHitTestVisible="False"/>
+                                </Grid>
+                            </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -87,11 +143,16 @@
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}" ToolTip="Tìm món ăn..." Width="400" Height="45" HorizontalAlignment="Left"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" Width="160" Height="45" Margin="0,0,10,0" Background="#20F59E0B" ToolTip="Gọi phục vụ">
+                <!-- Nút Gọi Phục Vụ -->
+                <Button Click="BtnCallStaff_Click" 
+                        Style="{StaticResource GlassButtonStyle}" 
+                        Width="160" Height="45" Margin="0,0,10,0" Background="#20F59E0B" ToolTip="Gọi nhân viên hỗ trợ hoặc thanh toán">
+                    <!-- Nội dung phức tạp (Content duy nhất) -->
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔔 Gọi Thanh Toán" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="🔔 GỌI PHỤC VỤ" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
                     </StackPanel>
                 </Button>
+                <!-- Giữ nguyên phần còn lại -->
                 <Border Background="#20FFFFFF" CornerRadius="12" Height="45" Padding="15,0" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Bàn:" Foreground="{StaticResource TextSecondary}" Margin="0,0,5,0"/>
@@ -113,54 +174,10 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Style="{StaticResource NavButtonStyle}" Width="200" Height="240" Margin="0,0,15,15" Padding="0" Click="Product_Click" Tag="{Binding}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="#25FFFFFF" CornerRadius="15" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Cursor="Hand">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="140"/>
-                                                <RowDefinition Height="*"/>
-                                            </Grid.RowDefinitions>
-
-                                            <!-- ẢNH MÓN ĂN -->
-                                            <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
-                                                <Grid>
-                                                    <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
-
-                                                    <!-- [MỚI] Lớp phủ HẾT HÀNG -->
-                                                    <!-- Chỉ hiện khi IsSoldOut = True -->
-                                                    <Border Background="#AA000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock Text="HẾT HÀNG" Foreground="#FF5555" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                            <TextBlock.RenderTransform>
-                                                                <RotateTransform Angle="-30"/>
-                                                            </TextBlock.RenderTransform>
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- THÔNG TIN -->
-                                            <StackPanel Grid.Row="1" Margin="12">
-                                                <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
-                                                <Grid Margin="0,5,0,0" VerticalAlignment="Bottom">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                                                        <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
-                                                        <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
-                                                    </StackPanel>
-                                                    <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource AccentGradient}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
-                                                        <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,-2,0,0"/>
-                                                    </Border>
-                                                </Grid>
-                                            </StackPanel>
-
-                                            <!-- [MỚI] Lớp phủ mờ toàn bộ thẻ nếu Hết hàng (để làm xám chữ) -->
-                                            <Border Grid.RowSpan="2" Background="#50000000" CornerRadius="15" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}" IsHitTestVisible="False"/>
-                                        </Grid>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <!-- [FIX] CHỈ GỌI STYLE VÀ KHÔNG ĐỊNH NGHĨA TEMPLATE LẠI -->
+                        <Button Style="{StaticResource FoodCardButtonStyle}" 
+                                Click="Product_Click" 
+                                Tag="{Binding}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

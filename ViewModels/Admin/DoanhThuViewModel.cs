@@ -4,7 +4,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using GymManagement.Models;
 using GymManagement.Services;
-using System.Collections.Generic; // Thêm cái này để dùng IEnumerable
+using System.Collections.Generic;
+using System;
+using System.Windows.Input;
+using GymManagement.Helpers;
 
 namespace GymManagement.ViewModels
 {
@@ -20,7 +23,6 @@ namespace GymManagement.ViewModels
             set { _danhSachHoaDon = value; OnPropertyChanged(); }
         }
 
-        // [MỚI] Biến từ khóa tìm kiếm
         private string _tuKhoaTimKiem;
         public string TuKhoaTimKiem
         {
@@ -33,7 +35,23 @@ namespace GymManagement.ViewModels
             }
         }
 
-        // Các chỉ số thống kê
+        // [SỬA ĐỔI] Thêm Property cho bộ lọc thời gian (Tag của RadioButton)
+        private string _selectedTimeFilter = "Hôm nay"; // Mặc định là "Hôm nay"
+        public string SelectedTimeFilter
+        {
+            get => _selectedTimeFilter;
+            set
+            {
+                if (_selectedTimeFilter != value)
+                {
+                    _selectedTimeFilter = value;
+                    OnPropertyChanged();
+                    FilterData(); // Lọc lại khi bộ lọc thời gian thay đổi
+                }
+            }
+        }
+
+        // Các chỉ số thống kê... (Giữ nguyên)
         private string _tongDoanhThuText;
         public string TongDoanhThuText { get => _tongDoanhThuText; set { _tongDoanhThuText = value; OnPropertyChanged(); } }
 
@@ -51,20 +69,44 @@ namespace GymManagement.ViewModels
 
         private void LoadData()
         {
+            // [CẢI THIỆN] Lấy tất cả hóa đơn đã thanh toán để tránh lẫn lộn
+            // Giả sử GetAll() đã lấy tất cả. Ta sẽ lọc sau.
             _allHoaDons = _repository.GetAll();
-            // Ban đầu hiển thị hết
-            DanhSachHoaDon = new ObservableCollection<HoaDon>(_allHoaDons);
-            TinhToanThongKe();
+            FilterData(); // Lọc dữ liệu ngay sau khi load
         }
 
-        // [MỚI] Hàm lọc dữ liệu
+        // [SỬA LOGIC] Hàm lọc chính, kết hợp cả Lọc theo Thời gian và Lọc theo Từ khóa
         private void FilterData()
         {
             if (_allHoaDons == null) return;
 
             IEnumerable<HoaDon> query = _allHoaDons;
+            DateTime startDate = DateTime.MinValue;
 
-            // Lọc theo từ khóa (Mã HĐ hoặc Tên nhân viên)
+            // 1. Lọc theo thời gian
+            if (_selectedTimeFilter == "Hôm nay")
+            {
+                startDate = DateTime.Today;
+            }
+            else if (_selectedTimeFilter == "Tuần này")
+            {
+                // Ngày đầu tuần (Thứ Hai)
+                int diff = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                startDate = DateTime.Today.AddDays(-1 * diff).Date;
+            }
+            else if (_selectedTimeFilter == "Tháng này")
+            {
+                startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            }
+
+            // Thực hiện lọc theo thời gian
+            if (_selectedTimeFilter != "Tất cả") // Nếu có bộ lọc thời gian
+            {
+                query = query.Where(h => h.NgayTao >= startDate);
+            }
+
+
+            // 2. Lọc theo từ khóa (Mã HĐ hoặc Tên nhân viên)
             if (!string.IsNullOrEmpty(TuKhoaTimKiem))
             {
                 string k = TuKhoaTimKiem.ToLower();
@@ -73,7 +115,7 @@ namespace GymManagement.ViewModels
             }
 
             // Cập nhật danh sách hiển thị
-            DanhSachHoaDon = new ObservableCollection<HoaDon>(query);
+            DanhSachHoaDon = new ObservableCollection<HoaDon>(query.OrderByDescending(h => h.NgayTao));
 
             // Tính lại thống kê theo danh sách mới lọc
             TinhToanThongKe();
@@ -81,6 +123,7 @@ namespace GymManagement.ViewModels
 
         private void TinhToanThongKe()
         {
+            // Logic giữ nguyên
             if (DanhSachHoaDon == null || DanhSachHoaDon.Count == 0)
             {
                 TongDoanhThuText = "0 VNĐ";

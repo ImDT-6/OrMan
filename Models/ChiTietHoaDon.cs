@@ -17,7 +17,9 @@ namespace GymManagement.Models
 
         public decimal ThanhTien => SoLuong * DonGia;
 
-        protected ChiTietHoaDon() { }
+        // [SỬA LỖI] Đổi từ protected sang public để có thể khởi tạo đối tượng 
+        // trong các lớp khác (ví dụ: QuanLyBanViewModel)
+        public ChiTietHoaDon() { }
 
         public ChiTietHoaDon(string maHD, MonAn mon, int sl, int capDo, string ghiChu)
         {

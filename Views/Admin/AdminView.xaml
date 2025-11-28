@@ -12,6 +12,13 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- [FIX] Tạo Style NavButtonStyle mới/sửa đổi để hỗ trợ việc set màu từ Code-behind -->
+            <!-- Style này được đơn giản hóa để không bị các Trigger khác làm phiền -->
+            <Style x:Key="AdminNavButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+                <!-- Remove IsMouseOver triggers from the base style if needed, or ensure they don't override the color set by code-behind -->
+                <!-- For now, we rely on the NavButtonStyle structure and manually set the foreground/background -->
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -40,7 +47,7 @@
                         <!-- Logout -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- Logo -->
+                    <!-- Logo (Giữ nguyên) -->
                     <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
                         <Border Width="45" Height="45" CornerRadius="12" Background="{StaticResource AccentGradient}" Margin="0,0,15,0">
                             <TextBlock Text="MÌ" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -53,14 +60,15 @@
                     </StackPanel>
 
                     <!-- Menu Items -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="Tổng Quan" Tag="{StaticResource IconDashboardGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Foreground="White" Background="#20FFFFFF" Margin="0,0,10,0"/>
-                        <Button Content="Quản Lý Bàn" Tag="{StaticResource IconTableGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
-                        <Button Content="Thực Đơn" Tag="{StaticResource IconFoodGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
-                        <Button Content="Doanh Thu" Tag="{StaticResource IconMoneyGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
+                    <!-- [FIX] Thêm x:Name cho StackPanel và các Button -->
+                    <StackPanel x:Name="MenuItemsPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="MenuButtonTongQuan" Content="Tổng Quan" Tag="{StaticResource IconDashboardGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Foreground="White" Background="{StaticResource AccentGradient}" Margin="0,0,10,0"/>
+                        <Button x:Name="MenuButtonQuanLyBan" Content="Quản Lý Bàn" Tag="{StaticResource IconTableGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
+                        <Button x:Name="MenuButtonThucDon" Content="Thực Đơn" Tag="{StaticResource IconFoodGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
+                        <Button x:Name="MenuButtonDoanhThu" Content="Doanh Thu" Tag="{StaticResource IconMoneyGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
                     </StackPanel>
 
-                    <!-- Logout -->
+                    <!-- Logout (Giữ nguyên) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <StackPanel VerticalAlignment="Center" Margin="0,0,15,0" HorizontalAlignment="Right">
                             <TextBlock Text="Xin chào, Admin" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
@@ -72,7 +80,6 @@
             </Border>
 
             <!-- 2. KHU VỰC NỘI DUNG THAY ĐỔI -->
-            <!-- Đây là chìa khóa: ContentControl sẽ hiển thị View con tương ứng -->
             <ContentControl x:Name="AdminContentArea" Grid.Row="1"/>
         </Grid>
     </Grid>

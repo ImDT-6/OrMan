@@ -16,6 +16,7 @@ namespace GymManagement.ViewModels.User
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
 
+        // [FIX LỖI] Đã thêm Property MenuHienThi
         private ObservableCollection<MonAn> _menuHienThi;
         public ObservableCollection<MonAn> MenuHienThi
         {
@@ -47,7 +48,7 @@ namespace GymManagement.ViewModels.User
             _banRepo = new BanAnRepository();
             LoadData();
 
-            CallStaffCommand = new RelayCommand<object>(CallStaff);
+            CallStaffCommand = new RelayCommand<object>(_ => { /* Not used directly for now */ });
         }
 
         private void LoadData()
@@ -62,15 +63,16 @@ namespace GymManagement.ViewModels.User
 
             if (loai == "Mì Cay")
             {
+                // Gán giá trị và gọi OnPropertyChanged()
                 MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
             }
             else
             {
+                // Gán giá trị và gọi OnPropertyChanged()
                 MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
             }
         }
 
-        // [SỬA LOGIC GỘP ĐƠN TẠI ĐÂY]
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
             // 1. Tìm xem món này đã có trong giỏ chưa (Khớp Mã, Cấp độ và Ghi chú)
@@ -99,11 +101,19 @@ namespace GymManagement.ViewModels.User
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
-        private void CallStaff(object obj)
+        public bool HasActiveOrder(int soBan)
         {
-            int currentTable = 1;
-            _banRepo.RequestPayment(currentTable);
-            MessageBox.Show("Đã gửi yêu cầu thanh toán/hỗ trợ tới Admin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            return _banRepo.GetActiveOrder(soBan) != null;
+        }
+
+        public void RequestCheckout(int soBan)
+        {
+            _banRepo.RequestPayment(soBan);
+        }
+
+        public void RequestSupport(int soBan)
+        {
+            _banRepo.RequestPayment(soBan);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -113,7 +123,9 @@ namespace GymManagement.ViewModels.User
         public bool SubmitOrder()
         {
             if (GioHang.Count == 0) return false;
+
             _repo.CreateOrder(1, TongTienCart, "Đơn từ Tablet", GioHang);
+
             GioHang.Clear();
             UpdateCartInfo();
             return true;
