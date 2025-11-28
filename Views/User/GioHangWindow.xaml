@@ -27,7 +27,43 @@
             <!-- Header -->
             <Grid Grid.Row="0" Margin="0,0,0,15">
                 <TextBlock Text="GIỎ HÀNG CỦA BẠN" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                <Button Content="✕" Click="BtnClose_Click" HorizontalAlignment="Right" Style="{StaticResource NavButtonStyle}" Width="40" Height="40" Padding="0" Background="#20FFFFFF"/>
+                <Button Click="BtnClose_Click" 
+        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
+        Width="40" Height="40"
+        Background="#50000000"
+        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <!-- Nền nút (Hình tròn hoặc bo góc) -->
+                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="20">
+                                    <!-- Nội dung (Icon) canh giữa -->
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <!-- [MỚI] Hiệu ứng khi di chuột: Đổi màu nền sang đỏ cam nhạt -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
+                                    <!-- Bạn có thể chỉnh màu khác, ví dụ "#AAEF4444"(đỏ cam) #80FFFFFF (trắng mờ) hoặc #AA000000 (đen mờ) -->
+                                </Trigger>
+
+                                <!-- Hiệu ứng khi nhấn giữ -->
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="20" CenterY="20"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+
+                    <!-- Icon X -->
+                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="14" Height="14"/>
+                </Button>
             </Grid>
 
             <!-- List Items -->
