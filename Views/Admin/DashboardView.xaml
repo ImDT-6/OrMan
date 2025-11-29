@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:GymManagement.ViewModels"
-             xmlns:local="clr-namespace:GymManagement.Helpers"
+             xmlns:helpers="clr-namespace:GymManagement.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100"
              FontFamily="Segoe UI">
@@ -17,7 +17,7 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- [QUAN TRỌNG] Khai báo Converter để tính chiều cao cột -->
-            <local:RatioConverter x:Key="RatioConverter"/>
+            <helpers:HeightConverter x:Key="HeightConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -30,7 +30,7 @@
         <!-- CỘT TRÁI -->
         <StackPanel Grid.Column="0" Margin="0,0,20,0">
 
-            <!-- 1. Cards Tổng Quan -->
+            <!-- Cards Tổng Quan -->
             <UniformGrid Columns="2" Rows="1" Margin="0,0,0,20">
                 <!-- Card Doanh Thu -->
                 <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25" Margin="0,0,10,0">
@@ -61,83 +61,136 @@
                 </Border>
             </UniformGrid>
 
-            <!-- 2. Biểu Đồ Doanh Thu (Cột Cao Thấp) -->
+            <!-- [ĐÃ CẬP NHẬT] BIỂU ĐỒ VỚI TRỤC TUNG & CỘT ĐỘNG -->
             <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="25" Padding="25" Height="350">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <!-- Title -->
                         <RowDefinition Height="*"/>
+                        <!-- Chart Area -->
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="BIỂU ĐỒ DOANH THU THEO GIỜ" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
 
-                    <!-- ItemsControl vẽ các cột -->
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Bottom">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <!-- UniformGrid chia đều chiều ngang -->
-                                <UniformGrid Rows="1"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                    <!-- Khu vực biểu đồ -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <!-- Trục Y (Số tiền) -->
+                            <ColumnDefinition Width="*"/>
+                            <!-- Các Cột -->
+                        </Grid.ColumnDefinitions>
 
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Bottom" Margin="5">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                        <!-- 1. Trục Tung (Y-Axis Labels) -->
+                        <!-- Margin Bottom 30px để chừa chỗ cho trục hoành (Giờ) -->
+                        <Grid Grid.Column="0" Margin="0,0,10,30">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!-- Các mốc giá trị giả định (Khớp với tham số Converter 2.000.000) -->
+                            <TextBlock Text="2M" Grid.Row="0" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="1.5M" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="1M" Grid.Row="2" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="500k" Grid.Row="3" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <!-- Số 0 nằm ở đáy của Row cuối cùng -->
+                            <TextBlock Text="0" Grid.Row="3" VerticalAlignment="Bottom" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                        </Grid>
 
-                                    <!-- CỘT BIỂU ĐỒ -->
-                                    <Border Grid.Row="0" 
-                                            Background="{StaticResource AccentGradient}" 
-                                            CornerRadius="5,5,0,0"  
-                                            VerticalAlignment="Bottom" 
-                                            ToolTip="{Binding Value, StringFormat='{}{0:N0} VNĐ'}">
+                        <!-- 2. Lưới ngang & Cột Biểu Đồ (Chồng lên nhau trong cùng 1 Grid để khớp vị trí) -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <!-- Vùng vẽ biểu đồ -->
+                                <RowDefinition Height="30"/>
+                                <!-- Vùng hiển thị giờ (Trục hoành) -->
+                            </Grid.RowDefinitions>
 
-                                        <!-- TÍNH TOÁN CHIỀU CAO -->
-                                        <Border.Height>
-                                            <MultiBinding Converter="{StaticResource RatioConverter}" ConverterParameter="200">
-                                                <!-- Parameter=200: Chiều cao tối đa (pixels) của khung vẽ -->
+                            <!-- Lớp 1: Các đường kẻ ngang (Grid Lines) -->
+                            <Grid Grid.Row="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="1" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="2" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="3" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,1"/>
+                                <!-- Đường đáy (Vạch số 0) -->
+                            </Grid>
 
-                                                <!-- Giá trị 1: Doanh thu của giờ này -->
-                                                <Binding Path="Value"/>
+                            <!-- Lớp 2: Các cột biểu đồ -->
+                            <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Bottom">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <!-- Cột -->
+                                                <RowDefinition Height="Auto"/>
+                                                <!-- Khoảng đệm để nối với trục hoành -->
+                                            </Grid.RowDefinitions>
 
-                                                <!-- Giá trị 2: Doanh thu lớn nhất trong ngày (lấy từ ViewModel) -->
-                                                <Binding Path="DataContext.MaxRevenue" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                            </MultiBinding>
-                                        </Border.Height>
+                                            <!-- CỘT: Chiều cao (Height) được tính toán tự động -->
+                                            <!-- VerticalAlignment="Bottom" để cột mọc từ đáy (vạch số 0) lên -->
+                                            <!-- ConverterParameter='2000000': Nghĩa là 2 triệu sẽ full cột -->
+                                            <Border Grid.Row="0" Background="{StaticResource AccentGradient}" 
+                                                    CornerRadius="5,5,0,0"  
+                                                    Height="{Binding Value, Converter={StaticResource HeightConverter}, ConverterParameter='2000000'}" 
+                                                    VerticalAlignment="Bottom" 
+                                                    ToolTip="{Binding Value, StringFormat='{}{0:N0} VNĐ'}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Opacity" Value="0.8"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Opacity" Value="0.8"/>
-                                                        <Setter Property="Background" Value="{StaticResource SuccessGreen}"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-
-                                    <!-- NHÃN GIỜ (Trục X) -->
-                                    <TextBlock Grid.Row="1" Text="{Binding Key}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,10,0,0" FontSize="11"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                            <!-- Lớp 3: Trục Hoành (Giờ) - Nằm ở Row bên dưới -->
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Key}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Border>
         </StackPanel>
 
-        <!-- CỘT PHẢI -->
+        <!-- CỘT PHẢI (Giữ nguyên như cũ) -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 3. Danh Sách Cần Xử Lý Gấp -->
+            <!-- 1. Danh Sách Cần Xử Lý Gấp -->
             <Border Grid.Row="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource DangerRed}" BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -182,7 +235,6 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <!-- Thông báo khi trống -->
                     <TextBlock Grid.Row="1" Text="Hiện không có yêu cầu nào." Foreground="#94A3B8" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -198,7 +250,7 @@
                 </Grid>
             </Border>
 
-            <!-- 4. Top Món Bán Chạy -->
+            <!-- 2. Top Món Bán Chạy -->
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
                 <Grid>
                     <Grid.RowDefinitions>

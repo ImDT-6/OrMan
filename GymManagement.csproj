@@ -181,7 +181,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Data\MenuContext.cs" />
-    <Compile Include="Helpers\RatioConverter.cs" />
+    <Compile Include="Helpers\HeightConverter.cs" />
     <Compile Include="Helpers\NullToBoolConverter.cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Models\BanAn.cs" />
