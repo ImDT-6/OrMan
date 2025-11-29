@@ -3,6 +3,7 @@ using System.Linq;
 using GymManagement.Data;
 using GymManagement.Models;
 using System;
+using System.Collections.Generic;
 
 namespace GymManagement.Services
 {
@@ -13,8 +14,6 @@ namespace GymManagement.Services
         public DoanhThuRepository()
         {
             _context = new MenuContext();
-            // Nếu chưa có dữ liệu mẫu thì thêm vào để test
-            
         }
 
         public ObservableCollection<HoaDon> GetAll()
@@ -26,7 +25,6 @@ namespace GymManagement.Services
             }
         }
 
-        // Tính tổng tiền hôm nay
         public decimal GetTodayRevenue()
         {
             using (var context = new MenuContext())
@@ -38,7 +36,6 @@ namespace GymManagement.Services
             }
         }
 
-        // [MỚI] Tính tổng tiền HÔM QUA (để so sánh)
         public decimal GetYesterdayRevenue()
         {
             using (var context = new MenuContext())
@@ -51,13 +48,35 @@ namespace GymManagement.Services
             }
         }
 
-        // [MỚI] Đếm số đơn hôm nay
         public int GetTodayOrderCount()
         {
             using (var context = new MenuContext())
             {
                 var today = DateTime.Today;
                 return context.HoaDons.Count(h => h.NgayTao >= today);
+            }
+        }
+
+        // [MỚI] Hàm lấy doanh thu theo giờ trong ngày hôm nay
+        public Dictionary<int, decimal> GetRevenueByHour()
+        {
+            using (var context = new MenuContext())
+            {
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                // Lấy dữ liệu thô về trước (để tránh lỗi GroupBy của EF Core 3.1 với DatePart)
+                var rawData = context.HoaDons
+                    .Where(h => h.NgayTao >= today && h.NgayTao < tomorrow)
+                    .Select(h => new { h.NgayTao, h.TongTien })
+                    .ToList();
+
+                // Group by ở phía Client (RAM)
+                var result = rawData
+                    .GroupBy(h => h.NgayTao.Hour)
+                    .ToDictionary(g => g.Key, g => g.Sum(h => h.TongTien));
+
+                return result;
             }
         }
     }
