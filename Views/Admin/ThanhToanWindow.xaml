@@ -1,0 +1,108 @@
+﻿<Window x:Class="GymManagement.Views.Admin.ThanhToanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Thanh Toán" Height="550" Width="400"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+        <Grid Margin="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <!-- Phần này sẽ co giãn để chứa ScrollViewer -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 1. Header -->
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+                <TextBlock Text="XÁC NHẬN THANH TOÁN" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="txtTenBan" Text="Bàn 01" FontSize="14" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- 2. Tổng Tiền Lớn -->
+            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" CornerRadius="15" Padding="20" Margin="0,0,0,25">
+                <StackPanel>
+                    <TextBlock Text="Tổng số tiền phải thu" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="txtTongTien" Text="150,000 VNĐ" FontSize="32" FontWeight="Bold" Foreground="{StaticResource WarningYellow}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 3. Chọn Phương Thức -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Tabs -->
+                <Border Background="{StaticResource GlassBackground}" CornerRadius="10" Padding="3" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton x:Name="radTienMat" Content="💵 Tiền Mặt" IsChecked="True" Style="{StaticResource FilterRadioButtonStyle}" Grid.Column="0" Click="Method_Click"/>
+                        <RadioButton x:Name="radChuyenKhoan" Content="📲 Chuyển Khoản" Style="{StaticResource FilterRadioButtonStyle}" Grid.Column="1" Click="Method_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- Nội dung thay đổi -->
+                <Grid Grid.Row="1">
+                    <!-- TIỀN MẶT -->
+                    <StackPanel x:Name="pnlTienMat" VerticalAlignment="Center">
+                        <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Stretch="Uniform" Height="60" Margin="0,0,0,15"/>
+                        <TextBlock Text="Vui lòng thu tiền mặt từ khách hàng" Foreground="White" HorizontalAlignment="Center" FontSize="16"/>
+                        <TextBlock Text="Kiểm tra kỹ tiền thừa trước khi xác nhận" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,5,0,0" FontStyle="Italic"/>
+                    </StackPanel>
+
+                    <!-- [ĐÃ CẬP NHẬT] CHUYỂN KHOẢN (QR) CÓ THANH CUỘN -->
+                    <!-- Thay StackPanel cũ bằng ScrollViewer để có thể kéo lên xuống -->
+                    <!-- Style thanh cuộn kính đẹp sẽ tự động áp dụng do bạn đã cài Global Style ở InputStyles.xaml -->
+                    <ScrollViewer x:Name="pnlChuyenKhoan" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                        <StackPanel VerticalAlignment="Top">
+                            <!-- Khung chứa ảnh QR -->
+                            <Border Background="White" CornerRadius="10" Padding="10" HorizontalAlignment="Center" Margin="0,0,0,15">
+                                <!-- Ảnh QR Code (nhớ đảm bảo file ảnh tồn tại trong thư mục /Images/) -->
+                                <Image Source="/Images/QR.png" Stretch="Uniform" MaxWidth="170"/>
+                            </Border>
+
+                            <TextBlock Text="Quét mã để thanh toán" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                            <!-- Thông tin tài khoản -->
+                            <Border Background="#20FFFFFF" CornerRadius="10" Padding="15" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="NGÂN HÀNG SACOMBANK" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                                        <TextBlock Text="STK: " Foreground="{StaticResource TextSecondary}"/>
+                                        <TextBlock Text="070148216655" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
+                                    </StackPanel>
+                                    <TextBlock Text="CTK: NGUYEN MINH TRONG" Foreground="White" HorizontalAlignment="Center" FontSize="14"/>
+                                    <TextBlock Text="Nội dung: Ban 01" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" FontSize="12" Margin="0,5,0,0" FontStyle="Italic"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+
+            <!-- 4. Buttons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button Content="Xác Nhận Đã Thu" Click="BtnConfirm_Click" Style="{StaticResource GlassButtonStyle}" Width="150" Background="{StaticResource SuccessGreen}" Margin="0,0,15,0"/>
+                <Button Content="Hủy Bỏ" Click="BtnCancel_Click" Style="{StaticResource GlassButtonStyle}" Width="100" Background="{StaticResource DangerRed}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

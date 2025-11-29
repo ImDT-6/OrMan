@@ -10,11 +10,13 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using System;
 using System.Linq;
+using GymManagement.Views.Admin; // [QUAN TRỌNG] Thêm dòng này để gọi ThanhToanWindow
 
 namespace GymManagement.ViewModels
 {
     public class QuanLyBanViewModel : INotifyPropertyChanged
     {
+        // ... (Giữ nguyên các khai báo biến cũ) ...
         private readonly BanAnRepository _repository;
         private DispatcherTimer _timer;
 
@@ -62,7 +64,6 @@ namespace GymManagement.ViewModels
             CheckoutCommand = new RelayCommand<object>(Checkout);
             AssignTableCommand = new RelayCommand<object>(AssignTable);
 
-            // Timer cập nhật mỗi 2 giây (nhanh hơn để thấy ngay)
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(2);
             _timer.Tick += (s, e) => RefreshTableStatus();
@@ -76,21 +77,14 @@ namespace GymManagement.ViewModels
 
         private void RefreshTableStatus()
         {
-            // Lấy dữ liệu mới nhất từ DB
             var newData = _repository.GetAll();
-
-            // Cập nhật vào danh sách hiện tại (để giữ nguyên selection)
             foreach (var banMoi in newData)
             {
                 var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
                 if (banCu != null)
                 {
-                    // Chỉ cập nhật nếu có thay đổi để tránh nháy giao diện
-                    if (banCu.TrangThai != banMoi.TrangThai)
-                        banCu.TrangThai = banMoi.TrangThai;
-
-                    if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan)
-                        banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
+                    if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
+                    if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
                 }
             }
         }
@@ -98,12 +92,9 @@ namespace GymManagement.ViewModels
         private void AssignTable(object obj)
         {
             if (SelectedBan == null) return;
-
             if (SelectedBan.TrangThai == "Trống")
             {
-                // Cập nhật DB
                 _repository.UpdateStatus(SelectedBan.SoBan, "Có Khách");
-                // Cập nhật ngay UI để Admin thấy liền
                 SelectedBan.TrangThai = "Có Khách";
                 MessageBox.Show($"Đã xếp bàn {SelectedBan.SoBan} cho khách!", "Thành công");
             }
@@ -117,10 +108,9 @@ namespace GymManagement.ViewModels
         {
             if (SelectedBan == null) return;
 
-            if (SelectedBan.TrangThai == "Có Khách" || SelectedBan.TrangThai == "Đã Đặt")
+            if (SelectedBan.TrangThai == "Có Khách")
             {
                 _currentHoaDon = _repository.GetActiveOrder(SelectedBan.SoBan);
-
                 if (_currentHoaDon != null)
                 {
                     ChiTietDonHang = _repository.GetOrderDetails(_currentHoaDon.MaHoaDon);
@@ -128,74 +118,58 @@ namespace GymManagement.ViewModels
                 }
                 else
                 {
-                    // Trường hợp bàn đang Có Khách nhưng chưa có đơn (Khách vừa vào)
                     ChiTietDonHang = new List<ChiTietHoaDon>();
                     TongTienCanThu = 0;
                 }
-            }
-            else if (SelectedBan.YeuCauThanhToan)
-            {
-                // [FIX] Trường hợp bàn Trống nhưng vẫn có yêu cầu thanh toán (Khách gọi phục vụ khi bàn trống)
-                ChiTietDonHang = new List<ChiTietHoaDon> { new ChiTietHoaDon { TenMonHienThi = "Yêu cầu hỗ trợ/phục vụ.", DonGia = 0, SoLuong = 1 } };
-                TongTienCanThu = 0;
-                _currentHoaDon = null; // Quan trọng: Đảm bảo không có Hóa đơn nào được thanh toán
             }
             else
             {
                 ChiTietDonHang = null;
                 TongTienCanThu = 0;
-                _currentHoaDon = null;
             }
         }
 
+        // [ĐÃ SỬA] Cập nhật logic Thanh Toán
         private void Checkout(object obj)
         {
             if (SelectedBan == null) return;
 
-            // 1. [FIX LOGIC]: Xử lý trường hợp Yêu cầu phục vụ/Thanh toán nhưng không có đơn hàng (TongTienCanThu == 0)
-            if (SelectedBan.YeuCauThanhToan && TongTienCanThu == 0)
+            // Trường hợp 1: Bàn có khách nhưng chưa gọi món -> Hủy bàn
+            if (TongTienCanThu == 0 && SelectedBan.TrangThai != "Trống")
             {
-                // Trường hợp này là khách chỉ bấm nút "Gọi nhân viên"
-                if (MessageBox.Show($"Bàn {SelectedBan.TenBan} đang yêu cầu hỗ trợ. Bạn xác nhận đã xử lý xong yêu cầu này?", "Xác nhận xử lý", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Bàn chưa gọi món. Bạn muốn hủy bàn/trả bàn?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    // Reset trạng thái yêu cầu thanh toán
-                    _repository.ResolvePaymentRequest(SelectedBan.SoBan);
-                    // Nếu bàn đang Có Khách (tức là đã có khách vào), giữ nguyên trạng thái bàn là Có Khách.
-                    if (SelectedBan.TrangThai != "Trống")
-                    {
-                        SelectedBan.YeuCauThanhToan = false;
-                    }
-                    else
-                    {
-                        // Nếu bàn đang Trống (vì khách vừa vào và ấn Gọi nhân viên), thì chuyển về Trống hẳn.
-                        SelectedBan.TrangThai = "Trống";
-                        SelectedBan.YeuCauThanhToan = false;
-                        LoadTableDetails();
-                    }
+                    _repository.UpdateStatus(SelectedBan.SoBan, "Trống");
+                    SelectedBan.TrangThai = "Trống";
+                    SelectedBan.YeuCauThanhToan = false;
+                    LoadTableDetails();
                 }
                 return;
             }
 
-            // 2. Xử lý Thanh toán (Có đơn hàng)
-            if (_currentHoaDon == null)
-            {
-                MessageBox.Show("Không tìm thấy hóa đơn hoạt động để thanh toán.", "Lỗi thanh toán", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            if (_currentHoaDon == null) return;
 
-            if (MessageBox.Show($"Thanh toán cho {SelectedBan.TenBan}?\nTổng tiền: {TongTienCanThu:N0} VNĐ",
-                                "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            // Trường hợp 2: Có tiền -> Mở cửa sổ Thanh Toán mới
+            var paymentWindow = new ThanhToanWindow(SelectedBan.TenBan, TongTienCanThu);
+
+            // Làm mờ cửa sổ chính
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null) mainWindow.Opacity = 0.4;
+
+            if (paymentWindow.ShowDialog() == true)
             {
-                // Thanh toán trong DB
+                // Người dùng đã bấm "Xác nhận đã thu"
                 _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
 
-                // Cập nhật ngay lập tức trên UI
                 SelectedBan.TrangThai = "Trống";
                 SelectedBan.YeuCauThanhToan = false;
 
                 LoadTableDetails();
-                MessageBox.Show("Thanh toán thành công! Bàn đã trống.", "Thông báo");
+                MessageBox.Show("Thanh toán thành công! Bàn đã trống.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+
+            // Trả lại độ sáng
+            if (mainWindow != null) mainWindow.Opacity = 1;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
