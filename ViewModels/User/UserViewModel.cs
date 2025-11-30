@@ -1,13 +1,17 @@
-﻿using System.Collections.ObjectModel;
+﻿using GymManagement.Helpers;
+using GymManagement.Models;
+using GymManagement.Services;
+using GymManagement.Views.User;
+using GymManagement.Helpers;
+using GymManagement.Models;
+using GymManagement.Services;
+using GymManagement.Views.User;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
-using GymManagement.Views.User; // Để mở cửa sổ chọn bàn
 
 namespace GymManagement.ViewModels.User
 {
@@ -17,7 +21,7 @@ namespace GymManagement.ViewModels.User
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
 
-        // [MỚI] Biến lưu bàn hiện tại
+        // Biến lưu bàn hiện tại
         private int _currentTable;
         public int CurrentTable
         {
@@ -51,7 +55,7 @@ namespace GymManagement.ViewModels.User
         }
 
         public ICommand CallStaffCommand { get; private set; }
-        public ICommand ChonBanCommand { get; private set; } // [MỚI]
+        public ICommand ChonBanCommand { get; private set; }
 
         public UserViewModel()
         {
@@ -60,10 +64,9 @@ namespace GymManagement.ViewModels.User
             LoadData();
 
             CallStaffCommand = new RelayCommand<object>(CallStaff);
-            ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow); // [MỚI]
+            ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
         }
 
-        // [MỚI] Hàm mở cửa sổ chọn bàn
         private void OpenChonBanWindow(object obj)
         {
             var wd = new ChonBanWindow();
@@ -118,40 +121,68 @@ namespace GymManagement.ViewModels.User
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
+        // [SỬA ĐỔI] Logic gọi thanh toán chặt chẽ hơn
         private void CallStaff(object obj)
         {
-            // [MỚI] Kiểm tra đã chọn bàn chưa
+            // 1. Kiểm tra đã chọn bàn chưa
             if (CurrentTable <= 0)
             {
                 OpenChonBanWindow(null);
                 if (CurrentTable <= 0) return; // Nếu vẫn chưa chọn thì thôi
             }
 
-            _banRepo.RequestPayment(CurrentTable);
-            MessageBox.Show($"Đã gửi yêu cầu từ Bàn {CurrentTable} tới Admin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+            // 2. Lấy hóa đơn thực tế dưới Database
+            var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            // 3. Logic chặn nếu chưa có món
+            // Nếu (Không có hóa đơn đang ăn) VÀ (Giỏ hàng cũng đang rỗng)
+            if (activeOrder == null)
+            {
+                if (GioHang.Count > 0)
+                {
+                    // Trường hợp khách đã chọn món vào giỏ nhưng QUÊN bấm gửi bếp
+                    MessageBox.Show("Bạn có món trong giỏ hàng nhưng chưa Gửi Bếp.\nVui lòng bấm 'GỬI ĐƠN' trước khi thanh toán.",
+                                    "Chưa gửi đơn",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                }
+                else
+                {
+                    // Trường hợp chưa chọn gì cả (Đúng ý bạn yêu cầu)
+                    MessageBox.Show("Giỏ hàng rỗng (Chưa chọn món).\nVui lòng gọi món trước khi yêu cầu thanh toán!",
+                                    "Thông báo",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                }
+                return; // Dừng lại, không gửi yêu cầu đi
+            }
+
+            // 4. Nếu hợp lệ -> Gửi yêu cầu thanh toán
+            _banRepo.RequestPayment(CurrentTable);
+            MessageBox.Show($"Đã gửi yêu cầu thanh toán từ Bàn {CurrentTable} tới Thu ngân!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
 
         public bool SubmitOrder()
         {
             if (GioHang.Count == 0) return false;
 
-            // [MỚI] Bắt buộc chọn bàn trước khi gửi đơn
             if (CurrentTable <= 0)
             {
                 MessageBox.Show("Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!", "Chưa chọn bàn", MessageBoxButton.OK, MessageBoxImage.Warning);
                 OpenChonBanWindow(null);
-                if (CurrentTable <= 0) return false; // Khách hủy chọn bàn
+                if (CurrentTable <= 0) return false;
             }
 
-            // Gửi đơn với số bàn thực tế
+            // Gọi hàm tạo/gộp đơn (Hàm này đã được update ở bước trước để gộp đơn cũ)
             _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
+
             GioHang.Clear();
             UpdateCartInfo();
             return true;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
