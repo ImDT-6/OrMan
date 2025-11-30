@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using GymManagement.Data;
 using GymManagement.Models;
@@ -77,20 +78,29 @@ namespace GymManagement.Services
                            .Where(ct => ct.MaHoaDon == maHoaDon)
                            .ToList();
         }
+        public static event Action OnPaymentSuccess;
 
         public void CheckoutTable(int soBan, string maHoaDon)
         {
-            var hd = _context.HoaDons.Find(maHoaDon);
-            if (hd != null) hd.DaThanhToan = true;
-
-            var ban = _context.BanAns.Find(soBan);
-            if (ban != null)
+            using (var context = new MenuContext())
             {
-                ban.TrangThai = "Trống";
-                ban.YeuCauThanhToan = false;
-            }
+                var hd = context.HoaDons.Find(maHoaDon);
+                if (hd != null)
+                {
+                    hd.DaThanhToan = true; // Đánh dấu đã trả tiền -> Lúc này mới tính doanh thu
+                }
 
-            _context.SaveChanges();
+                var ban = context.BanAns.Find(soBan);
+                if (ban != null)
+                {
+                    ban.TrangThai = "Trống";
+                    ban.YeuCauThanhToan = false;
+                }
+                context.SaveChanges();
+
+                // [MỚI] Bắn tín hiệu cập nhật cho toàn bộ hệ thống
+                OnPaymentSuccess?.Invoke();
+            }
         }
 
         public void ResolvePaymentRequest(int soBan)

@@ -80,9 +80,12 @@ namespace GymManagement.ViewModels
 
             LoadDashboardData();
 
-            // Timer tự động cập nhật dữ liệu mỗi 5 giây (Real-time dashboard)
+            // [MỚI] Đăng ký sự kiện: Khi có thanh toán -> Tự động Load lại dữ liệu ngay
+            BanAnRepository.OnPaymentSuccess += () => LoadDashboardData();
+
+            // Timer vẫn giữ để cập nhật giờ hệ thống hoặc reset qua ngày mới
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(5);
+            _timer.Interval = TimeSpan.FromSeconds(30); // Tăng lên 30s cho đỡ tốn tài nguyên vì đã có Event rồi
             _timer.Tick += (s, e) => LoadDashboardData();
             _timer.Start();
         }

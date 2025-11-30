@@ -64,7 +64,12 @@ namespace GymManagement.ViewModels
         public DoanhThuViewModel()
         {
             _repository = new DoanhThuRepository();
+
+            // Load lần đầu
             LoadData();
+
+            // [MỚI] Đăng ký sự kiện: Khi có thanh toán -> Load lại danh sách hóa đơn
+            BanAnRepository.OnPaymentSuccess += () => LoadData();
         }
 
         private void LoadData()
