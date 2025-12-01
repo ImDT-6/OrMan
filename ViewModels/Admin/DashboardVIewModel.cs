@@ -20,6 +20,15 @@ namespace GymManagement.ViewModels
         public int SoLuongBan { get; set; }
     }
 
+    // [MỚI] Class hỗ trợ vẽ biểu đồ (Thay thế KeyValuePair)
+    public class ChartBarItem
+    {
+        public string TimeLabel { get; set; } // Giờ (VD: "10:00")
+        public double Value { get; set; }     // Doanh thu thật (VD: 4,500,000)
+        public double BarHeight { get; set; } // Chiều cao pixel đã tính toán (VD: 200)
+        public string TooltipText => $"{Value:N0} VNĐ";
+    }
+
     public class DashboardViewModel : INotifyPropertyChanged
     {
         private readonly DoanhThuRepository _doanhThuRepo;
@@ -27,18 +36,21 @@ namespace GymManagement.ViewModels
         private readonly BanAnRepository _banRepo;
         private DispatcherTimer _timer;
 
-        // Dữ liệu biểu đồ
-        public ObservableCollection<KeyValuePair<string, double>> DoanhThuTheoGio { get; set; }
+        // [SỬA] Dữ liệu biểu đồ dùng class mới
+        public ObservableCollection<ChartBarItem> DoanhThuTheoGio { get; set; }
 
-        // [MỚI] Giá trị doanh thu lớn nhất trong ngày (để tính tỷ lệ chiều cao cột)
-        private double _maxRevenue;
-        public double MaxRevenue
-        {
-            get => _maxRevenue;
-            set { _maxRevenue = value; OnPropertyChanged(); }
-        }
+        // [MỚI] Các nhãn trục tung (Y-Axis) động
+        private string _axisMax = "2M";
+        private string _axisMidHigh = "1.5M";
+        private string _axisMid = "1M";
+        private string _axisMidLow = "500k";
 
-        // [ĐÃ KHÔI PHỤC] Danh sách Top món bán chạy
+        public string AxisMax { get => _axisMax; set { _axisMax = value; OnPropertyChanged(); } }
+        public string AxisMidHigh { get => _axisMidHigh; set { _axisMidHigh = value; OnPropertyChanged(); } }
+        public string AxisMid { get => _axisMid; set { _axisMid = value; OnPropertyChanged(); } }
+        public string AxisMidLow { get => _axisMidLow; set { _axisMidLow = value; OnPropertyChanged(); } }
+
+        // Danh sách Top món
         private ObservableCollection<TopFoodItem> _topMonAn;
         public ObservableCollection<TopFoodItem> TopMonAn
         {
@@ -46,7 +58,7 @@ namespace GymManagement.ViewModels
             set { _topMonAn = value; OnPropertyChanged(); }
         }
 
-        // Danh sách Bàn cần xử lý (Yêu cầu thanh toán)
+        // Danh sách Bàn cần xử lý
         private ObservableCollection<BanAn> _banCanXuLy;
         public ObservableCollection<BanAn> BanCanXuLy
         {
@@ -75,17 +87,15 @@ namespace GymManagement.ViewModels
             _thucDonRepo = new ThucDonRepository();
             _banRepo = new BanAnRepository();
 
-            DoanhThuTheoGio = new ObservableCollection<KeyValuePair<string, double>>();
+            DoanhThuTheoGio = new ObservableCollection<ChartBarItem>();
             ResolveRequestCommand = new RelayCommand<BanAn>(ResolveRequest);
 
             LoadDashboardData();
 
-            // [MỚI] Đăng ký sự kiện: Khi có thanh toán -> Tự động Load lại dữ liệu ngay
             BanAnRepository.OnPaymentSuccess += () => LoadDashboardData();
 
-            // Timer vẫn giữ để cập nhật giờ hệ thống hoặc reset qua ngày mới
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(30); // Tăng lên 30s cho đỡ tốn tài nguyên vì đã có Event rồi
+            _timer.Interval = TimeSpan.FromSeconds(30);
             _timer.Tick += (s, e) => LoadDashboardData();
             _timer.Start();
         }
@@ -96,17 +106,17 @@ namespace GymManagement.ViewModels
             if (MessageBox.Show($"Xác nhận đã xử lý yêu cầu tại {ban.TenBan}?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 _banRepo.ResolvePaymentRequest(ban.SoBan);
-                LoadDashboardData(); // Refresh ngay sau khi xử lý
+                LoadDashboardData();
             }
         }
 
         private void LoadDashboardData()
         {
-            // 1. Load số liệu tổng quan (Doanh thu, Tăng trưởng, Số đơn)
+            // 1. Load số liệu tổng quan
             decimal totalToday = _doanhThuRepo.GetTodayRevenue();
             decimal totalYesterday = _doanhThuRepo.GetYesterdayRevenue();
 
-            DoanhThuNgay = totalToday > 1000000 ? (totalToday / 1000000).ToString("0.##") + "M" : totalToday.ToString("N0");
+            DoanhThuNgay = FormatCurrencyShort(totalToday);
 
             if (totalYesterday == 0)
                 TangTruongText = totalToday > 0 ? "+100% (Mới)" : "---";
@@ -120,59 +130,90 @@ namespace GymManagement.ViewModels
             if (SoDonHomNay > 0)
             {
                 decimal avg = totalToday / SoDonHomNay;
-                TrungBinhDon = "TB: " + (avg > 1000 ? (avg / 1000).ToString("0") + "k" : avg.ToString("N0")) + "/đơn";
+                TrungBinhDon = "TB: " + FormatCurrencyShort(avg) + "/đơn";
             }
             else
             {
                 TrungBinhDon = "Chưa có đơn";
             }
 
-            // 2. Load biểu đồ theo giờ (Real-time)
+            // 2. Load biểu đồ (Đã nâng cấp logic)
             LoadChartData();
 
-            // 3. Load bàn cần xử lý (Lấy từ DB -> Lọc những bàn YêuCauThanhToan=True)
-            var allTables = _banRepo.GetAll(); // Lưu ý: Hàm này dùng fresh context nên data luôn mới
+            // 3. Load bàn cần xử lý
+            var allTables = _banRepo.GetAll();
             var urgentTables = allTables.Where(b => b.YeuCauThanhToan).ToList();
-
-            // Chỉ cập nhật nếu số lượng thay đổi để tránh giật list (đơn giản hóa)
             if (BanCanXuLy == null || BanCanXuLy.Count != urgentTables.Count)
                 BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
 
-            // 4. [ĐÃ KHÔI PHỤC] Load Top món bán chạy (Lấy Top 5 món)
+            // 4. Load Top món
             var topDict = _thucDonRepo.GetTopSellingFoods(5);
             var topList = topDict.Select(x => new TopFoodItem { MonAn = x.Key, SoLuongBan = x.Value }).ToList();
-
-            // Cập nhật lại danh sách Top món
             TopMonAn = new ObservableCollection<TopFoodItem>(topList);
         }
 
+        // [LOGIC MỚI] Tính toán chiều cao cột và thang đo trục tung
         private void LoadChartData()
         {
-            // Lấy dữ liệu thật từ DB (Dictionary: Giờ -> Doanh thu)
             var hourlyData = _doanhThuRepo.GetRevenueByHour();
-
             DoanhThuTheoGio.Clear();
 
-            double max = 1; // Mặc định là 1 để tránh lỗi chia cho 0
+            // Bước 1: Tìm giá trị lớn nhất trong ngày
+            double maxVal = 0;
+            if (hourlyData.Count > 0)
+            {
+                maxVal = (double)hourlyData.Values.Max();
+            }
 
-            // Hiển thị khung giờ từ 8h sáng đến 22h đêm
+            // Bước 2: Xác định thang đo (Max Axis)
+            // Nếu max < 2tr thì để thang 2tr cho đẹp
+            // Nếu max lớn hơn thì làm tròn lên (VD: 4.49M -> 5M)
+            double axisTop = 2000000;
+            if (maxVal > 2000000)
+            {
+                // Làm tròn lên mức đẹp tiếp theo (bội số của 1M)
+                axisTop = Math.Ceiling(maxVal / 1000000) * 1000000;
+                // Nếu sát nút quá (VD 4.9M so với 5M) thì cộng thêm 1 nấc cho thoáng
+                if (maxVal > axisTop * 0.9) axisTop += 1000000;
+            }
+
+            // Bước 3: Cập nhật các nhãn trục tung
+            AxisMax = FormatCurrencyShort((decimal)axisTop);
+            AxisMidHigh = FormatCurrencyShort((decimal)(axisTop * 0.75));
+            AxisMid = FormatCurrencyShort((decimal)(axisTop * 0.5));
+            AxisMidLow = FormatCurrencyShort((decimal)(axisTop * 0.25));
+
+            // Bước 4: Tạo dữ liệu cột với chiều cao Pixel (Max Height khung vẽ là 220px)
+            double chartAreaHeight = 220;
+
             for (int hour = 8; hour <= 22; hour++)
             {
                 decimal revenue = 0;
-                if (hourlyData.ContainsKey(hour))
-                {
-                    revenue = hourlyData[hour];
-                }
+                if (hourlyData.ContainsKey(hour)) revenue = hourlyData[hour];
 
                 double val = (double)revenue;
-                if (val > max) max = val; // Tìm giá trị lớn nhất trong ngày
 
-                // Trục X là giờ (VD: 10:00), Trục Y là tiền (Double)
-                DoanhThuTheoGio.Add(new KeyValuePair<string, double>($"{hour}:00", val));
+                // Công thức: (Giá trị / Thang đo max) * Chiều cao khung
+                double pixelHeight = (val / axisTop) * chartAreaHeight;
+
+                // Đảm bảo tối thiểu 2px để người dùng thấy có cột (nếu có tiền)
+                if (val > 0 && pixelHeight < 2) pixelHeight = 2;
+
+                DoanhThuTheoGio.Add(new ChartBarItem
+                {
+                    TimeLabel = $"{hour}:00",
+                    Value = val,
+                    BarHeight = pixelHeight
+                });
             }
+        }
 
-            // Cập nhật MaxRevenue để View dùng RatioConverter tính chiều cao cột
-            MaxRevenue = max;
+        // Helper format tiền gọn (1.5M, 500k)
+        private string FormatCurrencyShort(decimal amount)
+        {
+            if (amount >= 1000000) return (amount / 1000000).ToString("0.##") + "M";
+            if (amount >= 1000) return (amount / 1000).ToString("0.#") + "k";
+            return amount.ToString("N0");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

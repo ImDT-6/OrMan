@@ -15,9 +15,6 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-
-            <!-- [QUAN TRỌNG] Khai báo Converter để tính chiều cao cột -->
-            <helpers:HeightConverter x:Key="HeightConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -61,29 +58,23 @@
                 </Border>
             </UniformGrid>
 
-            <!-- [ĐÃ CẬP NHẬT] BIỂU ĐỒ VỚI TRỤC TUNG & CỘT ĐỘNG -->
+            <!-- [ĐÃ CẬP NHẬT] BIỂU ĐỒ VỚI TRỤC TUNG & CỘT ĐỘNG HOÀN TOÀN -->
             <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="25" Padding="25" Height="350">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Title -->
                         <RowDefinition Height="*"/>
-                        <!-- Chart Area -->
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="BIỂU ĐỒ DOANH THU THEO GIỜ" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
 
-                    <!-- Khu vực biểu đồ -->
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <!-- Trục Y (Số tiền) -->
                             <ColumnDefinition Width="*"/>
-                            <!-- Các Cột -->
                         </Grid.ColumnDefinitions>
 
-                        <!-- 1. Trục Tung (Y-Axis Labels) -->
-                        <!-- Margin Bottom 30px để chừa chỗ cho trục hoành (Giờ) -->
+                        <!-- 1. Trục Tung (Dynamic Y-Axis Labels) -->
                         <Grid Grid.Column="0" Margin="0,0,10,30">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
@@ -91,25 +82,24 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <!-- Các mốc giá trị giả định (Khớp với tham số Converter 2.000.000) -->
-                            <TextBlock Text="2M" Grid.Row="0" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="1.5M" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="1M" Grid.Row="2" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="500k" Grid.Row="3" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <!-- Số 0 nằm ở đáy của Row cuối cùng -->
+                            <!-- Binding vào các biến AxisMax, AxisMid... trong ViewModel -->
+                            <TextBlock Text="{Binding AxisMax}" Grid.Row="0" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="{Binding AxisMidHigh}" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="{Binding AxisMid}" Grid.Row="2" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="{Binding AxisMidLow}" Grid.Row="3" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
                             <TextBlock Text="0" Grid.Row="3" VerticalAlignment="Bottom" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
                         </Grid>
 
-                        <!-- 2. Lưới ngang & Cột Biểu Đồ (Chồng lên nhau trong cùng 1 Grid để khớp vị trí) -->
+                        <!-- 2. Lưới ngang & Cột Biểu Đồ -->
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
-                                <!-- Vùng vẽ biểu đồ -->
+                                <!-- Vùng vẽ (220px) -->
                                 <RowDefinition Height="30"/>
-                                <!-- Vùng hiển thị giờ (Trục hoành) -->
+                                <!-- Vùng giờ -->
                             </Grid.RowDefinitions>
 
-                            <!-- Lớp 1: Các đường kẻ ngang (Grid Lines) -->
+                            <!-- Lưới ngang -->
                             <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -121,10 +111,9 @@
                                 <Border Grid.Row="1" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
                                 <Border Grid.Row="2" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
                                 <Border Grid.Row="3" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,1"/>
-                                <!-- Đường đáy (Vạch số 0) -->
                             </Grid>
 
-                            <!-- Lớp 2: Các cột biểu đồ -->
+                            <!-- CỘT BIỂU ĐỒ (Binding Width/Height trực tiếp) -->
                             <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Bottom">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -134,37 +123,48 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="*"/>
-                                                <!-- Cột -->
-                                                <RowDefinition Height="Auto"/>
-                                                <!-- Khoảng đệm để nối với trục hoành -->
-                                            </Grid.RowDefinitions>
+                                            <!-- [MỚI] Dùng StackPanel để xếp số tiền lên trên cột -->
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <!-- Số tiền trên đỉnh cột -->
+                                                <!-- Chỉ hiện nếu giá trị > 0 -->
+                                                <TextBlock Text="{Binding Value, StringFormat='{}{0:N0}'}" 
+                                                           FontSize="10" 
+                                                           Foreground="{StaticResource TextSecondary}" 
+                                                           HorizontalAlignment="Center" 
+                                                           Margin="0,0,0,3">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Value}" Value="0">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
 
-                                            <!-- CỘT: Chiều cao (Height) được tính toán tự động -->
-                                            <!-- VerticalAlignment="Bottom" để cột mọc từ đáy (vạch số 0) lên -->
-                                            <!-- ConverterParameter='2000000': Nghĩa là 2 triệu sẽ full cột -->
-                                            <Border Grid.Row="0" Background="{StaticResource AccentGradient}" 
-                                                    CornerRadius="5,5,0,0"  
-                                                    Height="{Binding Value, Converter={StaticResource HeightConverter}, ConverterParameter='2000000'}" 
-                                                    VerticalAlignment="Bottom" 
-                                                    ToolTip="{Binding Value, StringFormat='{}{0:N0} VNĐ'}">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Opacity" Value="0.8"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                            </Border>
+                                                <!-- Cột biểu đồ -->
+                                                <Border Background="{StaticResource AccentGradient}" 
+                                                        CornerRadius="5,5,0,0"  
+                                                        Height="{Binding BarHeight}" 
+                                                        ToolTip="{Binding TooltipText}">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Opacity" Value="0.8"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </StackPanel>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!-- Lớp 3: Trục Hoành (Giờ) - Nằm ở Row bên dưới -->
+                            <!-- Trục Hoành (Giờ) -->
                             <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -173,7 +173,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{Binding TimeLabel}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -183,7 +183,7 @@
             </Border>
         </StackPanel>
 
-        <!-- CỘT PHẢI (Giữ nguyên như cũ) -->
+        <!-- CỘT PHẢI (Giữ nguyên) -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
