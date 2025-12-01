@@ -11,7 +11,6 @@ namespace GymManagement.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int SoBan { get; set; }
 
-        // [SỬA QUAN TRỌNG] Logic set/get đầy đủ để giao diện tự đổi màu
         private string _trangThai;
         public string TrangThai
         {
@@ -23,7 +22,42 @@ namespace GymManagement.Models
         public bool YeuCauThanhToan
         {
             get => _yeuCauThanhToan;
-            set { if (_yeuCauThanhToan != value) { _yeuCauThanhToan = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_yeuCauThanhToan != value)
+                {
+                    _yeuCauThanhToan = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(HienThiYeuCau)); // Cập nhật text hiển thị
+                }
+            }
+        }
+
+        // [MỚI] Lưu nội dung yêu cầu hỗ trợ (Ví dụ: "Xin thêm nước")
+        private string _yeuCauHoTro;
+        public string YeuCauHoTro
+        {
+            get => _yeuCauHoTro;
+            set
+            {
+                if (_yeuCauHoTro != value)
+                {
+                    _yeuCauHoTro = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(HienThiYeuCau)); // Cập nhật text hiển thị
+                }
+            }
+        }
+
+        // [MỚI] Property phụ trợ để hiển thị trên Dashboard Admin
+        public string HienThiYeuCau
+        {
+            get
+            {
+                if (YeuCauThanhToan) return "Yêu cầu thanh toán";
+                if (!string.IsNullOrEmpty(YeuCauHoTro)) return $"Hỗ trợ: {YeuCauHoTro}";
+                return "";
+            }
         }
 
         public string TenBan => $"Bàn {SoBan:00}";
@@ -35,6 +69,7 @@ namespace GymManagement.Models
             SoBan = soBan;
             TrangThai = trangThai;
             YeuCauThanhToan = false;
+            YeuCauHoTro = null;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

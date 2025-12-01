@@ -124,42 +124,58 @@ namespace GymManagement.ViewModels.User
         // [SỬA ĐỔI] Logic gọi thanh toán chặt chẽ hơn
         private void CallStaff(object obj)
         {
-            // 1. Kiểm tra đã chọn bàn chưa
+            // 1. Bắt buộc chọn bàn trước
             if (CurrentTable <= 0)
             {
                 OpenChonBanWindow(null);
-                if (CurrentTable <= 0) return; // Nếu vẫn chưa chọn thì thôi
+                if (CurrentTable <= 0) return;
             }
 
-            // 2. Lấy hóa đơn thực tế dưới Database
+            // 2. Kiểm tra trạng thái đơn hàng của bàn
             var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
+            bool hasActiveOrder = (activeOrder != null);
 
-            // 3. Logic chặn nếu chưa có món
-            // Nếu (Không có hóa đơn đang ăn) VÀ (Giỏ hàng cũng đang rỗng)
-            if (activeOrder == null)
+            // 3. Mở cửa sổ chọn loại yêu cầu
+            // Truyền trạng thái đơn hàng vào để quyết định có hiện nút Thanh Toán hay không
+            var requestWindow = new SupportRequestWindow(hasActiveOrder);
+
+            // Hiệu ứng làm mờ màn hình chính
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null) mainWindow.Opacity = 0.4;
+
+            if (requestWindow.ShowDialog() == true)
             {
-                if (GioHang.Count > 0)
+                if (requestWindow.SelectedRequest == RequestType.Checkout)
                 {
-                    // Trường hợp khách đã chọn món vào giỏ nhưng QUÊN bấm gửi bếp
-                    MessageBox.Show("Bạn có món trong giỏ hàng nhưng chưa Gửi Bếp.\nVui lòng bấm 'GỬI ĐƠN' trước khi thanh toán.",
-                                    "Chưa gửi đơn",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Warning);
+                    // --- TRƯỜNG HỢP 1: GỌI THANH TOÁN ---
+                    // Logic cũ: Kiểm tra kỹ lại lần nữa cho chắc
+                    if (activeOrder == null)
+                    {
+                        if (GioHang.Count > 0)
+                            MessageBox.Show("Bạn chưa gửi đơn bếp. Vui lòng bấm 'Gửi Đơn' trước.", "Chưa có đơn", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        else
+                            MessageBox.Show("Bàn chưa có món nào. Vui lòng gọi món trước.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    else
+                    {
+                        _banRepo.RequestPayment(CurrentTable);
+                        MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN cho Bàn {CurrentTable}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
-                else
+                else if (requestWindow.SelectedRequest == RequestType.Support)
                 {
-                    // Trường hợp chưa chọn gì cả (Đúng ý bạn yêu cầu)
-                    MessageBox.Show("Giỏ hàng rỗng (Chưa chọn món).\nVui lòng gọi món trước khi yêu cầu thanh toán!",
-                                    "Thông báo",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Warning);
+                    // --- TRƯỜNG HỢP 2: GỌI HỖ TRỢ / NHẮN TIN ---
+                    string msg = requestWindow.SupportMessage;
+
+                    // [MỚI] Lưu trực tiếp vào Database để Admin thấy
+                    _banRepo.SendSupportRequest(CurrentTable, msg);
+
+                    MessageBox.Show($"Đã gửi lời nhắn đến nhân viên:\n\"{msg}\"\n\nNhân viên sẽ đến bàn {CurrentTable} ngay!", "Đã gửi yêu cầu", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                return; // Dừng lại, không gửi yêu cầu đi
             }
 
-            // 4. Nếu hợp lệ -> Gửi yêu cầu thanh toán
-            _banRepo.RequestPayment(CurrentTable);
-            MessageBox.Show($"Đã gửi yêu cầu thanh toán từ Bàn {CurrentTable} tới Thu ngân!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Trả lại độ sáng
+            if (mainWindow != null) mainWindow.Opacity = 1;
         }
 
         public bool SubmitOrder()

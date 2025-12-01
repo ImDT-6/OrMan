@@ -222,13 +222,15 @@
 
                                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Yêu cầu thanh toán" Foreground="#EF4444" FontSize="12"/>
+                                            <!-- [MỚI] Binding vào Property HienThiYeuCau đã tạo trong Model -->
+                                            <TextBlock Text="{Binding HienThiYeuCau}" Foreground="#EF4444" FontSize="12" FontStyle="Italic" TextWrapping="Wrap"/>
                                         </StackPanel>
-
-                                        <Button Grid.Column="2" Content="Xem &amp; Xử lý" 
-                                                Click="BtnXuLy_Click"
-                                                Tag="{Binding}"
-                                                Style="{StaticResource GlassButtonStyle}" Height="30" FontSize="12" Padding="10,0" Background="#EF4444"/>
+                                        <Button Grid.Column="2" Content="Xử lý" 
+                                                Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource GlassButtonStyle}" 
+                                                Height="30" FontSize="12" Padding="15,0" 
+                                                Background="#EF4444"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

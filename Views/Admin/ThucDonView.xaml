@@ -17,7 +17,6 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Khai báo Converter chuẩn của WPF -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <DataTemplate x:Key="FoodCardTemplate">
@@ -107,6 +106,8 @@
             <Style TargetType="ListBox">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
+                <!-- [FIX] Đảm bảo ListBox tự hiện thanh cuộn dọc -->
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
                 <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
                 <Setter Property="ItemContainerStyle">
                     <Setter.Value>
@@ -167,19 +168,16 @@
 
             <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="25,0,25,25" x:Name="MenuTabControl" SelectionChanged="MenuTabControl_SelectionChanged">
                 <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
-                        <ListBox x:Name="ListBoxMiCay" ItemTemplate="{StaticResource FoodCardTemplate}"/>
-                    </ScrollViewer>
+                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài, chuyển Margin vào ListBox -->
+                    <ListBox x:Name="ListBoxMiCay" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
                 </TabItem>
                 <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
-                        <ListBox x:Name="ListBoxDoChien" ItemTemplate="{StaticResource FoodCardTemplate}"/>
-                    </ScrollViewer>
+                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài -->
+                    <ListBox x:Name="ListBoxDoChien" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
                 </TabItem>
                 <TabItem Header="🥤 NƯỚC UỐNG" Tag="Nước Uống">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
-                        <ListBox x:Name="ListBoxNuocUong" ItemTemplate="{StaticResource FoodCardTemplate}"/>
-                    </ScrollViewer>
+                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài -->
+                    <ListBox x:Name="ListBoxNuocUong" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
                 </TabItem>
             </TabControl>
         </Grid>

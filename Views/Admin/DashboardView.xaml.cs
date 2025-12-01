@@ -11,24 +11,22 @@ namespace GymManagement.Views.Admin
         public DashboardView()
         {
             InitializeComponent();
-            this.DataContext = new DashboardViewModel();
-        }
 
-        // [MỚI] Hàm xử lý khi bấm nút "Xem & Xử lý"
-        private void BtnXuLy_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is BanAn banCanXuLy)
+            var vm = new DashboardViewModel();
+            this.DataContext = vm;
+
+            // Lắng nghe sự kiện từ ViewModel: Khi nào cần chuyển trang thì mới chuyển
+            vm.RequestNavigationToTable += (ban) =>
             {
-                // Tìm AdminView cha để gọi hàm chuyển trang
                 var adminView = FindParent<AdminView>(this);
                 if (adminView != null)
                 {
-                    adminView.ChuyenDenBanCanXuLy(banCanXuLy);
+                    adminView.ChuyenDenBanCanXuLy(ban);
                 }
-            }
+            };
         }
 
-        // Hàm hỗ trợ tìm Control cha (Helper)
+        // Helper tìm cha (Giữ nguyên)
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);

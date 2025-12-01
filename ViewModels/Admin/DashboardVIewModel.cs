@@ -79,8 +79,11 @@ namespace GymManagement.ViewModels
         private string _trungBinhDon;
         public string TrungBinhDon { get => _trungBinhDon; set { _trungBinhDon = value; OnPropertyChanged(); } }
 
-        public ICommand ResolveRequestCommand { get; private set; }
+        // Command này sẽ được Binding vào nút "Xử lý" trên Dashboard
+        public ICommand ProcessRequestCommand { get; private set; }
 
+        // Event để View (Code-behind) lắng nghe và thực hiện điều hướng nếu cần
+        public event Action<BanAn> RequestNavigationToTable;
         public DashboardViewModel()
         {
             _doanhThuRepo = new DoanhThuRepository();
@@ -88,7 +91,7 @@ namespace GymManagement.ViewModels
             _banRepo = new BanAnRepository();
 
             DoanhThuTheoGio = new ObservableCollection<ChartBarItem>();
-            ResolveRequestCommand = new RelayCommand<BanAn>(ResolveRequest);
+            ProcessRequestCommand = new RelayCommand<BanAn>(ProcessRequest);
 
             LoadDashboardData();
 
@@ -100,13 +103,30 @@ namespace GymManagement.ViewModels
             _timer.Start();
         }
 
-        private void ResolveRequest(BanAn ban)
+        private void ProcessRequest(BanAn ban)
         {
             if (ban == null) return;
-            if (MessageBox.Show($"Xác nhận đã xử lý yêu cầu tại {ban.TenBan}?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+
+            // TRƯỜNG HỢP 1: YÊU CẦU THANH TOÁN -> CẦN ĐIỀU HƯỚNG
+            if (ban.YeuCauThanhToan)
             {
-                _banRepo.ResolvePaymentRequest(ban.SoBan);
-                LoadDashboardData();
+                // Bắn sự kiện để View biết mà chuyển trang
+                RequestNavigationToTable?.Invoke(ban);
+            }
+            // TRƯỜNG HỢP 2: YÊU CẦU HỖ TRỢ (Xin đồ...) -> XỬ LÝ NHANH TẠI CHỖ
+            else if (!string.IsNullOrEmpty(ban.YeuCauHoTro))
+            {
+                if (MessageBox.Show($"Đã mang \"{ban.YeuCauHoTro}\" cho {ban.TenBan} chưa?",
+                                    "Xác nhận phục vụ",
+                                    MessageBoxButton.YesNo,
+                                    MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    // 1. Cập nhật DB (Xóa yêu cầu hỗ trợ)
+                    _banRepo.ResolvePaymentRequest(ban.SoBan);
+
+                    // 2. Xóa khỏi danh sách hiển thị ngay lập tức
+                    BanCanXuLy.Remove(ban);
+                }
             }
         }
 
@@ -140,11 +160,14 @@ namespace GymManagement.ViewModels
             // 2. Load biểu đồ (Đã nâng cấp logic)
             LoadChartData();
 
-            // 3. Load bàn cần xử lý
+            // 3. Load bàn cần xử lý [CẬP NHẬT LOGIC]
             var allTables = _banRepo.GetAll();
-            var urgentTables = allTables.Where(b => b.YeuCauThanhToan).ToList();
-            if (BanCanXuLy == null || BanCanXuLy.Count != urgentTables.Count)
-                BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
+
+            // Lọc các bàn: Có yêu cầu thanh toán HOẶC Có yêu cầu hỗ trợ (khác null/empty)
+            var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
+
+            // Cập nhật danh sách hiển thị
+            BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
 
             // 4. Load Top món
             var topDict = _thucDonRepo.GetTopSellingFoods(5);

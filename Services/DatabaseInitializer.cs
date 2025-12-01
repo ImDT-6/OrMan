@@ -13,7 +13,7 @@ namespace GymManagement.Services
                 // 1. Đảm bảo DB đã được tạo
                 context.Database.EnsureCreated();
 
-                // 2. Chạy lệnh SQL để thêm cột 'YeuCauThanhToan' vào bảng BanAn (nếu chưa có)
+                // 2. Cột YeuCauThanhToan
                 try
                 {
                     string sqlBanAn = @"
@@ -25,7 +25,19 @@ namespace GymManagement.Services
                 }
                 catch { }
 
-                // 3. Chạy lệnh SQL để thêm cột 'IsSoldOut' vào bảng MonAn (nếu chưa có)
+                // 3. [MỚI] Thêm cột YeuCauHoTro (NVARCHAR)
+                try
+                {
+                    string sqlHoTro = @"
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'YeuCauHoTro' AND Object_ID = Object_ID(N'BanAn'))
+                        BEGIN
+                            ALTER TABLE BanAn ADD YeuCauHoTro NVARCHAR(255) NULL;
+                        END";
+                    context.Database.ExecuteSqlRaw(sqlHoTro);
+                }
+                catch { }
+
+                // 4. Cột IsSoldOut
                 try
                 {
                     string sqlMonAn = @"

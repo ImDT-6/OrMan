@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Yêu Cầu Hỗ Trợ" Height="300" Width="400"
+        Title="Dịch Vụ Khách Hàng" Height="450" Width="420"
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
 
@@ -13,10 +13,87 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- STYLE CHO COMBOBOX ĐẸP (DARK/GLASS) -->
+            <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Background" Value="#30000000"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
+                            <Grid>
+                                <Border Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                        CornerRadius="10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Phần Textbox nhập liệu -->
+                                    <TextBox Name="PART_EditableTextBox" 
+                                             Style="{x:Null}" 
+                                             Background="Transparent" 
+                                             Foreground="White" 
+                                             BorderThickness="0" 
+                                             Padding="{TemplateBinding Padding}"
+                                             VerticalContentAlignment="Center"
+                                             HorizontalAlignment="Stretch"/>
+                                    <!-- Mũi tên -->
+                                    <ToggleButton Grid.Column="1" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate>
+                                                <Border Background="Transparent">
+                                                    <Path Data="M0,0 L4,4 L8,0" Stroke="White" StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                                <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                    <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <Border x:Name="DropDownBorder" Background="#2D3748" BorderThickness="1" BorderBrush="{StaticResource GlassBorder}" CornerRadius="10"/>
+                                        <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Popup>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ComboBoxItem">
+                                        <Border x:Name="bd" Background="Transparent" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentGradient}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{StaticResource GlassBackground}" CornerRadius="20" BorderBrush="{StaticResource AccentGradient}" BorderThickness="2">
+    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Grid Margin="25">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -24,29 +101,68 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="BẠN CẦN PHỤC VỤ?" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="BẠN CẦN GIÚP GÌ?" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock Text="Vui lòng chọn hoặc nhập yêu cầu bên dưới" Foreground="{StaticResource TextSecondary}" FontSize="13" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            </StackPanel>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center">
+            <StackPanel Grid.Row="1" VerticalAlignment="Top">
 
-                <!-- Hỗ trợ / Phục vụ (Mặc định cho cả bàn trống/có đơn) -->
-                <Button x:Name="BtnSupport" Content="🔔 GỌI PHỤC VỤ (HỖ TRỢ)" 
-                        Click="BtnSupport_Click" 
-                        Style="{StaticResource GlassButtonStyle}" 
-                        Background="#203B82F6" 
-                        Height="55" Margin="0,0,0,15" FontSize="15" FontWeight="Bold"/>
+                <!-- 1. PHẦN GỌI HỖ TRỢ / NHẮN TIN -->
+                <Border Background="{StaticResource GlassBackground}" CornerRadius="15" Padding="15" Margin="0,0,0,20">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="💬" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Gửi lời nhắn tới nhân viên" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                <!-- Thanh toán (Chỉ hiện khi có đơn đang hoạt động) -->
-                <Button x:Name="BtnCheckout" Content="💵 YÊU CẦU THANH TOÁN" 
-                        Click="BtnCheckout_Click" 
-                        Style="{StaticResource GlassButtonStyle}" 
-                        Background="{StaticResource WarningYellow}" 
-                        Height="55" FontSize="15" FontWeight="Bold"/>
+                        <!-- ComboBox với Style mới -->
+                        <ComboBox x:Name="cboMessage" 
+                                  IsEditable="True" 
+                                  Style="{StaticResource DarkComboBoxStyle}"
+                                  Height="45"
+                                  Margin="0,0,0,15"
+                                  Text="Xin thêm nước lọc">
+                            <ComboBoxItem Content="Xin thêm nước lọc"/>
+                            <ComboBoxItem Content="Xin thêm chén bát"/>
+                            <ComboBoxItem Content="Xin thêm đá lạnh"/>
+                            <ComboBoxItem Content="Cần tư vấn menu"/>
+                            <ComboBoxItem Content="Xin khăn giấy"/>
+                            <ComboBoxItem Content="Gọi quản lý"/>
+                        </ComboBox>
+
+                        <Button Content="Gửi Yêu Cầu Hỗ Trợ" 
+                                Click="BtnSupport_Click" 
+                                Style="{StaticResource GlassButtonStyle}" 
+                                Background="#203B82F6" 
+                                Height="45" FontSize="14" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2. PHẦN THANH TOÁN (Chỉ hiện khi cần) -->
+                <StackPanel x:Name="pnlCheckout">
+                    <Border Height="1" Background="{StaticResource GlassBorder}" Margin="10,0,10,20"/>
+
+                    <Button x:Name="BtnCheckout" 
+                            Content="💵 YÊU CẦU THANH TOÁN" 
+                            Click="BtnCheckout_Click" 
+                            Style="{StaticResource GlassButtonStyle}" 
+                            Background="{StaticResource WarningYellow}" 
+                            Height="50" FontSize="15" FontWeight="Bold">
+                        <Button.Effect>
+                            <DropShadowEffect Color="#F59E0B" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                        </Button.Effect>
+                    </Button>
+                    <TextBlock Text="*Chỉ chọn khi bạn đã dùng bữa xong" Foreground="{StaticResource TextSecondary}" FontSize="11" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
 
             </StackPanel>
 
-            <Button Grid.Row="2" Content="Hủy" Click="BtnCancel_Click" 
+            <!-- Footer -->
+            <Button Grid.Row="2" Content="Đóng" Click="BtnCancel_Click" 
                     Style="{StaticResource NavButtonStyle}" 
-                    Background="Transparent" Foreground="{StaticResource TextSecondary}" Height="30" Padding="0" Margin="0,15,0,0"/>
+                    Background="Transparent" Foreground="{StaticResource TextSecondary}" Height="35" Padding="0" Margin="0,10,0,0"/>
         </Grid>
     </Border>
 </Window>

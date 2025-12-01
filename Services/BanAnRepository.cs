@@ -18,7 +18,6 @@ namespace GymManagement.Services
             _context.Database.EnsureCreated();
         }
 
-        // [SỬA QUAN TRỌNG] Dùng context mới mỗi khi gọi để đảm bảo dữ liệu Real-time chính xác nhất
         public ObservableCollection<BanAn> GetAll()
         {
             using (var freshContext = new MenuContext())
@@ -52,13 +51,28 @@ namespace GymManagement.Services
 
         public void RequestPayment(int soBan)
         {
-            // Dùng context mới để đảm bảo User update được ngay dù Admin đang mở
             using (var context = new MenuContext())
             {
                 var item = context.BanAns.Find(soBan);
                 if (item != null)
                 {
                     item.YeuCauThanhToan = true;
+                    // Nếu đang gọi thanh toán thì xóa yêu cầu hỗ trợ cũ đi cho đỡ rối
+                    item.YeuCauHoTro = null;
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        // [MỚI] Gửi yêu cầu hỗ trợ kèm lời nhắn
+        public void SendSupportRequest(int soBan, string message)
+        {
+            using (var context = new MenuContext())
+            {
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.YeuCauHoTro = message;
                     context.SaveChanges();
                 }
             }
@@ -85,24 +99,21 @@ namespace GymManagement.Services
             using (var context = new MenuContext())
             {
                 var hd = context.HoaDons.Find(maHoaDon);
-                if (hd != null)
-                {
-                    hd.DaThanhToan = true; // Đánh dấu đã trả tiền -> Lúc này mới tính doanh thu
-                }
+                if (hd != null) hd.DaThanhToan = true;
 
                 var ban = context.BanAns.Find(soBan);
                 if (ban != null)
                 {
                     ban.TrangThai = "Trống";
                     ban.YeuCauThanhToan = false;
+                    ban.YeuCauHoTro = null; // Xóa luôn hỗ trợ
                 }
                 context.SaveChanges();
-
-                // [MỚI] Bắn tín hiệu cập nhật cho toàn bộ hệ thống
                 OnPaymentSuccess?.Invoke();
             }
         }
 
+        // [CẬP NHẬT] Xử lý xong yêu cầu (cả thanh toán lẫn hỗ trợ)
         public void ResolvePaymentRequest(int soBan)
         {
             using (var context = new MenuContext())
@@ -110,7 +121,8 @@ namespace GymManagement.Services
                 var ban = context.BanAns.Find(soBan);
                 if (ban != null)
                 {
-                    ban.YeuCauThanhToan = false; // Tắt yêu cầu
+                    ban.YeuCauThanhToan = false;
+                    ban.YeuCauHoTro = null; // Xóa lời nhắn
                     context.SaveChanges();
                 }
             }

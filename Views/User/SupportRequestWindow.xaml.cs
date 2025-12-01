@@ -2,12 +2,13 @@
 
 namespace GymManagement.Views.User
 {
-    // Enum để xác định loại yêu cầu mà User chọn
     public enum RequestType { None, Support, Checkout }
 
     public partial class SupportRequestWindow : Window
     {
         public RequestType SelectedRequest { get; private set; } = RequestType.None;
+        public string SupportMessage { get; private set; } = ""; // Lưu lời nhắn
+
         private bool _hasActiveOrder = false;
 
         public SupportRequestWindow(bool hasActiveOrder)
@@ -15,16 +16,21 @@ namespace GymManagement.Views.User
             InitializeComponent();
             _hasActiveOrder = hasActiveOrder;
 
-            // Ẩn nút Thanh toán nếu chưa có đơn đang hoạt động
+            // Nếu chưa có đơn (Khách mới vào), ẩn phần thanh toán
             if (!_hasActiveOrder)
             {
-                BtnCheckout.Visibility = Visibility.Collapsed;
+                pnlCheckout.Visibility = Visibility.Collapsed;
             }
         }
 
         private void BtnSupport_Click(object sender, RoutedEventArgs e)
         {
             SelectedRequest = RequestType.Support;
+            SupportMessage = cboMessage.Text; // Lấy nội dung khách nhập hoặc chọn
+
+            if (string.IsNullOrWhiteSpace(SupportMessage))
+                SupportMessage = "Cần hỗ trợ"; // Mặc định
+
             this.DialogResult = true;
             this.Close();
         }
