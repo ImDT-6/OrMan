@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Chi Tiết Món" Height="600" Width="500"
+        Title="Chi Tiết Món" Height="620" Width="550"
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
 
@@ -19,114 +19,149 @@
     <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="25" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="200"/>
-                <!-- Ảnh món -->
+                <RowDefinition Height="220"/>
+                <!-- Ảnh món (Tăng nhẹ để đẹp hơn) -->
                 <RowDefinition Height="*"/>
-                <!-- Tùy chọn -->
+                <!-- Phần nội dung chính (Co giãn) -->
                 <RowDefinition Height="Auto"/>
-                <!-- Nút đặt -->
+                <!-- Nút đặt (Cố định) -->
             </Grid.RowDefinitions>
 
             <!-- 1. Ảnh Header -->
             <Grid Grid.Row="0">
                 <Border CornerRadius="25,25,0,0">
                     <Border.Background>
-                        <ImageBrush ImageSource="{Binding HinhAnhUrl}" Stretch="UniformToFill" Opacity="0.8"/>
+                        <ImageBrush ImageSource="{Binding HinhAnhUrl}" Stretch="UniformToFill" Opacity="0.9"/>
+                    </Border.Background>
+                </Border>
+                <!-- Lớp phủ gradient để text dễ đọc hơn -->
+                <Border CornerRadius="25,25,0,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#00000000" Offset="0.5"/>
+                            <GradientStop Color="#CC000000" Offset="1"/>
+                        </LinearGradientBrush>
                     </Border.Background>
                 </Border>
 
-                <!-- [ĐÃ SỬA CHUẨN] Nút Đóng (Viết lại Template để căn giữa tuyệt đối) -->
-                <!-- Bỏ Style="NavButtonStyle" vì nó gây lệch icon -->
+                <!-- Nút Đóng -->
                 <Button Click="BtnClose_Click" 
                         HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
-                        Width="40" Height="40"
-                        Background="#50000000"
+                        Width="36" Height="36"
+                        Background="#60000000"
                         Cursor="Hand">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Grid>
-                                <!-- Nền nút (Hình tròn hoặc bo góc) -->
-                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="20">
-                                    <!-- Nội dung (Icon) canh giữa -->
+                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="18">
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Grid>
                             <ControlTemplate.Triggers>
-                                <!-- [MỚI] Hiệu ứng khi di chuột: Đổi màu nền sang đỏ cam nhạt -->
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
-                                    <!-- Bạn có thể chỉnh màu khác, ví dụ "#AAEF4444"(đỏ cam) #80FFFFFF (trắng mờ) hoặc #AA000000 (đen mờ) -->
                                 </Trigger>
-
-                                <!-- Hiệu ứng khi nhấn giữ -->
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
                                     <Setter Property="RenderTransform">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="20" CenterY="20"/>
+                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="18" CenterY="18"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Button.Template>
-
-                    <!-- Icon X -->
-                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="14" Height="14"/>
+                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="12" Height="12"/>
                 </Button>
+
                 <!-- Tên và Giá -->
-                <StackPanel VerticalAlignment="Bottom" Margin="20">
-                    <TextBlock Text="{Binding TenMon}" FontSize="24" FontWeight="Bold" Foreground="White">
+                <StackPanel VerticalAlignment="Bottom" Margin="25,0,25,20">
+                    <TextBlock Text="{Binding TenMon}" FontSize="28" FontWeight="Bold" Foreground="White" TextWrapping="Wrap">
                         <TextBlock.Effect>
-                            <DropShadowEffect ShadowDepth="1"/>
+                            <DropShadowEffect ShadowDepth="2" BlurRadius="5"/>
                         </TextBlock.Effect>
                     </TextBlock>
-                    <TextBlock Text="{Binding GiaBan, StringFormat='{}{0:N0} đ'}" FontSize="20" Foreground="{StaticResource WarningYellow}" FontWeight="Bold">
+                    <TextBlock Text="{Binding GiaBan, StringFormat='{}{0:N0} đ'}" FontSize="24" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" Margin="0,5,0,0">
                         <TextBlock.Effect>
-                            <DropShadowEffect ShadowDepth="1"/>
+                            <DropShadowEffect ShadowDepth="2" BlurRadius="5"/>
                         </TextBlock.Effect>
                     </TextBlock>
                 </StackPanel>
             </Grid>
 
-            <!-- 2. Tùy Chọn (Scroll được) -->
-            <ScrollViewer Grid.Row="1" Padding="20">
-                <StackPanel>
-                    <!-- CHỌN CẤP ĐỘ CAY (Chỉ hiện nếu là Mì Cay) -->
-                    <StackPanel x:Name="PnlCapDoCay">
-                        <TextBlock Text="Chọn Cấp Độ Cay" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                        <ItemsControl x:Name="LevelItemsControl">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <RadioButton GroupName="LevelCay" Content="{Binding}" Style="{StaticResource FilterRadioButtonStyle}" Margin="0,0,10,10" MinWidth="60"
-                                                 Checked="RadioButton_Checked" Foreground="White"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,20"/>
-                    </StackPanel>
+            <!-- 2. Tùy Chọn (Sử dụng DockPanel để phân chia không gian hiệu quả) -->
+            <DockPanel Grid.Row="1" Margin="25,15,25,10" LastChildFill="True">
 
-                    <!-- Ghi chú -->
-                    <TextBlock Text="Ghi chú cho bếp" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                    <TextBox x:Name="txtNote" Style="{StaticResource GlassTextBox}" Height="80" TextWrapping="Wrap" ToolTip="Ví dụ: Không hành, ít nước..." VerticalContentAlignment="Top" Padding="15"/>
+                <!-- [TOP] CHỌN CẤP ĐỘ CAY (Dock Top) -->
+                <!-- Chỉ hiển thị nếu là Mì Cay (đã xử lý logic Visibility trong Code-behind) -->
+                <StackPanel x:Name="PnlCapDoCay" DockPanel.Dock="Top" Margin="0,0,0,15">
+                    <TextBlock Text="CHỌN CẤP ĐỘ CAY" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,10"/>
+                    <ItemsControl x:Name="LevelItemsControl">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton GroupName="LevelCay" Content="{Binding}" 
+                                             Style="{StaticResource FilterRadioButtonStyle}" 
+                                             Margin="0,0,8,8" MinWidth="60" Height="32" FontSize="13"
+                                             Checked="RadioButton_Checked" Foreground="White"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,10,0,0"/>
+                </StackPanel>
 
-                    <!-- Số lượng -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
-                        <Button Content="-" Click="BtnGiam_Click" Style="{StaticResource GlassButtonStyle}" Width="50" Background="#30FFFFFF"/>
-                        <TextBlock x:Name="txtSoLuong" Text="1" Foreground="White" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="20,0"/>
-                        <Button Content="+" Click="BtnTang_Click" Style="{StaticResource GlassButtonStyle}" Width="50" Background="#30FFFFFF"/>
+                <!-- [BOTTOM] SỐ LƯỢNG (Dock Bottom - Luôn nằm dưới cùng của phần nội dung) -->
+                <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Center" Margin="0,15,0,5">
+                    <TextBlock Text="SỐ LƯỢNG" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="-" Click="BtnGiam_Click" Style="{StaticResource GlassButtonStyle}" Width="45" Height="40" Background="#30FFFFFF" FontSize="18" FontWeight="Bold"/>
+                        <Border Background="#15FFFFFF" CornerRadius="10" Margin="10,0" MinWidth="60" Height="40">
+                            <TextBlock x:Name="txtSoLuong" Text="1" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Button Content="+" Click="BtnTang_Click" Style="{StaticResource GlassButtonStyle}" Width="45" Height="40" Background="#30FFFFFF" FontSize="18" FontWeight="Bold"/>
                     </StackPanel>
                 </StackPanel>
-            </ScrollViewer>
 
-            <!-- 3. Nút Xác Nhận -->
-            <Border Grid.Row="2" Padding="20" Background="#20000000" CornerRadius="0,0,25,25">
-                <Button x:Name="btnConfirm" Content="Thêm vào giỏ - 65,000 đ" Click="BtnConfirm_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" Height="50" FontSize="18"/>
+                <!-- [CENTER] GHI CHÚ (Fill phần còn lại) -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="GHI CHÚ CHO BẾP" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
+
+                    <!-- Khung nhập liệu tự co giãn -->
+                    <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15">
+                        <TextBox x:Name="txtNote" 
+                                 Style="{x:Null}" 
+                                 Background="Transparent" 
+                                 Foreground="White" 
+                                 CaretBrush="White"
+                                 BorderThickness="0"
+                                 FontSize="14"
+                                 Padding="12"
+                                 Margin="10,10,10,10"
+                                 TextWrapping="Wrap" 
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 VerticalContentAlignment="Top" 
+                                 ToolTip="Ví dụ: Không hành, ít nước..."/>
+                    </Border>
+                </Grid>
+            </DockPanel>
+
+            <!-- 3. Nút Xác Nhận (Cố định ở đáy) -->
+            <Border Grid.Row="2" Padding="25,10,25,25" Background="#00000000">
+                <Button x:Name="btnConfirm" Content="Thêm vào giỏ - 35,000 đ" Click="BtnConfirm_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" Height="50" FontSize="16" FontWeight="Bold">
+                    <Button.Effect>
+                        <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                    </Button.Effect>
+                </Button>
             </Border>
         </Grid>
     </Border>
