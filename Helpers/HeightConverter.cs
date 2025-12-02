@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace GymManagement.Helpers
+namespace OrMan.Helpers
 {
     public class HeightConverter : IValueConverter
     {

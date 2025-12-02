@@ -5,12 +5,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
-using GymManagement.Views.Admin;
+using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
+using OrMan.Views.Admin;
 
-namespace GymManagement.ViewModels.Admin
+namespace OrMan.ViewModels.Admin
 {
     public class ThucDonViewModel : INotifyPropertyChanged
     {

@@ -1,7 +1,7 @@
-﻿<Application x:Class="GymManagement.App"
+﻿<Application x:Class="OrMan.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:GymManagement"
+             xmlns:local="clr-namespace:OrMan"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>

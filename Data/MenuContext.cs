@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using GymManagement.Models; // Chỉ cần using Models thôi
+using OrMan.Models; // Chỉ cần using Models thôi
 
-namespace GymManagement.Data
+namespace OrMan.Data
 {
     public class MenuContext : DbContext
     {

@@ -1,9 +1,9 @@
 ﻿using System.Windows;
-using GymManagement.Views;
-using GymManagement.Views.Admin; // Nhớ using đúng folder
-using GymManagement.Views.User;
+using OrMan.Views;
+using OrMan.Views.Admin; // Nhớ using đúng folder
+using OrMan.Views.User;
 
-namespace GymManagement
+namespace OrMan
 {
     public partial class MainWindow : Window
     {

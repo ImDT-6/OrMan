@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using GymManagement.Services; // [QUAN TRỌNG] Thêm dòng này
+using OrMan.Services; // [QUAN TRỌNG] Thêm dòng này
 
-namespace GymManagement
+namespace OrMan
 {
     public partial class App : Application
     {

@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using GymManagement.Models;
+using OrMan.Models;
 using Microsoft.Win32;
-namespace GymManagement.Views.Admin
+namespace OrMan.Views.Admin
 {
     public partial class ThemSuaMonWindow : Window
     {

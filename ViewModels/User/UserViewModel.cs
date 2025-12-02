@@ -1,11 +1,11 @@
-﻿using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
-using GymManagement.Views.User;
-using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
-using GymManagement.Views.User;
+﻿using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
+using OrMan.Views.User;
+using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
+using OrMan.Views.User;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
-namespace GymManagement.ViewModels.User
+namespace OrMan.ViewModels.User
 {
     public class UserViewModel : INotifyPropertyChanged
     {

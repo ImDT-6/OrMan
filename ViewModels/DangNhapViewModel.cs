@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace GymManagement.ViewModels
+namespace OrMan.ViewModels
 {
     public class DangNhapViewModel : ValidationBase
     {

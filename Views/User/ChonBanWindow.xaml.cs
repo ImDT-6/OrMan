@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace GymManagement.Views.User
+namespace OrMan.Views.User
 {
     public partial class ChonBanWindow : Window
     {

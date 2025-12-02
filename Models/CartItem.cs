@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace GymManagement.Models
+namespace OrMan.Models
 {
     public class CartItem : INotifyPropertyChanged
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GymManagement.Data;
-using GymManagement.Models;
+using OrMan.Data;
+using OrMan.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
-namespace GymManagement.Services
+namespace OrMan.Services
 {
     public class BanAnRepository
     {

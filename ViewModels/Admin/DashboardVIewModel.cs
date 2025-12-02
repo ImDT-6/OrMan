@@ -4,14 +4,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
-using GymManagement.Models;
-using GymManagement.Services;
+using OrMan.Models;
+using OrMan.Services;
 using System.Collections.Generic;
 using System.Windows.Input;
-using GymManagement.Helpers;
+using OrMan.Helpers;
 using System.Windows;
 
-namespace GymManagement.ViewModels
+namespace OrMan.ViewModels
 {
     // Class hỗ trợ hiển thị Top món
     public class TopFoodItem

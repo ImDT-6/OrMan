@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="GymManagement.Views.Admin.ThucDonView"
+﻿<UserControl x:Class="OrMan.Views.Admin.ThucDonView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              
-             xmlns:vm="clr-namespace:GymManagement.ViewModels.Admin" 
+             xmlns:vm="clr-namespace:OrMan.ViewModels.Admin" 
              
              d:DataContext="{d:DesignInstance Type=vm:ThucDonViewModel}"
              mc:Ignorable="d" 

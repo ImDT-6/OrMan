@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using GymManagement.Data;
-using GymManagement.Models;
+using OrMan.Data;
+using OrMan.Models;
 using System.Collections.Generic;
 using System;
 using Microsoft.EntityFrameworkCore; // Cần thêm dòng này
 
-namespace GymManagement.Services
+namespace OrMan.Services
 {
     public class ThucDonRepository
     {

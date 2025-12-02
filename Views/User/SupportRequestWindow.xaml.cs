@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace GymManagement.Views.User
+namespace OrMan.Views.User
 {
     public enum RequestType { None, Support, Checkout }
 

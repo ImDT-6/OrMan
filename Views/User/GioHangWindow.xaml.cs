@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using GymManagement.ViewModels.User;
+using OrMan.ViewModels.User;
 
-namespace GymManagement.Views.User
+namespace OrMan.Views.User
 {
     public partial class GioHangWindow : Window
     {

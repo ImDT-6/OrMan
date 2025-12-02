@@ -1,8 +1,8 @@
-﻿using GymManagement.ViewModels;
+﻿using OrMan.ViewModels;
 using System.Windows.Controls;
 using System.Windows.Input; // Cần cái này để dùng Keyboard
 
-namespace GymManagement.Views.Admin
+namespace OrMan.Views.Admin
 {
     public partial class DoanhThuView : UserControl
     {

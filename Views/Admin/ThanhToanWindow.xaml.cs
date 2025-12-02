@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace GymManagement.Views.Admin
+namespace OrMan.Views.Admin
 {
     public partial class ThanhToanWindow : Window
     {

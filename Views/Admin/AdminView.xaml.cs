@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using GymManagement.Models;
-using GymManagement.ViewModels;
+using OrMan.Models;
+using OrMan.ViewModels;
 
-namespace GymManagement.Views.Admin
+namespace OrMan.Views.Admin
 {
     public partial class AdminView : UserControl
     {

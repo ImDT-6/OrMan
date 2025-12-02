@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:GymManagement.Helpers">
+                    xmlns:local="clr-namespace:OrMan.Helpers">
 
     <!-- ... (GIỮ NGUYÊN MÀU SẮC CŨ) ... -->
     <LinearGradientBrush x:Key="MainBackgroundGradient" StartPoint="0,0" EndPoint="1,1">

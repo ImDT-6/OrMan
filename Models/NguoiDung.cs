@@ -1,4 +1,4 @@
-﻿namespace GymManagement.Models
+﻿namespace OrMan.Models
 {
     // Class cha (Base class) để chứa thông tin chung
     public class BaseAccount

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GymManagement.Models
+namespace OrMan.Models
 {
     public class HoaDon
     {

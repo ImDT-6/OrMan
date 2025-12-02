@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36109.1 d17.14
+VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymManagement", "GymManagement.csproj", "{A2ADA189-8573-4F25-838C-649480669C67}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrMan", "OrMan.csproj", "{A2ADA189-8573-4F25-838C-649480669C67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

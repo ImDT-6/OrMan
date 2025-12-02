@@ -3,10 +3,10 @@ using System.Threading.Tasks; // Dùng cho Task.Delay
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input; // Dùng cho KeyEventArgs
-using GymManagement.Models;
-using GymManagement.ViewModels;
+using OrMan.Models;
+using OrMan.ViewModels;
 
-namespace GymManagement.Views
+namespace OrMan.Views
 {
     public partial class DangNhapView : UserControl
     {
@@ -62,8 +62,8 @@ namespace GymManagement.Views
             }
 
             // --- LOGIC ĐĂNG NHẬP SAU KHI PASS VALIDATION ---
-            var admin = new GymManagement.Models.Admin("admin", "123", "Quản lý nhà hàng");
-            var user = new GymManagement.Models.User("user", "123", "Nguyễn Văn A", "VIP Gold", 1500);
+            var admin = new OrMan.Models.Admin("admin", "123", "Quản lý nhà hàng");
+            var user = new OrMan.Models.User("user", "123", "Nguyễn Văn A", "VIP Gold", 1500);
 
             if (vm.TaiKhoan == admin.TaiKhoan && vm.MatKhau == admin.MatKhau)
             {

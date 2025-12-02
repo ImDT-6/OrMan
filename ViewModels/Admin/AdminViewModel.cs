@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace GymManagement.ViewModels
+namespace OrMan.ViewModels
 {
     public class AdminViewModel : INotifyPropertyChanged
     {

@@ -1,8 +1,8 @@
-﻿using GymManagement.Data;
+﻿using OrMan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace GymManagement.Services
+namespace OrMan.Services
 {
     public static class DatabaseInitializer
     {

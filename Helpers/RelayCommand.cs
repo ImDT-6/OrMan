@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace GymManagement.Helpers
+namespace OrMan.Helpers
 {
     public class RelayCommand<T> : ICommand
     {

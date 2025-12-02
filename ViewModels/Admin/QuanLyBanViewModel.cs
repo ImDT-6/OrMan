@@ -3,16 +3,16 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows;
-using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
+using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using System;
 using System.Linq;
-using GymManagement.Views.Admin; // [QUAN TRỌNG] Thêm dòng này để gọi ThanhToanWindow
+using OrMan.Views.Admin; // [QUAN TRỌNG] Thêm dòng này để gọi ThanhToanWindow
 
-namespace GymManagement.ViewModels
+namespace OrMan.ViewModels
 {
     public class QuanLyBanViewModel : INotifyPropertyChanged
     {

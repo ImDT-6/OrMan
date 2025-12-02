@@ -3,9 +3,9 @@ using System.Text.RegularExpressions; // [CẦN THÊM] Để dùng Regex
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using GymManagement.Models;
+using OrMan.Models;
 
-namespace GymManagement.Views.User
+namespace OrMan.Views.User
 {
     public partial class ChiTietMonWindow : Window
     {

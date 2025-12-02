@@ -1,8 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows;
-using GymManagement.ViewModels.Admin;
+using OrMan.ViewModels.Admin;
 
-namespace GymManagement.Views.Admin
+namespace OrMan.Views.Admin
 {
     public partial class ThucDonView : UserControl
     {

@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using GymManagement.Models;
-using GymManagement.ViewModels.User;
+using OrMan.Models;
+using OrMan.ViewModels.User;
 
-namespace GymManagement.Views.User
+namespace OrMan.Views.User
 {
     public partial class UserView : UserControl
     {

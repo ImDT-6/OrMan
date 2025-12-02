@@ -2,14 +2,14 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using GymManagement.Models;
-using GymManagement.Services;
+using OrMan.Models;
+using OrMan.Services;
 using System.Collections.Generic;
 using System;
 using System.Windows.Input;
-using GymManagement.Helpers;
+using OrMan.Helpers;
 
-namespace GymManagement.ViewModels
+namespace OrMan.ViewModels
 {
     public class DoanhThuViewModel : INotifyPropertyChanged
     {

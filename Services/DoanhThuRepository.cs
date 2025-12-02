@@ -1,13 +1,13 @@
-﻿using GymManagement.Data;
-using GymManagement.Models;
-using GymManagement.Data;
-using GymManagement.Models;
+﻿using OrMan.Data;
+using OrMan.Models;
+using OrMan.Data;
+using OrMan.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace GymManagement.Services
+namespace OrMan.Services
 {
     public class DoanhThuRepository
     {
