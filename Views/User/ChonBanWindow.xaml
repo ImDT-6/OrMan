@@ -40,7 +40,7 @@
                             <Button Content="{Binding}" Click="BtnChonBan_Click"
                                     Width="80" Height="80" Margin="10"
                                     FontSize="24" FontWeight="Bold" Foreground="White"
-                                    Style="{StaticResource GlassButtonStyle}"
+                                    Style="{StaticResource SocialButtonStyle}"
                                     Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

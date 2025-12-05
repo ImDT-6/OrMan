@@ -76,7 +76,7 @@
     </UserControl.Resources>
 
     <Grid Background="{StaticResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
-        <Grid Margin="25" Background="Transparent">
+        <Grid Margin="25,5,25,0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -133,7 +133,7 @@
                             <TextBlock Text="{Binding TrungBinhDon}" Foreground="{StaticResource WarningYellow}" FontSize="32" FontWeight="Bold" Margin="0,5,0,0"/>
                         </StackPanel>
                         <Border Width="50" Height="50" CornerRadius="25" Background="#20F59E0B" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <TextBlock Text="⚖️" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="⚖️" Foreground="RosyBrown" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>

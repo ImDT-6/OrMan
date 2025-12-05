@@ -180,6 +180,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\IndexConverter.cs" />
+    <Compile Include="Helpers\RankToColorConverter.cs" />
     <Compile Include="Data\MenuContext.cs" />
     <Compile Include="Helpers\HeightConverter.cs" />
     <Compile Include="Helpers\NullToBoolConverter.cs" />
@@ -340,17 +342,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Converters\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\MienBulgogi.jpg" />
-    <Resource Include="Images\MyKimchiBachTuoc.png" />
-    <Resource Include="Images\MyKimchiBo.jpg" />
-    <Resource Include="Images\MyKimchiBoMy.png" />
-    <Resource Include="Images\MyKimchiGa.jpg" />
-    <Resource Include="Images\MyKimchiHaiSan.jpg" />
-    <Resource Include="Images\MyKimchiThapCam.jpg" />
-    <Resource Include="Images\MyTokbokkiPhoMai.png" />
-    <Resource Include="Images\MyUdonBulgogi.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="AppIcon.ico" />

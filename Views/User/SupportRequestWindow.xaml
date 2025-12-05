@@ -41,6 +41,7 @@
                                              Background="Transparent" 
                                              Foreground="White" 
                                              BorderThickness="0" 
+                                             Margin="10,10,0,0"
                                              Padding="{TemplateBinding Padding}"
                                              VerticalContentAlignment="Center"
                                              HorizontalAlignment="Stretch"/>
@@ -113,7 +114,7 @@
                 <Border Background="{StaticResource GlassBackground}" CornerRadius="15" Padding="15" Margin="0,0,0,20">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <TextBlock Text="💬" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="💬" FontSize="18" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <TextBlock Text="Gửi lời nhắn tới nhân viên" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
 
@@ -161,8 +162,8 @@
 
             <!-- Footer -->
             <Button Grid.Row="2" Content="Đóng" Click="BtnCancel_Click" 
-                    Style="{StaticResource NavButtonStyle}" 
-                    Background="Transparent" Foreground="{StaticResource TextSecondary}" Height="35" Padding="0" Margin="0,10,0,0"/>
+                    Style="{StaticResource GlassDismissButtonStyle}" 
+                    Background="Transparent" Foreground="White" Height="35" HorizontalAlignment="Center"/>
         </Grid>
     </Border>
 </Window>

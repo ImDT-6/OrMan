@@ -25,12 +25,11 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- 1. Tiêu đề -->
             <TextBlock x:Name="txtTitle" Text="THÊM MÓN MỚI" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-            <!-- 2. Form Nhập (Tự động nhận Style Scroll đẹp từ InputStyles.xaml) -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                 <StackPanel>
+
                     <TextBlock Text="Loại Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
                     <ComboBox x:Name="cboLoaiMon" Height="40" Margin="0,0,0,15" Padding="10,0" VerticalContentAlignment="Center" FontSize="14">
                         <ComboBoxItem Content="Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
@@ -39,16 +38,16 @@
                     </ComboBox>
 
                     <TextBlock Text="Mã Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtMaMon" ToolTip="Mã món (VD: MC001)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBox x:Name="txtMaMon" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Tên Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtTenMon" ToolTip="Tên món ăn" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBox x:Name="txtTenMon" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Giá Bán:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtGiaBan" ToolTip="Giá bán (VNĐ)" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBox x:Name="txtGiaBan" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Đơn Vị:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtDonVi" ToolTip="Thành phần" Style="{StaticResource GlassTextBox}" Margin="0,0,0,15"/>
+                    <TextBox x:Name="txtDonVi" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Hình Ảnh:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
                     <Grid Margin="0,0,0,15">
@@ -57,19 +56,22 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:Name="txtHinhAnh" ToolTip="Đường dẫn ảnh" Style="{StaticResource GlassTextBox}"/>
+                        <TextBox x:Name="txtHinhAnh" Style="{StaticResource SimpleGlassTextBox}"/>
 
                         <Button Content="..." Grid.Column="1" Click="btnBrowse_Click" 
-                                Style="{StaticResource GlassButtonStyle}" Width="40" Margin="5,0,0,0"
-                                ToolTip="Chọn ảnh từ máy tính"/>
+                                Style="{StaticResource GlassDismissButtonStyle}" Width="40" Margin="5,0,0,0"/>
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- 3. Nút Bấm -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                <Button Content="Lưu Lại" Click="btnSave_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource SuccessGreen}" Margin="0,0,10,0"/>
-                <Button Content="Hủy Bỏ" Click="btnCancel_Click" Style="{StaticResource GlassButtonStyle}" Width="120" Background="{StaticResource DangerRed}"/>
+                <Button Content="Lưu Lại" Click="btnSave_Click" 
+                        Style="{StaticResource GlassButtonStyle}" Width="120" Height="40"
+                        Background="{StaticResource SuccessGreen}" Margin="0,0,10,0"/>
+
+                <Button Content="Hủy Bỏ" Click="btnCancel_Click" 
+                        Style="{StaticResource GlassButtonStyle}" Width="120" Height="40"
+                        Background="{StaticResource DangerRed}"/>
             </StackPanel>
         </Grid>
     </Border>

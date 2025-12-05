@@ -37,7 +37,7 @@
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
                                     <Setter TargetName="bdr" Property="Background" Value="#203B82F6"/>
-                                    <Setter TargetName="indicator" Property="Fill" Value="#3B82F6"/>
+                                    <Setter TargetName="indicator" Property="Fill" Value="#7C3AED"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Trigger>
@@ -63,12 +63,19 @@
         <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0,0,1,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="20,25">
-                    <Border Width="40" Height="40" CornerRadius="10" Background="{StaticResource AccentGradient}">
-                        <TextBlock Text="POS" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Border Width="45" Height="45" CornerRadius="12" Background="{StaticResource AccentGradient}" Margin="0,0,15,0">
+                        <!-- Ví dụ Path hình cái bát mì hoặc logo -->
+                        <Path Data="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2ZM12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20Z" 
+                              Fill="White" 
+                              Stretch="Uniform" 
+                              Width="24" 
+                              Height="24"
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
                         <TextBlock Text="MÌ CAY" Foreground="White" FontWeight="Bold" FontSize="16"/>
-                        <TextBlock Text="Sasin" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                        <TextBlock Text="OMEGA 3/2" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>
                 <TextBlock Text="DANH MỤC" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,10" Opacity="0.7"/>
@@ -93,20 +100,20 @@
 
                 <!-- [ĐÃ CẬP NHẬT] Nút chọn bàn: Hiển thị số bàn từ ViewModel -->
                 <Button Command="{Binding ChonBanCommand}" 
-                        Style="{StaticResource GlassButtonStyle}" 
-                        Height="45" Margin="0,0,10,0" Padding="15,0"
+                        Style="{StaticResource SocialButtonStyle}" 
+                        Height="45" Width="90" Margin="0,0,10,0" Padding="15,0"
                         Background="#20FFFFFF" ToolTip="Bấm để chọn bàn">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Bàn:" Foreground="White" Margin="0,0,5,0"/>
+                        <TextBlock Text="Bàn:" Foreground="White" Margin="0,3,5,0"/>
                         <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="16"/>
-                        <TextBlock Text=" ▼" Foreground="White" FontSize="10" VerticalAlignment="Center"/>
+                        <TextBlock Text=" ▼" Foreground="White" Margin="1,2,5,0" FontSize="10" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
                 <!-- [ĐÃ CẬP NHẬT] Nút Thoát: Sử dụng IconLogoutGeo -->
-                <Button Style="{StaticResource GlassButtonStyle}" Width="45" Height="45" Background="#20EF4444" Click="BtnDangXuat_Click" ToolTip="Đăng xuất">
-                    <Path Data="{StaticResource IconLogoutGeo}" Fill="White" Stretch="Uniform" Width="16"/>
-                </Button>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
 
@@ -151,8 +158,8 @@
                                                         <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
                                                         <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
                                                     </StackPanel>
-                                                    <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource AccentGradient}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
-                                                        <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,-2,0,0"/>
+                                                    <Border Width="40" Height="40" CornerRadius="14" Background="{StaticResource GlassBackground}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
+                                                        <TextBlock Text="+" Foreground="LawnGreen" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,-2,0,0"/>
                                                     </Border>
                                                 </Grid>
                                             </StackPanel>

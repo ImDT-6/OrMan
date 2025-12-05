@@ -12,13 +12,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- [FIX] Tạo Style NavButtonStyle mới/sửa đổi để hỗ trợ việc set màu từ Code-behind -->
-            <!-- Style này được đơn giản hóa để không bị các Trigger khác làm phiền -->
-            <Style x:Key="AdminNavButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-                <!-- Remove IsMouseOver triggers from the base style if needed, or ensure they don't override the color set by code-behind -->
-                <!-- For now, we rely on the NavButtonStyle structure and manually set the foreground/background -->
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -30,27 +23,22 @@
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- MENU NGANG (CỐ ĐỊNH) -->
                 <RowDefinition Height="*"/>
-                <!-- NỘI DUNG (THAY ĐỔI) -->
             </Grid.RowDefinitions>
 
-            <!-- 1. TOP NAVIGATION BAR -->
-            <Border Grid.Row="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Margin="0,0,0,20" Padding="15,10">
+            <Border Grid.Row="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0.5" CornerRadius="20" Margin="0,0,0,20" Padding="15,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <!-- Logo -->
                         <ColumnDefinition Width="*"/>
-                        <!-- Menu -->
                         <ColumnDefinition Width="Auto"/>
-                        <!-- Logout -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- Logo (Giữ nguyên) -->
                     <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
                         <Border Width="45" Height="45" CornerRadius="12" Background="{StaticResource AccentGradient}" Margin="0,0,15,0">
-                            <TextBlock Text="MÌ" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Path Data="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2ZM12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20Z" 
+                                  Fill="White" Stretch="Uniform" Width="24" Height="24"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="QUẢN LÝ MÌ CAY" FontSize="16" FontWeight="Bold" Foreground="White"/>
@@ -59,28 +47,48 @@
                         <Border Width="1" Height="30" Background="{StaticResource GlassBorder}" Margin="20,0"/>
                     </StackPanel>
 
-                    <!-- Menu Items -->
-                    <!-- [FIX] Thêm x:Name cho StackPanel và các Button -->
                     <StackPanel x:Name="MenuItemsPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button x:Name="MenuButtonTongQuan" Content="Tổng Quan" Tag="{StaticResource IconDashboardGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Foreground="White" Background="{StaticResource AccentGradient}" Margin="0,0,10,0"/>
-                        <Button x:Name="MenuButtonQuanLyBan" Content="Quản Lý Bàn" Tag="{StaticResource IconTableGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
-                        <Button x:Name="MenuButtonThucDon" Content="Thực Đơn" Tag="{StaticResource IconFoodGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
-                        <Button x:Name="MenuButtonDoanhThu" Content="Doanh Thu" Tag="{StaticResource IconMoneyGeo}" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Margin="0,0,10,0"/>
+                        <RadioButton x:Name="MenuButtonTongQuan" 
+                                     Content="Tổng Quan" 
+                                     Tag="{StaticResource IconDashboardGeo}" 
+                                     GroupName="AdminMenu" 
+                                     IsChecked="True"
+                                     Click="MenuButton_Click" 
+                                     Style="{StaticResource NavRadioButtonStyle}"/>
+
+                        <RadioButton x:Name="MenuButtonQuanLyBan" 
+                                     Content="Quản Lý Bàn" 
+                                     Tag="{StaticResource IconTableGeo}" 
+                                     GroupName="AdminMenu"
+                                     Click="MenuButton_Click" 
+                                     Style="{StaticResource NavRadioButtonStyle}"/>
+
+                        <RadioButton x:Name="MenuButtonThucDon" 
+                                     Content="Thực Đơn" 
+                                     Tag="{StaticResource IconFoodGeo}" 
+                                     GroupName="AdminMenu"
+                                     Click="MenuButton_Click" 
+                                     Style="{StaticResource NavRadioButtonStyle}"/>
+
+                        <RadioButton x:Name="MenuButtonDoanhThu" 
+                                     Content="Doanh Thu" 
+                                     Tag="{StaticResource IconMoneyGeo}" 
+                                     GroupName="AdminMenu"
+                                     Click="MenuButton_Click" 
+                                     Style="{StaticResource NavRadioButtonStyle}"/>
                     </StackPanel>
 
-                    <!-- Logout (Giữ nguyên) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <StackPanel VerticalAlignment="Center" Margin="0,0,15,0" HorizontalAlignment="Right">
                             <TextBlock Text="Xin chào, Admin" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
                             <TextBlock Text="Chi nhánh 1" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Right"/>
                         </StackPanel>
-                        <Button Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="Button_DangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
+                        <RadioButton Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="Button_DangXuat_Click" Style="{StaticResource NavRadioButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- 2. KHU VỰC NỘI DUNG THAY ĐỔI -->
-            <ContentControl x:Name="AdminContentArea" Grid.Row="1"/>
+            <ContentControl x:Name="AdminContentArea" Margin="0,90,0,0" Grid.RowSpan="2"/>
         </Grid>
     </Grid>
 </UserControl>

@@ -20,55 +20,149 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <DataTemplate x:Key="FoodCardTemplate">
-                <Border Width="220" Height="330" Margin="10" 
-                        Background="#25FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15">
+                <Border Width="210" Height="300" Margin="10" 
+                        Background="#15FFFFFF" 
+                        BorderBrush="{StaticResource GlassBorder}" 
+                        BorderThickness="1" 
+                        CornerRadius="18"
+                        Cursor="Hand">
+
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <TranslateTransform Y="0"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#25FFFFFF"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <TranslateTransform Y="-4"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="150"/>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
 
-                        <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
+                        <Border Grid.Row="0" CornerRadius="17,17,0,0" ClipToBounds="True">
                             <Grid>
                                 <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
-                                <Border Background="#AA000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock Text="HẾT HÀNG" Foreground="Red" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-                                        <TextBlock.RenderTransform>
-                                            <RotateTransform Angle="-30"/>
-                                        </TextBlock.RenderTransform>
-                                    </TextBlock>
+
+                                <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
+                                        Background="#90000000" CornerRadius="6" Padding="8,4">
+                                    <TextBlock Text="{Binding MaMon}" Foreground="#E2E8F0" FontSize="11" FontWeight="Bold"/>
+                                </Border>
+
+                                <Border Background="#CC000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border BorderBrush="#EF4444" BorderThickness="2" CornerRadius="8" 
+                                            HorizontalAlignment="Center" VerticalAlignment="Center" Padding="15,5" RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform>
+                                            <RotateTransform Angle="-15"/>
+                                        </Border.RenderTransform>
+                                        <TextBlock Text="SOLD OUT" Foreground="#EF4444" FontWeight="Bold" FontSize="18"/>
+                                    </Border>
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <StackPanel Grid.Row="1" Margin="15,10,15,0">
-                            <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
-                            <TextBlock Text="{Binding MaMon}" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,2,0,5"/>
-                            <StackPanel Orientation="Horizontal">
+                        <StackPanel Grid.Row="1" Margin="15,12,15,0">
+                            <TextBlock Text="{Binding TenMon}" 
+                                       Foreground="White" FontWeight="Bold" FontSize="16" 
+                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="42" LineHeight="20"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="18"/>
                                 <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="14" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
                             </StackPanel>
                         </StackPanel>
 
-                        <CheckBox Grid.Row="2" Content="Báo Hết Hàng" 
-                                  IsChecked="{Binding IsSoldOut}"
-                                  Command="{Binding DataContext.ToggleSoldOutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                  CommandParameter="{Binding}"
-                                  Foreground="White" Margin="15,5"/>
+                        <Border Grid.Row="2" Background="#10FFFFFF" CornerRadius="0,0,18,18" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0,1,0,0">
+                            <Grid Margin="15,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Grid.Row="3" Background="#10000000" CornerRadius="0,0,15,15" Padding="10">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="Sửa" 
-                                        Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Margin="0,0,5,0" Background="#203B82F6"/>
-                                <Button Content="Xóa" 
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource GlassButtonStyle}" Width="90" Height="35" FontSize="12" Background="#20EF4444" Foreground="#EF4444"/>
-                            </StackPanel>
+                                <ToggleButton Grid.Column="0" 
+                                              IsChecked="{Binding IsSoldOut}"
+                                              Command="{Binding DataContext.ToggleSoldOutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}"
+                                              ToolTip="Bật để báo hết hàng"
+                                              Height="24" Width="44">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Grid>
+                                                <Border x:Name="Track" Background="#334155" CornerRadius="12" Width="44" Height="24"/>
+                                                <Border x:Name="Thumb" Background="White" CornerRadius="10" Width="18" Height="18" HorizontalAlignment="Left" Margin="3,0,0,0">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect ShadowDepth="1" Opacity="0.3" BlurRadius="2"/>
+                                                    </Border.Effect>
+                                                </Border>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Track" Property="Background" Value="#EF4444"/>
+                                                    <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
+                                                    <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource GlassDismissButtonStyle}"
+                                            Background="Transparent" Width="32" Height="32" Margin="0,0,5,0"
+                                            ToolTip="Chỉnh sửa">
+                                        <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" 
+                                              Fill="#60A5FA" Stretch="Uniform" Width="14" Height="14"/>
+                                    </Button>
+
+                                    <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource GlassDismissButtonStyle}"
+                                            Background="Transparent" Width="32" Height="32"
+                                            ToolTip="Xóa món này">
+                                        <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" 
+                                              Fill="#EF4444" Stretch="Uniform" Width="14" Height="14"/>
+                                        <Button.Triggers>
+                                            <EventTrigger RoutedEvent="MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#20EF4444" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                            <EventTrigger RoutedEvent="MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="Transparent" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Border>
@@ -106,7 +200,6 @@
             <Style TargetType="ListBox">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
-                <!-- [FIX] Đảm bảo ListBox tự hiện thanh cuộn dọc -->
                 <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
                 <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
                 <Setter Property="ItemContainerStyle">
@@ -142,44 +235,63 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border Background="{StaticResource MainBackgroundGradient}" Margin="20" CornerRadius="25">
-        <Grid>
+    <Grid Background="{StaticResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
+
+        <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="25,25,25,0">
-                <TextBlock Text="QUẢN LÝ THỰC ĐƠN" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                <Grid Margin="0,15,0,30">
+            <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                <TextBlock Text="QUẢN LÝ THỰC ĐƠN" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
+
+                <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBox Grid.Column="0" 
                              ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
                              Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}"
                              TextChanged="TextBox_TextChanged"
                              Style="{StaticResource SearchTextBoxStyle}" 
                              Height="45" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
-                    <Button Grid.Column="1" Command="{Binding AddCommand}" Content="+ Thêm Món" Style="{StaticResource GlassButtonStyle}" Height="45" Padding="25,0" Background="{StaticResource SuccessGreen}" FontSize="15"/>
+
+                    <Button Grid.Column="1" 
+                            Command="{Binding AddCommand}" 
+                            Content="+ Thêm Món" 
+                            Style="{StaticResource GlassDismissButtonStyle}" 
+                            Height="45" Width="120" Padding="25,0" 
+                            Background="{StaticResource SuccessGreen}" FontSize="15"/>
                 </Grid>
             </StackPanel>
 
-            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="25,0,25,25" x:Name="MenuTabControl" SelectionChanged="MenuTabControl_SelectionChanged">
+            <TabControl Grid.Row="1" 
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        x:Name="MenuTabControl" 
+                        SelectionChanged="MenuTabControl_SelectionChanged">
+
                 <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
-                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài, chuyển Margin vào ListBox -->
-                    <ListBox x:Name="ListBoxMiCay" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
+                    <ListBox x:Name="ListBoxMiCay" 
+                             ItemTemplate="{StaticResource FoodCardTemplate}" 
+                             Margin="0,10,0,0"/>
                 </TabItem>
+
                 <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
-                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài -->
-                    <ListBox x:Name="ListBoxDoChien" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
+                    <ListBox x:Name="ListBoxDoChien" 
+                             ItemTemplate="{StaticResource FoodCardTemplate}" 
+                             Margin="0,10,0,0"/>
                 </TabItem>
+
                 <TabItem Header="🥤 NƯỚC UỐNG" Tag="Nước Uống">
-                    <!-- [FIX] Đã Xóa ScrollViewer bao ngoài -->
-                    <ListBox x:Name="ListBoxNuocUong" ItemTemplate="{StaticResource FoodCardTemplate}" Margin="0,20,0,0"/>
+                    <ListBox x:Name="ListBoxNuocUong" 
+                             ItemTemplate="{StaticResource FoodCardTemplate}" 
+                             Margin="0,10,0,0"/>
                 </TabItem>
             </TabControl>
         </Grid>
-    </Border>
+    </Grid>
 </UserControl>

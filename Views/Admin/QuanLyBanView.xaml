@@ -18,7 +18,7 @@
     </UserControl.Resources>
 
     <Grid Background="{StaticResource MainBackgroundGradient}">
-        <Grid Margin="25">
+        <Grid Margin="25,5,25,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="1.2*"/>

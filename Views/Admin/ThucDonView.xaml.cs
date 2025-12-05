@@ -1,5 +1,6 @@
-﻿using System.Windows.Controls;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using OrMan.ViewModels.Admin;
 
 namespace OrMan.Views.Admin
@@ -59,6 +60,15 @@ namespace OrMan.Views.Admin
                 else if (tag == "Nước Uống" && ListBoxNuocUong != null)
                     ListBoxNuocUong.ItemsSource = filteredData;
             }
+        }
+
+        private void RootGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Lệnh này sẽ làm mất focus của ô đang nhập (TextBox)
+            Keyboard.ClearFocus();
+
+            // Hoặc focus vào chính UserControl để chắc chắn
+            this.Focus();
         }
     }
 }

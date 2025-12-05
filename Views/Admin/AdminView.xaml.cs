@@ -21,14 +21,14 @@ namespace OrMan.Views.Admin
             // this.DataContext = new DashboardViewModel(); 
 
             // Mặc định vào là hiện Dashboard
-            ChuyenSangChucNang("Tổng Quan", MenuButtonTongQuan); // Truyền thêm nút mặc định
+            ChuyenSangChucNang("Tổng Quan"); // Truyền thêm nút mặc định
         }
 
         // [MỚI] Hàm công khai để Dashboard gọi
         public void ChuyenDenBanCanXuLy(BanAn ban)
         {
             // 1. Chuyển sang màn hình Quản Lý Bàn
-            ChuyenSangChucNang("Quản Lý Bàn", MenuButtonQuanLyBan); // Highlight nút Quản Lý Bàn
+            ChuyenSangChucNang("Quản Lý Bàn"); // Highlight nút Quản Lý Bàn
 
             // 2. Chọn đúng cái bàn cần xử lý trong ViewModel của màn hình đó
             if (_banView != null && _banView.DataContext is QuanLyBanViewModel vm)
@@ -43,7 +43,7 @@ namespace OrMan.Views.Admin
         }
 
         // Hàm trung tâm xử lý việc chuyển đổi
-        private void ChuyenSangChucNang(string chucNang, Button buttonClicked)
+        private void ChuyenSangChucNang(string chucNang)
         {
             UserControl viewToLoad = null;
 
@@ -67,33 +67,10 @@ namespace OrMan.Views.Admin
                     break;
             }
 
-            // [FIX LỖI FOCUS] 1. Reset tất cả các nút
-            // Tìm StackPanel chứa Menu Buttons (Giả định có tên là MenuItemsPanel)
-            if (MenuItemsPanel != null)
-            {
-                foreach (var child in MenuItemsPanel.Children)
-                {
-                    if (child is Button btn)
-                    {
-                        // Đặt lại Background và Foreground về mặc định (Transparent và TextSecondary)
-                        btn.SetResourceReference(Control.BackgroundProperty, "Transparent");
-                        btn.SetResourceReference(Control.ForegroundProperty, "TextSecondary");
-                    }
-                }
-            }
+            // [ĐÃ XÓA]: Đoạn code foreach reset background
+            // [ĐÃ XÓA]: Đoạn code buttonClicked.SetResourceReference...
 
-
-            // 2. Highlight nút được chọn
-            if (buttonClicked != null)
-            {
-                // Set lại Style/Color cho nút đang được chọn (Dùng màu nổi bật đã định nghĩa)
-                // Bạn cần đảm bảo các màu này có trong Resource Dictionary
-                buttonClicked.SetResourceReference(Control.BackgroundProperty, "AccentGradient");
-                buttonClicked.SetResourceReference(Control.ForegroundProperty, "TextPrimary"); // White
-            }
-
-
-            // 3. Thay đổi nội dung hiển thị bên dưới Menu
+            // Chỉ còn lại việc hiển thị View
             if (viewToLoad != null)
             {
                 AdminContentArea.Content = viewToLoad;
@@ -102,11 +79,16 @@ namespace OrMan.Views.Admin
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
+            // [QUAN TRỌNG] Đổi 'Button' thành 'RadioButton'
+            var button = sender as RadioButton;
+
+            if (button == null) return; // Kiểm tra an toàn
+
             string content = button.Content?.ToString();
 
             // Gọi hàm chuyển đổi và truyền chính nút đó vào
-            ChuyenSangChucNang(content, button);
+            // Lưu ý: Hàm ChuyenSangChucNang có thể cũng cần sửa tham số đầu vào nếu nó đang nhận Button
+            ChuyenSangChucNang(content);
         }
 
         private void Button_DangXuat_Click(object sender, RoutedEventArgs e)

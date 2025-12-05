@@ -15,6 +15,9 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+            <helpers:IndexConverter x:Key="IndexConverter"/>
+            <helpers:RankToColorConverter x:Key="RankToColorConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -262,26 +265,83 @@
 
                     <TextBlock Text="🔥 TOP MÓN BÁN CHẠY" FontSize="16" FontWeight="Bold" Foreground="#F59E0B" Margin="0,0,0,15"/>
 
-                    <ListBox Grid.Row="1" ItemsSource="{Binding TopMonAn}" Background="Transparent" BorderThickness="0">
+                    <ListBox Grid.Row="1" ItemsSource="{Binding TopMonAn}" 
+         Background="Transparent" 
+         BorderThickness="0" 
+         Padding="0" 
+         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,0,0,15">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="35"/>
+                                        <ColumnDefinition Width="55"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border CornerRadius="10" ClipToBounds="True">
-                                        <Image Source="{Binding MonAn.HinhAnhUrl}" Stretch="UniformToFill"/>
+                                    <TextBlock Grid.Column="0" 
+                           Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource IndexConverter}}"
+                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource RankToColorConverter}}"
+                           FontWeight="Bold" 
+                           FontSize="16" 
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center"
+                           Margin="5,0,0,0"/>
+
+                                    <Border Grid.Column="1" 
+                        CornerRadius="12" 
+                        ClipToBounds="True" 
+                        Height="45" Width="45" 
+                        Background="#15FFFFFF" 
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+
+                                        <Image Source="{Binding MonAn.HinhAnhUrl}" 
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
                                     </Border>
 
-                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding MonAn.TenMon}" Foreground="White" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding MonAn.MaMon}" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                                    <StackPanel Grid.Column="2" Margin="10,0,15,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding MonAn.TenMon}" 
+                               Foreground="White" 
+                               FontWeight="SemiBold" 
+                               FontSize="14" 
+                               TextTrimming="CharacterEllipsis" 
+                               ToolTip="{Binding MonAn.TenMon}"/>
+
+                                        <TextBlock Text="{Binding MonAn.MaMon}" 
+                               Foreground="{StaticResource TextSecondary}" 
+                               FontSize="12" 
+                               Margin="0,2,0,0"/>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="2" Text="{Binding SoLuongBan, StringFormat='{}{0} đã bán'}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding SoLuongBan}" 
+                               Foreground="{StaticResource SuccessGreen}" 
+                               FontWeight="Bold" 
+                               FontSize="15"/>
+                                        <TextBlock Text=" bán" 
+                               Foreground="{StaticResource SuccessGreen}" 
+                               FontSize="12" 
+                               Opacity="0.8"
+                               VerticalAlignment="Bottom" 
+                               Margin="3,0,0,2"/>
+                                    </StackPanel>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
