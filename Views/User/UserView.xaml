@@ -25,19 +25,14 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="RadioButton">
-                            <Grid>
-                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="0,10,10,0" Margin="0,0,10,0"/>
-                                <Rectangle x:Name="indicator" HorizontalAlignment="Left" Width="4" Fill="Transparent" RadiusX="2" RadiusY="2" Margin="0,10"/>
+                            <Grid Background="Transparent">
                                 <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" Margin="20,0,0,0"/>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="bdr" Property="Background" Value="#10FFFFFF"/>
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="bdr" Property="Background" Value="#203B82F6"/>
-                                    <Setter TargetName="indicator" Property="Fill" Value="#7C3AED"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Trigger>
@@ -64,7 +59,6 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="20,25">
                     <Border Width="45" Height="45" CornerRadius="12" Background="{StaticResource AccentGradient}" Margin="0,0,15,0">
-                        <!-- Ví dụ Path hình cái bát mì hoặc logo -->
                         <Path Data="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2ZM12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20Z" 
                               Fill="White" 
                               Stretch="Uniform" 
@@ -78,10 +72,30 @@
                         <TextBlock Text="OMEGA 3/2" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>
+
                 <TextBlock Text="DANH MỤC" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,10" Opacity="0.7"/>
-                <RadioButton Content="🔥 Mì Cay &amp; Lẩu" Style="{StaticResource CategoryTabStyle}" IsChecked="True" Click="Filter_Click" Tag="Mì Cay"/>
-                <RadioButton Content="🥟 Ăn Vặt" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ Chiên"/>
-                <RadioButton Content="🥤 Nước Uống" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Nước Uống"/>
+
+                <Grid>
+                    <Border x:Name="MenuIndicator"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            Height="60" 
+                            Background="#208B5CF6"
+                            CornerRadius="0,10,10,0"
+                            Margin="0,0,10,0">
+                        <Border HorizontalAlignment="Left" Width="4" Background="#8B5CF6" CornerRadius="0,2,2,0" Margin="0,10"/>
+
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="MenuIndicatorTransform" Y="0"/>
+                        </Border.RenderTransform>
+                    </Border>
+
+                    <StackPanel x:Name="MenuPanel">
+                        <RadioButton Content="🔥 Mì Cay &amp; Lẩu" Style="{StaticResource CategoryTabStyle}" IsChecked="True" Click="Filter_Click" Tag="Mì Cay"/>
+                        <RadioButton Content="🥟 Ăn Vặt" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ Chiên"/>
+                        <RadioButton Content="🥤 Nước Uống" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Nước Uống"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </Border>
 
@@ -98,7 +112,6 @@
                     </StackPanel>
                 </Button>
 
-                <!-- [ĐÃ CẬP NHẬT] Nút chọn bàn: Hiển thị số bàn từ ViewModel -->
                 <Button Command="{Binding ChonBanCommand}" 
                         Style="{StaticResource SocialButtonStyle}" 
                         Height="45" Width="90" Margin="0,0,10,0" Padding="15,0"
@@ -110,7 +123,6 @@
                     </StackPanel>
                 </Button>
 
-                <!-- [ĐÃ CẬP NHẬT] Nút Thoát: Sử dụng IconLogoutGeo -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
                 </StackPanel>
@@ -136,35 +148,59 @@
                                                 <RowDefinition Height="*"/>
                                             </Grid.RowDefinitions>
 
-                                            <!-- ẢNH MÓN ĂN -->
                                             <Border Grid.Row="0" CornerRadius="15,15,0,0" ClipToBounds="True">
                                                 <Grid>
                                                     <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
-                                                    <Border Background="#AA000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock Text="HẾT HÀNG" Foreground="Red" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-                                                            <TextBlock.RenderTransform>
-                                                                <RotateTransform Angle="-30"/>
-                                                            </TextBlock.RenderTransform>
-                                                        </TextBlock>
+
+                                                    <Border Background="#CC000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <Border BorderBrush="#EF4444" BorderThickness="2" CornerRadius="8" 
+                                                                HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                                Padding="15,5" RenderTransformOrigin="0.5,0.5"> 
+                                                            <Border.RenderTransform>
+                                                                <RotateTransform Angle="-15"/>
+                                                            </Border.RenderTransform>
+                                                            <TextBlock Text="TẠM HẾT" Foreground="#EF4444" FontWeight="Bold" FontSize="18"/>
+                                                        </Border>
                                                     </Border>
                                                 </Grid>
                                             </Border>
 
-                                            <!-- THÔNG TIN -->
-                                            <StackPanel Grid.Row="1" Margin="12">
-                                                <TextBlock Text="{Binding TenMon}" Foreground="White" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
-                                                <Grid Margin="0,5,0,0" VerticalAlignment="Bottom">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                                                        <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
-                                                        <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
-                                                    </StackPanel>
-                                                    <Border Width="40" Height="40" CornerRadius="14" Background="{StaticResource GlassBackground}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,-20,0,0">
-                                                        <TextBlock Text="+" Foreground="LawnGreen" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,-2,0,0"/>
-                                                    </Border>
-                                                </Grid>
-                                            </StackPanel>
+                                            <Grid Grid.Row="1">
+                                                <TextBlock Text="{Binding TenMon}" 
+                                                           Foreground="White" FontWeight="SemiBold" FontSize="15" 
+                                                           TextWrapping="Wrap" 
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Top"
+                                                           Margin="12,12,12,0"
+                                                           MaxHeight="42"/>
 
-                                            <!-- Lớp phủ mờ toàn bộ thẻ nếu Hết hàng -->
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="12,0,0,12">
+                                                    <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
+                                                    <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="12" Margin="2,0,0,2" VerticalAlignment="Bottom"/>
+                                                </StackPanel>
+
+                                                <Border Width="32" Height="32" CornerRadius="10" 
+                                                        VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                                        Margin="0,0,12,12"
+                                                        Cursor="Hand"
+                                                        UseLayoutRounding="True"
+                                                        SnapsToDevicePixels="True">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#6366F1" Offset="0.0"/>
+                                                            <GradientStop Color="#8B5CF6" Offset="1.0"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Path Data="M 2,12 H 22 M 12,2 V 22" 
+                                                              Stroke="White"
+                                                              StrokeThickness="3"
+                                                              StrokeStartLineCap="Round"
+                                                              StrokeEndLineCap="Round"/>
+                                                    </Viewbox>
+                                                </Border>
+                                            </Grid>
+
                                             <Border Grid.RowSpan="2" Background="#50000000" CornerRadius="15" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}" IsHitTestVisible="False"/>
                                         </Grid>
                                     </Border>
@@ -176,25 +212,51 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <Border Grid.Row="2" Grid.Column="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="0,1,0,0" Padding="20,10">
+        <Border Grid.Row="2" Grid.Column="1" 
+                Background="{StaticResource GlassBackground}" 
+                BorderBrush="{StaticResource GlassBorder}" 
+                BorderThickness="0,1,0,0" 
+                Padding="20,10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{StaticResource AccentGradient}" CornerRadius="25" Width="50" Height="50" Margin="0,0,15,0">
-                        <TextBlock Text="🛒" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                    <Border Background="{StaticResource AccentGradient}" 
+                            CornerRadius="25" Width="50" Height="50" Margin="0,0,15,0">
+                        <TextBlock Text="🛒" FontSize="24" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                   Foreground="White" Margin="0,0,0,2"/>
                     </Border>
+
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding TongSoLuong, StringFormat='{}Đã chọn {0} món'}" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Tạm tính: " Foreground="White"/>
-                            <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20"/>
-                        </StackPanel>
+                        <TextBlock Text="{Binding TongSoLuong, StringFormat='{}Đã chọn {0} món'}" 
+                                   Foreground="{StaticResource TextSecondary}" 
+                                   FontSize="14" 
+                                   Margin="0,0,0,3"/>
+
+                        <TextBlock VerticalAlignment="Bottom">
+                            <Run Text="Tạm tính: " Foreground="#E2E8F0" FontSize="14" BaselineAlignment="Baseline"/>
+                            <Run Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" 
+                                 Foreground="{StaticResource WarningYellow}" 
+                                 FontWeight="Bold" 
+                                 FontSize="22" 
+                                 BaselineAlignment="Baseline"/>
+                        </TextBlock>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Column="1" Content="XEM GIỎ HÀNG &amp; GỬI ĐƠN" Click="BtnThanhToan_Click" Style="{StaticResource GlassButtonStyle}" Width="250" Background="{StaticResource SuccessGreen}" FontSize="15" FontWeight="Bold"/>
+                
+                <Button Grid.Column="1" 
+                        Content="XEM GIỎ HÀNG &amp; GỬI ĐƠN" 
+                        Click="BtnThanhToan_Click" 
+                        Style="{StaticResource GlassButtonStyle}" 
+                        Width="250" Height="46"
+                        Background="{StaticResource SuccessGreen}" 
+                        Foreground="White"
+                        FontSize="15" 
+                        FontWeight="Bold"/>
             </Grid>
         </Border>
     </Grid>

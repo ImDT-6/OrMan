@@ -4,181 +4,208 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Chi Tiết Món" Height="620" Width="550"
+        Title="Chi Tiết Món" Height="555" Width="440"
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
-
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
 
-    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="25" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="220"/>
-                <!-- Ảnh món (Tăng nhẹ để đẹp hơn) -->
-                <RowDefinition Height="*"/>
-                <!-- Phần nội dung chính (Co giãn) -->
-                <RowDefinition Height="Auto"/>
-                <!-- Nút đặt (Cố định) -->
-            </Grid.RowDefinitions>
-
-            <!-- 1. Ảnh Header -->
-            <Grid Grid.Row="0">
-                <Border CornerRadius="25,25,0,0">
-                    <Border.Background>
-                        <ImageBrush ImageSource="{Binding HinhAnhUrl}" Stretch="UniformToFill" Opacity="0.9"/>
-                    </Border.Background>
-                </Border>
-                <!-- Lớp phủ gradient để text dễ đọc hơn -->
-                <Border CornerRadius="25,25,0,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#00000000" Offset="0.5"/>
-                            <GradientStop Color="#CC000000" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
-
-                <!-- Nút Đóng -->
-                <Button Click="BtnClose_Click" 
-                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
-                        Width="36" Height="36"
-                        Background="#60000000"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="18">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
+            <Style x:Key="ChipStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="#15FFFFFF"/>
+                <Setter Property="Foreground" Value="#CCCCCC"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Margin" Value="4"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="8" Padding="0,8">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
+                                    <Setter TargetName="bdr" Property="Background" Value="#25FFFFFF"/>
+                                    <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
-                                    <Setter Property="RenderTransform">
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter TargetName="bdr" Property="Effect">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="18" CenterY="18"/>
+                                            <DropShadowEffect Color="#8B5CF6" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
-                    </Button.Template>
-                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="12" Height="12"/>
-                </Button>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-                <!-- Tên và Giá -->
-                <StackPanel VerticalAlignment="Bottom" Margin="25,0,25,20">
-                    <TextBlock Text="{Binding TenMon}" FontSize="28" FontWeight="Bold" Foreground="White" TextWrapping="Wrap">
-                        <TextBlock.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text="{Binding GiaBan, StringFormat='{}{0:N0} đ'}" FontSize="24" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" Margin="0,5,0,0">
-                        <TextBlock.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
-                </StackPanel>
+            <Style x:Key="TransparentButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,3"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="#A78BFA"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border CornerRadius="25" Background="{StaticResource MainBackgroundGradient}" ClipToBounds="True">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="10" Color="Black" Opacity="0.5"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="150"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,5,0,0">
+                <Image Source="{Binding HinhAnhUrl}" Stretch="Uniform" VerticalAlignment="Center"/>
+                <Button Click="BtnClose_Click" 
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
+                        Width="30" Height="30" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bdr" Background="#80000000" CornerRadius="15" BorderBrush="#30FFFFFF" BorderThickness="1">
+                                <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="8" Height="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="#CCFF4444"/>
+                                    <Setter TargetName="bdr" Property="BorderThickness" Value="0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </Grid>
 
-            <!-- 2. Tùy Chọn (Sử dụng DockPanel để phân chia không gian hiệu quả) -->
-            <DockPanel Grid.Row="1" Margin="25,15,25,10" LastChildFill="True">
+            <Grid Grid.Row="1" Margin="25,0,25,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <!-- [TOP] CHỌN CẤP ĐỘ CAY (Dock Top) -->
-                <!-- Chỉ hiển thị nếu là Mì Cay (đã xử lý logic Visibility trong Code-behind) -->
-                <StackPanel x:Name="PnlCapDoCay" DockPanel.Dock="Top" Margin="0,0,0,15">
-                    <TextBlock Text="CHỌN CẤP ĐỘ CAY" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,10"/>
-                    <ItemsControl x:Name="LevelItemsControl">
+                <Grid Grid.Row="0" Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding TenMon}" FontSize="20" FontWeight="Bold" Foreground="White" TextWrapping="Wrap" LineHeight="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding GiaBan, StringFormat='{}{0:N0}'}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource WarningYellow}" HorizontalAlignment="Right"/>
+                        <TextBlock Text="VND" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" Margin="0,-2,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Height="1" Background="White" Opacity="0.1" Margin="0,5,0,8"/>
+
+                <StackPanel Grid.Row="2" x:Name="PnlCapDoCay" Margin="0,0,0,8">
+                    <TextBlock Text="Cấp độ cay" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
+                    <ItemsControl x:Name="LevelItemsControl" Margin="-4,0,-4,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal"/>
+                                <UniformGrid Columns="4"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <RadioButton GroupName="LevelCay" Content="{Binding}" 
-                                             Style="{StaticResource FilterRadioButtonStyle}" 
-                                             Margin="0,0,8,8" MinWidth="60" Height="32" FontSize="13"
-                                             Checked="RadioButton_Checked" Foreground="White"/>
+                                <RadioButton GroupName="LevelCay" Content="{Binding}" Style="{StaticResource ChipStyle}" Checked="RadioButton_Checked"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,10,0,0"/>
                 </StackPanel>
 
-                <!-- [BOTTOM] SỐ LƯỢNG (Dock Bottom - Luôn nằm dưới cùng của phần nội dung) -->
-                <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Center" Margin="0,15,0,5">
-                    <TextBlock Text="SỐ LƯỢNG" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.8"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="-" Click="BtnGiam_Click" Style="{StaticResource GlassButtonStyle}" Width="45" Height="40" Background="#30FFFFFF" FontSize="18" FontWeight="Bold"/>
+                <Grid Grid.Row="3" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- [CẬP NHẬT] Đổi TextBlock thành TextBox để nhập được -->
-                        <Border Background="#15FFFFFF" CornerRadius="10" Margin="10,0" MinWidth="60" Height="40">
-                            <TextBox x:Name="txtSoLuong" 
-                                     Text="1"
-                                     Style="{x:Null}"
-                                     Background="Transparent"
-                                     Foreground="White"
-                                     CaretBrush="White"
-                                     BorderThickness="0"
-                                     FontSize="20"
-                                     FontWeight="Bold"
-                                     Margin="10,10,10,10"
-                                     HorizontalContentAlignment="Center"
-                                     VerticalContentAlignment="Center"
-                                     MaxLength="3"
-                                     PreviewTextInput="TxtSoLuong_PreviewTextInput"
-                                     TextChanged="TxtSoLuong_TextChanged"
-                                     LostFocus="TxtSoLuong_LostFocus"/>
-                        </Border>
+                    <TextBlock Grid.Column="0" Text="Số lượng" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
 
-                        <Button Content="+" Click="BtnTang_Click" Style="{StaticResource GlassButtonStyle}" Width="45" Height="40" Background="#30FFFFFF" FontSize="18" FontWeight="Bold"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- [CENTER] GHI CHÚ (Fill phần còn lại) -->
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="GHI CHÚ CHO BẾP" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
-
-                    <!-- Khung nhập liệu tự co giãn -->
-                    <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15">
-                        <TextBox x:Name="txtNote" 
-                                 Style="{x:Null}" 
-                                 Background="Transparent" 
-                                 Foreground="White" 
-                                 CaretBrush="White"
-                                 BorderThickness="0"
-                                 FontSize="14"
-                                 Padding="12"
-                                 Margin="10,10,10,10"
-                                 TextWrapping="Wrap" 
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 VerticalContentAlignment="Top" 
-                                 ToolTip="Ví dụ: Không hành, ít nước..."/>
+                    <Border Grid.Column="2" Background="#10FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Height="36" Width="110">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="32"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="32"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="-" Click="BtnGiam_Click" Style="{StaticResource TransparentButtonStyle}"/>
+                            <TextBox Grid.Column="1" x:Name="txtSoLuong" Text="1" 
+                                     Style="{x:Null}" Background="Transparent" Foreground="White" BorderThickness="0" CaretBrush="White"
+                                     FontSize="15" FontWeight="Bold"
+                                     Margin="0,6"
+                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                     MaxLength="3" PreviewTextInput="TxtSoLuong_PreviewTextInput"
+                                     TextChanged="TxtSoLuong_TextChanged" LostFocus="TxtSoLuong_LostFocus"/>
+                            <Button Grid.Column="2" Content="+" Click="BtnTang_Click" Style="{StaticResource TransparentButtonStyle}"/>
+                        </Grid>
                     </Border>
                 </Grid>
-            </DockPanel>
 
-            <!-- 3. Nút Xác Nhận (Cố định ở đáy) -->
-            <Border Grid.Row="2" Padding="25,10,25,25" Background="#00000000">
-                <Button x:Name="btnConfirm" Content="Thêm vào giỏ - 35,000 đ" Click="BtnConfirm_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" Height="50" FontSize="16" FontWeight="Bold">
+                <Grid Grid.Row="4" Margin="0,0,0,5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Ghi chú món" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+
+                    <Border Grid.Row="1" Background="#10FFFFFF" CornerRadius="12" BorderThickness="1" BorderBrush="#20FFFFFF" Height="70">
+                        <TextBox x:Name="txtNote" 
+                                 Style="{x:Null}" Background="Transparent" Foreground="White" CaretBrush="White" BorderThickness="0"
+                                 FontSize="13" 
+                                 Margin="7,7" 
+                                 Padding="0"
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 VerticalContentAlignment="Top"
+                                 ToolTip="Ví dụ: Không hành, nhiều nước..."/>   
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <Border Grid.Row="2" Padding="25,10,25,25" VerticalAlignment="Bottom">
+                <Button x:Name="btnConfirm" Click="BtnConfirm_Click" 
+                        Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" 
+                        Height="50" Cursor="Hand">
                     <Button.Effect>
-                        <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                        <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>
                     </Button.Effect>
+                    <Grid Width="360">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Path Data="M11,9H13V6H16V4H13V1H11V4H8V6H11M7,18A2,2 0 0,0 9,20A2,2 0 0,0 11,18A2,2 0 0,0 9,16A2,2 0 0,0 7,18M17,18A2,2 0 0,0 19,20A2,2 0 0,0 21,18A2,2 0 0,0 19,16A2,2 0 0,0 17,18M7.17,14.75L7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.59 17.3,11.97L21.16,4.96L19.42,4H19.41L18.31,6L15.55,11H8.53L8.4,10.73L6.16,6L5.21,4L4.27,2H1V4H3L4.24,6.65L2.92,9.03C2.37,10 2.89,11.21 4,11.77C4.19,11.87 4.41,11.94 4.63,11.97L4.7,12H18V14H7C6.45,14 6,14.45 6,15A1,1 0 0,0 7,16H18V18H7A3,3 0 0,1 4,15C4,14.64 4.08,14.29 4.22,13.97L2.62,11.07L2.61,11.05C2.3,10.5 2.3,9.81 2.64,9.25L4.19,6.43L4.62,7.21L4.62,7.22L7.17,14.75Z" 
+                                  Fill="White" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                            <TextBlock Text="Thêm vào giỏ" FontSize="15" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                        <TextBlock Text="35,000 đ" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
             </Border>
         </Grid>

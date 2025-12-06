@@ -1,5 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Animation; // Cần dòng này cho Animation
 using OrMan.Models;
 using OrMan.ViewModels.User;
 
@@ -21,10 +24,31 @@ namespace OrMan.Views.User
 
         private void Filter_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is RadioButton rb)
+            var button = sender as RadioButton;
+            if (button == null) return;
+
+            // 1. Logic lọc món ăn
+            if (button.Tag is string tag)
             {
-                FilterByTag(rb.Tag.ToString());
+                FilterByTag(tag);
             }
+
+            // 2. Logic Animation Trượt Dọc [MỚI]
+            // Tìm vị trí nút bấm trong danh sách (0, 1, 2)
+            int index = MenuPanel.Children.IndexOf(button);
+
+            // Mỗi nút cao 60px (như đã set trong Style)
+            double targetY = index * 60;
+
+            // Chạy Animation dịch chuyển thanh tím
+            DoubleAnimation animation = new DoubleAnimation
+            {
+                To = targetY,
+                Duration = TimeSpan.FromSeconds(0.25),
+                EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            MenuIndicatorTransform.BeginAnimation(TranslateTransform.YProperty, animation);
         }
 
         private void FilterByTag(string tag)
@@ -47,20 +71,17 @@ namespace OrMan.Views.User
                     return;
                 }
 
-                // Kiểm tra đã chọn bàn chưa trước khi cho order
                 if (_vm.CurrentTable <= 0)
                 {
-                    // Nếu chưa chọn bàn -> Gọi lệnh chọn bàn trong ViewModel
                     if (_vm.ChonBanCommand.CanExecute(null))
                     {
                         _vm.ChonBanCommand.Execute(null);
                     }
-
-                    // Nếu sau khi hiện bảng chọn mà vẫn chưa chọn (tắt đi) -> Thoát
                     if (_vm.CurrentTable <= 0) return;
                 }
 
                 var popup = new ChiTietMonWindow(monAn);
+                popup.Owner = Application.Current.MainWindow;
                 var mainWindow = Application.Current.MainWindow;
                 if (mainWindow != null) mainWindow.Opacity = 0.4;
 
@@ -81,13 +102,10 @@ namespace OrMan.Views.User
                 return;
             }
 
-            // Mở cửa sổ Giỏ Hàng
             var cartWindow = new GioHangWindow(_vm);
-
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
-            // Nếu khách bấm "Gửi Đơn" trong cửa sổ kia (DialogResult == true)
             if (cartWindow.ShowDialog() == true)
             {
                 if (_vm.SubmitOrder())

@@ -3,9 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             
              xmlns:vm="clr-namespace:OrMan.ViewModels.Admin" 
-             
              d:DataContext="{d:DesignInstance Type=vm:ThucDonViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100"
@@ -26,7 +24,6 @@
                         BorderThickness="1" 
                         CornerRadius="18"
                         Cursor="Hand">
-
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="RenderTransform">
@@ -63,19 +60,17 @@
                         <Border Grid.Row="0" CornerRadius="17,17,0,0" ClipToBounds="True">
                             <Grid>
                                 <Image Source="{Binding HinhAnhUrl}" Stretch="UniformToFill"/>
-
                                 <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
                                         Background="#90000000" CornerRadius="6" Padding="8,4">
                                     <TextBlock Text="{Binding MaMon}" Foreground="#E2E8F0" FontSize="11" FontWeight="Bold"/>
                                 </Border>
-
                                 <Border Background="#CC000000" Visibility="{Binding IsSoldOut, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Border BorderBrush="#EF4444" BorderThickness="2" CornerRadius="8" 
                                             HorizontalAlignment="Center" VerticalAlignment="Center" Padding="15,5" RenderTransformOrigin="0.5,0.5">
                                         <Border.RenderTransform>
                                             <RotateTransform Angle="-15"/>
                                         </Border.RenderTransform>
-                                        <TextBlock Text="SOLD OUT" Foreground="#EF4444" FontWeight="Bold" FontSize="18"/>
+                                        <TextBlock Text="TẠM HẾT" Foreground="#EF4444" FontWeight="Bold" FontSize="18"/>
                                     </Border>
                                 </Border>
                             </Grid>
@@ -85,7 +80,6 @@
                             <TextBlock Text="{Binding TenMon}" 
                                        Foreground="White" FontWeight="Bold" FontSize="16" 
                                        TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="42" LineHeight="20"/>
-
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="{Binding GiaBan, StringFormat=N0}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="18"/>
                                 <TextBlock Text="đ" Foreground="{StaticResource WarningYellow}" FontSize="14" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
@@ -144,22 +138,6 @@
                                             ToolTip="Xóa món này">
                                         <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" 
                                               Fill="#EF4444" Stretch="Uniform" Width="14" Height="14"/>
-                                        <Button.Triggers>
-                                            <EventTrigger RoutedEvent="MouseEnter">
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#20EF4444" Duration="0:0:0.2"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                            <EventTrigger RoutedEvent="MouseLeave">
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="Transparent" Duration="0:0:0.2"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </Button.Triggers>
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -178,20 +156,57 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="TabItem">
                             <Grid>
-                                <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0,0,0,2" CornerRadius="10,10,0,0" Margin="0,0,5,0">
-                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="{TemplateBinding Padding}" />
+                                <Border x:Name="Border" Background="{TemplateBinding Background}" 
+                                        CornerRadius="10,10,0,0" Margin="0,0,5,0">
+                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Center" ContentSource="Header" 
+                                                      Margin="{TemplateBinding Padding}" />
                                 </Border>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Foreground" Value="White"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
-                                    <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,4"/>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="SlidingTabControlStyle" TargetType="TabControl">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabControl">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <TabPanel IsItemsHost="True" Background="Transparent" ZIndex="1"/>
+
+                                    <Border x:Name="PART_Indicator" 
+                                            Height="4" 
+                                            VerticalAlignment="Bottom" 
+                                            HorizontalAlignment="Left"
+                                            Background="{StaticResource AccentGradient}" 
+                                            CornerRadius="2"
+                                            Width="0">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform x:Name="IndicatorTransform" X="0"/>
+                                        </Border.RenderTransform>
+                                    </Border>
+
+                                    <Border BorderBrush="#30FFFFFF" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
+                                </Grid>
+
+                                <ContentPresenter ContentSource="SelectedContent" Grid.Row="1"/>
+                            </Grid>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -236,7 +251,6 @@
     </UserControl.Resources>
 
     <Grid Background="{StaticResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
-
         <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -245,7 +259,6 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,10">
                 <TextBlock Text="QUẢN LÝ THỰC ĐƠN" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
-
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -269,10 +282,10 @@
             </StackPanel>
 
             <TabControl Grid.Row="1" 
-                        Background="Transparent" 
-                        BorderThickness="0" 
                         x:Name="MenuTabControl" 
-                        SelectionChanged="MenuTabControl_SelectionChanged">
+                        Style="{StaticResource SlidingTabControlStyle}"
+                        SelectionChanged="MenuTabControl_SelectionChanged"
+                        Loaded="MenuTabControl_Loaded">
 
                 <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
                     <ListBox x:Name="ListBoxMiCay" 
