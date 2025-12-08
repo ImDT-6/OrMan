@@ -30,13 +30,13 @@
     // Role 2: User (Đúng yêu cầu của bạn)
     public class User : BaseAccount
     {
-        public string HangThanhVien { get; set; } // Gold, Silver, Diamond
+        public string HangKhachHang { get; set; } // Gold, Silver, Diamond
         public int DiemTichLuy { get; set; }
 
         public User(string taiKhoan, string matKhau, string hoTen, string hangTv, int diem)
             : base(taiKhoan, matKhau, hoTen)
         {
-            HangThanhVien = hangTv;
+            HangKhachHang = hangTv;
             DiemTichLuy = diem;
         }
     }

@@ -229,6 +229,7 @@
                 <TextBox Grid.Column="1" 
                          Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource SearchTextBoxStyle}" 
+                         Tag="{StaticResource IconSearch}"
                          ToolTip="Tìm mã hóa đơn hoặc nhân viên..." 
                          Width="300" 
                          HorizontalAlignment="Right" 

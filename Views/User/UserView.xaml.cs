@@ -181,12 +181,26 @@ namespace OrMan.Views.User
 
         private void BtnTichDiem_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Tính năng Tích điểm đang được phát triển!", "Thông báo");
-        }
+            // [CŨ] MessageBox.Show("Tính năng Tích điểm đang được phát triển!", "Thông báo");
 
-        private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Cảm ơn Quý khách đã quan tâm! Tính năng Đánh giá sẽ sớm ra mắt.", "Thông báo");
+            // [MỚI]
+            var popup = new TichDiemWindow(_vm);
+            var mainWindow = Application.Current.MainWindow;
+
+            // Làm mờ màn hình chính cho đẹp
+            if (mainWindow != null) mainWindow.Opacity = 0.4;
+
+            popup.Owner = mainWindow;
+            popup.ShowDialog();
+
+            // Khôi phục độ sáng
+            if (mainWindow != null) mainWindow.Opacity = 1;
+
+            // Nếu đã đăng nhập thành công, cập nhật giao diện chính (nếu muốn)
+            if (_vm.CurrentCustomer != null)
+            {
+                // Ví dụ: đổi icon tích điểm thành màu vàng để báo hiệu đã đăng nhập
+            }
         }
 
         // Đã xóa hàm BtnNgonNgu_Click vì không còn dùng nữa

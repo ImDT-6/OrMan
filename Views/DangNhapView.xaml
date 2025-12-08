@@ -35,7 +35,7 @@
                          PreviewKeyDown="txtUser_PreviewKeyDown" 
                          Style="{StaticResource GlassTextBox}"
                          Text="{Binding TaiKhoan, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                         Tag="{StaticResource IconEmail}"
+                         Tag="{StaticResource IconUser}"
                          ToolTip="Tên đăng nhập" 
                          Margin="0,0,0,10"/>
 

@@ -89,5 +89,10 @@ namespace OrMan.Views.Admin
             this.DialogResult = false;
             this.Close();
         }
+
+        private void txtMaMon_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

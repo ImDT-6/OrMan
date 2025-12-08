@@ -142,14 +142,14 @@
                 <StackPanel Grid.Row="2" Margin="0,10,0,0">
                     <Rectangle Height="1" Fill="{StaticResource GlassBorder}" Margin="20,5,20,10" Opacity="0.5"/>
 
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnTichDiem_Click" ToolTip="Tích điểm thành viên">
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnTichDiem_Click" ToolTip="Tích điểm Khách Hàng">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="💎" Margin="0,0,10,0"/>
                             <TextBlock Text="Tích điểm" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnDanhGia_Click" ToolTip="Gửi đánh giá">
+                    <Button Style="{StaticResource SidebarButtonStyle}"  ToolTip="Gửi đánh giá">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⭐" Margin="0,0,10,0"/>
                             <TextBlock Text="Đánh giá" FontWeight="SemiBold"/>

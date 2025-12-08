@@ -25,7 +25,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 3. [MỚI] Thêm cột YeuCauHoTro (NVARCHAR)
+                // 3. Cột YeuCauHoTro
                 try
                 {
                     string sqlHoTro = @"
@@ -48,6 +48,33 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sqlMonAn);
                 }
                 catch { }
+
+                // 5. [MỚI] Tự động tạo bảng KhachHang nếu chưa có
+                try
+                {
+                    string sqlTaoBangKhach = @"
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[KhachHang]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[KhachHang](
+                                [KhachHangID] [int] IDENTITY(1,1) NOT NULL,
+                                [SoDienThoai] [nvarchar](20) NOT NULL,
+                                [HoTen] [nvarchar](100) NULL,
+                                [DiemTichLuy] [int] NOT NULL DEFAULT 0,
+                                [HangKhachHang] [nvarchar](20) DEFAULT N'Khách Hàng Mới',
+                                CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([KhachHangID] ASC)
+                            );
+
+                            -- Tạo thêm Index cho SĐT để tìm nhanh hơn
+                            CREATE UNIQUE NONCLUSTERED INDEX [IX_KhachHang_SoDienThoai] ON [dbo].[KhachHang] ([SoDienThoai] ASC);
+                        END";
+
+                    context.Database.ExecuteSqlRaw(sqlTaoBangKhach);
+                }
+                catch (Exception ex)
+                {
+                    // Nếu lỗi thì ghi ra console để biết đường sửa
+                    Console.WriteLine("Lỗi tạo bảng KhachHang: " + ex.Message);
+                }
             }
         }
     }

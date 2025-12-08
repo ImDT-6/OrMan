@@ -12,6 +12,7 @@ namespace OrMan.Data
         public DbSet<BanAn> BanAns { get; set; }
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public DbSet<KhachHang> KhachHangs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -23,6 +24,11 @@ namespace OrMan.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Cấu hình bảng
+            modelBuilder.Entity<KhachHang>().ToTable("KhachHang");
+            modelBuilder.Entity<KhachHang>()
+                .HasIndex(k => k.SoDienThoai)
+                .IsUnique();
+
             modelBuilder.Entity<MonAn>().ToTable("MonAn");
             modelBuilder.Entity<BanAn>().ToTable("BanAn");
             modelBuilder.Entity<HoaDon>().ToTable("HoaDon");

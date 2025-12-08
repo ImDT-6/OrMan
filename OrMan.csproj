@@ -190,6 +190,7 @@
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\ChiTietHoaDon.cs" />
     <Compile Include="Models\HoaDon.cs" />
+    <Compile Include="Models\KhachHang.cs" />
     <Compile Include="Models\MonAn.cs" />
     <Compile Include="Models\NguoiDung.cs" />
     <Compile Include="Services\BanAnRepository.cs" />
@@ -202,10 +203,14 @@
     <Compile Include="ViewModels\Admin\DoanhThuViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyBanViewModel.cs" />
     <Compile Include="ViewModels\Admin\ThucDonViewModel.cs" />
+    <Compile Include="ViewModels\KhachHangViewModel.cs" />
     <Compile Include="ViewModels\User\UserViewModel.cs" />
     <Compile Include="ViewModels\ValidationBase.cs" />
     <Compile Include="Views\Admin\AdminView.xaml.cs">
       <DependentUpon>AdminView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\KhachHangView.xaml.cs">
+      <DependentUpon>KhachHangView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Admin\ThanhToanWindow.xaml.cs">
       <DependentUpon>ThanhToanWindow.xaml</DependentUpon>
@@ -240,6 +245,9 @@
     <Compile Include="Views\User\SupportRequestWindow.xaml.cs">
       <DependentUpon>SupportRequestWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\User\TichDiemWindow.xaml.cs">
+      <DependentUpon>TichDiemWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\User\UserView.xaml.cs">
       <DependentUpon>UserView.xaml</DependentUpon>
     </Compile>
@@ -261,6 +269,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Admin\AdminView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\KhachHangView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -308,6 +320,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\User\TichDiemWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\User\UserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -330,6 +346,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

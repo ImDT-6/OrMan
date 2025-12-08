@@ -4,75 +4,334 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Thông Tin Món Ăn" Height="600" Width="420"
+        Title="Thông Tin Món Ăn" 
+        Height="650" Width="520"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
 
     <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+
+        <SolidColorBrush x:Key="InputBackground" Color="#20FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#A0AEC0"/>
+
+        <LinearGradientBrush x:Key="NeonButtonGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#8B5CF6" Offset="0"/>
+            <GradientStop Color="#6D28D9" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="InputLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="5,0,0,6"/>
+        </Style>
+
+        <Style x:Key="ModernInputStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                CornerRadius="12" BorderThickness="{TemplateBinding BorderThickness}" 
+                                BorderBrush="{TemplateBinding BorderBrush}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#8B5CF6"/>
+                                <Setter TargetName="border" Property="Background" Value="#30FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.ColumnSpan="2" Background="Transparent"/>
+                <Path Grid.Column="1" Data="M0,0 L5,5 L10,0" Stroke="White" StrokeThickness="1.5" 
+                      HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            </Grid>
+        </ControlTemplate>
+
+        <Style x:Key="ModernComboBox" TargetType="{x:Type ComboBox}">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <Border x:Name="templateBorder" Background="{TemplateBinding Background}" 
+                                    CornerRadius="12" BorderThickness="1" BorderBrush="Transparent">
+                                <Grid>
+                                    <ToggleButton Name="ToggleButton" Template="{StaticResource ComboBoxToggleButton}" 
+                                                  Focusable="false" ClickMode="Press" 
+                                                  IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"/>
+                                    <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  
+                                                      Content="{TemplateBinding SelectionBoxItem}" 
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                                      Margin="15,0,40,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                </Grid>
+                            </Border>
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="#232545" BorderThickness="1" 
+                                            BorderBrush="#8B5CF6" CornerRadius="10" Margin="0,5,0,0">
+                                        <ScrollViewer Margin="0,5" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+                                        </Border.Effect>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="templateBorder" Property="BorderBrush" Value="#8B5CF6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
-        <Grid Margin="20">
+    <Border CornerRadius="25" Background="{StaticResource MainBackgroundGradient}" ClipToBounds="True">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="60" ShadowDepth="0" Color="#000000" Opacity="0.8"/>
+        </Border.Effect>
+
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock x:Name="txtTitle" Text="THÊM MÓN MỚI" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                <Grid Grid.Row="0" Margin="25,0">
+                    <TextBlock x:Name="txtTitle" Text="CHI TIẾT MÓN ĂN" VerticalAlignment="Center" 
+                               FontSize="16" FontWeight="Bold" Foreground="White" Opacity="0.9"/>
+
+                    <Button Click="btnCancel_Click" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Width="36" Height="36" Cursor="Hand" Background="Transparent" BorderThickness="0">
+                        <Grid>
+                            <Ellipse Fill="#20FFFFFF" />
+                            <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="White" StrokeThickness="2" 
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <ContentPresenter/>
+                                    <Border x:Name="bdr" Background="Transparent" CornerRadius="18"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bdr" Property="Background" Value="#30FFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,10,0,15" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Ellipse Width="170" Height="170" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#8B5CF6" Offset="0.2"/>
+                                <GradientStop Color="Transparent" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="50"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <Border Width="160" Height="160" CornerRadius="80" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True">
+                        <Grid>
+                            <Path Data="M19,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,5V19H5V5H19M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z" 
+                                  Fill="#30FFFFFF" Stretch="Uniform" Width="50" Height="50"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                            <Image Source="{Binding Text, ElementName=txtHinhAnh}" 
+                                   Stretch="UniformToFill" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="30,0,30,0">
                 <StackPanel>
 
-                    <TextBlock Text="Loại Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="cboLoaiMon" Height="40" Margin="0,0,0,15" Padding="10,0" VerticalContentAlignment="Center" FontSize="14">
-                        <ComboBoxItem Content="Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
-                        <ComboBoxItem Content="Đồ Chiên &amp; Topping" Tag="Đồ Chiên"/>
-                        <ComboBoxItem Content="Nước Uống" Tag="Nước Uống"/>
-                    </ComboBox>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Mã Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtMaMon" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Mã món" Style="{StaticResource InputLabel}"/>
+                            <TextBox x:Name="txtMaMon" Style="{StaticResource ModernInputStyle}" 
+                                     Foreground="#A0AEC0" FontWeight="Bold"
+                                     TextChanged="txtMaMon_TextChanged"/>
+                        </StackPanel>
 
-                    <TextBlock Text="Tên Món:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtTenMon" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Phân loại" Style="{StaticResource InputLabel}"/>
+                            <ComboBox x:Name="cboLoaiMon" Style="{StaticResource ModernComboBox}">
+                                <ComboBoxItem Content="🔥 Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
+                                <ComboBoxItem Content="🥟 Đồ Chiên &amp; Topping" Tag="Đồ Chiên"/>
+                                <ComboBoxItem Content="🥤 Nước Uống" Tag="Nước Uống"/>
+                                <ComboBoxItem Content="🍚 Cơm Trộn" Tag="Cơm"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
 
-                    <TextBlock Text="Giá Bán:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtGiaBan" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock Text="Tên món ăn" Style="{StaticResource InputLabel}"/>
+                        <TextBox x:Name="txtTenMon" Style="{StaticResource ModernInputStyle}" 
+                                 FontSize="16" FontWeight="Bold"
+                                 d:Text="Miến Bulgogi Bò Mỹ"/>
+                    </StackPanel>
 
-                    <TextBlock Text="Đơn Vị:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtDonVi" Style="{StaticResource SimpleGlassTextBox}" Margin="0,0,0,15"/>
-
-                    <TextBlock Text="Hình Ảnh:" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:Name="txtHinhAnh" Style="{StaticResource SimpleGlassTextBox}"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Giá bán (VNĐ)" Style="{StaticResource InputLabel}"/>
+                            <TextBox x:Name="txtGiaBan" Style="{StaticResource ModernInputStyle}" 
+                                     Foreground="#F59E0B" FontWeight="Bold" FontSize="16"
+                                     d:Text="57000"/>
+                        </StackPanel>
 
-                        <Button Content="..." Grid.Column="1" Click="btnBrowse_Click" 
-                                Style="{StaticResource GlassDismissButtonStyle}" Width="40" Margin="5,0,0,0"/>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Đơn vị tính" Style="{StaticResource InputLabel}"/>
+                            <TextBox x:Name="txtDonVi" Style="{StaticResource ModernInputStyle}" 
+                                     d:Text="Tô"/>
+                        </StackPanel>
                     </Grid>
+
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock Text="Link Hình ảnh (URL/File)" Style="{StaticResource InputLabel}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="txtHinhAnh" Grid.Column="0" Style="{StaticResource ModernInputStyle}" 
+                                     FontSize="13" Foreground="#90A4AE" FontStyle="Italic"/>
+
+                            <Button Grid.Column="2" Click="btnBrowse_Click" ToolTip="Chọn ảnh" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bdr" Background="{StaticResource InputBackground}" CornerRadius="12" 
+                                                BorderThickness="1" BorderBrush="Transparent">
+                                            <TextBlock Text="..." FontSize="20" FontWeight="Bold" Foreground="White" 
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-8,0,0"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bdr" Property="BorderBrush" Value="#8B5CF6"/>
+                                                <Setter TargetName="bdr" Property="Background" Value="#30FFFFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
                 </StackPanel>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                <Button Content="Lưu Lại" Click="btnSave_Click" 
-                        Style="{StaticResource GlassButtonStyle}" Width="120" Height="40"
-                        Background="{StaticResource SuccessGreen}" Margin="0,0,10,0"/>
+            <Border Grid.Row="2" Padding="30,15,30,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="1.5*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Button Content="Hủy Bỏ" Click="btnCancel_Click" 
-                        Style="{StaticResource GlassButtonStyle}" Width="120" Height="40"
-                        Background="{StaticResource DangerRed}"/>
-            </StackPanel>
+                    <Button Grid.Column="0" Content="Hủy bỏ" Click="btnCancel_Click" 
+                            Foreground="#EF4444" Background="Transparent" FontWeight="Bold" Cursor="Hand"
+                            FontSize="15" HorizontalAlignment="Stretch" Height="50">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bdr" Background="Transparent" CornerRadius="15" BorderThickness="1" BorderBrush="#30EF4444">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bdr" Property="Background" Value="#15EF4444"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Button Grid.Column="2" Click="btnSave_Click" Height="50" Cursor="Hand" HorizontalAlignment="Stretch">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bdr" CornerRadius="15" Background="{StaticResource NeonButtonGradient}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
+                                    </Border.Effect>
+                                    <TextBlock Text="LƯU LẠI" FontSize="16" FontWeight="Bold" Foreground="White" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bdr" Property="Opacity" Value="0.9"/>
+                                        <Setter TargetName="bdr" Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect Color="#8B5CF6" BlurRadius="30" ShadowDepth="0" Opacity="0.8"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
         </Grid>
     </Border>
 </Window>

@@ -267,6 +267,7 @@
 
                     <TextBox Grid.Column="0" 
                              ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
+                             Tag="{StaticResource IconSearch}"
                              Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}"
                              TextChanged="TextBox_TextChanged"
                              Style="{StaticResource SearchTextBoxStyle}" 
