@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Sidebar -->
+    <s:String x:Key="StrCategory">DANH MỤC</s:String>
+    <s:String x:Key="StrTabNoodle">🔥 Mì Cay &amp; Lẩu</s:String>
+    <s:String x:Key="StrTabSnack">🥟 Ăn Vặt</s:String>
+    <s:String x:Key="StrTabDrink">🥤 Nước Uống</s:String>
+    <s:String x:Key="StrBtnPoints">Tích điểm</s:String>
+    <s:String x:Key="StrBtnRate">Đánh giá</s:String>
+    <s:String x:Key="StrBtnLang">Tiếng Việt</s:String>
+
+    <!-- Header -->
+    <s:String x:Key="StrSearchTooltip">Tìm món ăn...</s:String>
+    <s:String x:Key="StrBtnCallStaff">🔔 Gọi Phục Vụ</s:String>
+    <s:String x:Key="StrBtnTable">Bàn</s:String>
+    <s:String x:Key="StrBtnLogout">Thoát</s:String>
+
+    <!-- Greeting Logic -->
+    <s:String x:Key="GreetMorning">buổi sáng</s:String>
+    <s:String x:Key="GreetNoon">buổi trưa</s:String>
+    <s:String x:Key="GreetAfternoon">buổi chiều</s:String>
+    <s:String x:Key="GreetEvening">buổi tối</s:String>
+    <s:String x:Key="GreetFormat">Chào {0}, Quý khách</s:String>
+
+    <!-- Menu Item -->
+    <s:String x:Key="StrSoldOut">TẠM HẾT</s:String>
+
+    <!-- Footer -->
+    <s:String x:Key="StrSelectedCount">Đã chọn {0} món</s:String>
+    <s:String x:Key="StrSubtotal">Tạm tính:</s:String>
+    <s:String x:Key="StrBtnCheckout">XEM GIỎ HÀNG &amp; GỬI ĐƠN</s:String>
+
+    <!-- Messages -->
+    <s:String x:Key="MsgSoldOut">Món '{0}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!</s:String>
+    <s:String x:Key="TitleSorry">Rất tiếc</s:String>
+    <s:String x:Key="MsgCartEmpty">Giỏ hàng đang trống! Vui lòng chọn món trước.</s:String>
+    <s:String x:Key="TitleNotice">Thông báo</s:String>
+    <s:String x:Key="MsgOrderSuccess">Đã gửi đơn xuống bếp thành công!\nVui lòng đợi trong giây lát.</s:String>
+    <s:String x:Key="TitleSuccess">Thành công</s:String>
+    <s:String x:Key="MsgConfirmLogout">Bạn muốn kết thúc phiên gọi món?</s:String>
+    <s:String x:Key="TitleConfirm">Xác nhận</s:String>
+    <s:String x:Key="MsgFeatureDev">Tính năng đang được phát triển!</s:String>
+</ResourceDictionary>

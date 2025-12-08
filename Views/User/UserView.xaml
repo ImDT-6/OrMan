@@ -158,7 +158,7 @@
                 </StackPanel>
 
                 <!-- 4. Ngôn ngữ (Góc dưới bên trái) -->
-                <Button Grid.Row="4" Style="{StaticResource SidebarButtonStyle}" Click="BtnNgonNgu_Click" VerticalAlignment="Bottom" Margin="0,0,0,20">
+                <Button Grid.Row="4" Style="{StaticResource SidebarButtonStyle}" VerticalAlignment="Bottom" Margin="0,0,0,20">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="🇻🇳" Margin="0,0,10,0"/>
                         <TextBlock Text="Tiếng Việt" FontSize="13"/>
@@ -183,7 +183,7 @@
 
             <!-- Lời chào (Real-time) -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,25,0">
-                <TextBlock Text="👋" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="👋" Foreground="White" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock x:Name="txtGreeting" Text="Chào ..., Quý khách" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
 
@@ -200,11 +200,12 @@
 
                 <Button Command="{Binding ChonBanCommand}" 
                         Style="{StaticResource SocialButtonStyle}" 
-                        Height="45" Width="100" Margin="0,0,10,0" Padding="10,0"
+                        Height="45" Width="90" Margin="0,0,10,0" Padding="15,0"
                         Background="#20FFFFFF" ToolTip="Bấm để chọn bàn">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Bàn" Foreground="White" Margin="0,5,5,0" Opacity="0.8"/>
-                        <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="18"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Bàn:" Foreground="White" Margin="0,3,5,0"/>
+                        <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text=" ▼" Foreground="White" Margin="1,2,5,0" FontSize="10" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 

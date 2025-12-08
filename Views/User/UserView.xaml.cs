@@ -14,60 +14,58 @@ namespace OrMan.Views.User
         private UserViewModel _vm;
         private DispatcherTimer _clockTimer;
 
-        // Biến trạng thái ngôn ngữ (Mặc định là Tiếng Việt)
-        private bool _isVietnamese = true;
-
         public UserView()
         {
             InitializeComponent();
             _vm = new UserViewModel();
             this.DataContext = _vm;
 
+            // Đăng ký sự kiện Unloaded để dọn dẹp Timer
+            this.Unloaded += UserControl_Unloaded;
+
             FilterByTag("Mì Cay");
-            StartGreetingTimer();
+
+            SetupTimer();
+        }
+
+        private void SetupTimer()
+        {
+            _clockTimer = new DispatcherTimer();
+            // Cập nhật mỗi 30 giây
+            _clockTimer.Interval = TimeSpan.FromSeconds(30);
+            _clockTimer.Tick += (s, e) => UpdateGreeting();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            _clockTimer?.Start();
             UpdateGreeting();
         }
 
-        private void StartGreetingTimer()
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            _clockTimer = new DispatcherTimer();
-            _clockTimer.Interval = TimeSpan.FromMinutes(1);
-            _clockTimer.Tick += (s, e) => UpdateGreeting();
-            _clockTimer.Start();
+            _clockTimer?.Stop();
         }
 
         private void UpdateGreeting()
         {
             var now = DateTime.Now;
-            string greeting = "";
+            int hour = now.Hour;
+            string timeSession;
 
-            if (_isVietnamese)
-            {
-                // Logic Tiếng Việt
-                string timeSession;
-                if (now.Hour >= 5 && now.Hour < 11) timeSession = "buổi sáng";
-                else if (now.Hour >= 11 && now.Hour < 14) timeSession = "buổi trưa";
-                else if (now.Hour >= 14 && now.Hour < 18) timeSession = "buổi chiều";
-                else timeSession = "buổi tối";
-
-                greeting = $"Chào {timeSession}, Quý khách";
-            }
+            // Logic khung giờ Tiếng Việt
+            if (hour >= 5 && hour < 11)
+                timeSession = "buổi sáng";
+            else if (hour >= 11 && hour < 14)
+                timeSession = "buổi trưa";
+            else if (hour >= 14 && hour < 18)
+                timeSession = "buổi chiều";
             else
-            {
-                // Logic Tiếng Anh
-                string timeSession;
-                if (now.Hour >= 5 && now.Hour < 12) timeSession = "Morning";
-                else if (now.Hour >= 12 && now.Hour < 18) timeSession = "Afternoon";
-                else timeSession = "Evening";
+                timeSession = "buổi tối";
 
-                greeting = $"Good {timeSession}, Dear Customer";
-            }
+            string greeting = $"Chào {timeSession}, Quý khách";
 
-            if (txtGreeting != null)
+            if (txtGreeting != null && txtGreeting.Text != greeting)
             {
                 txtGreeting.Text = greeting;
             }
@@ -112,12 +110,11 @@ namespace OrMan.Views.User
             {
                 if (monAn.IsSoldOut)
                 {
-                    string msg = _isVietnamese
-                        ? $"Món '{monAn.TenMon}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!"
-                        : $"'{monAn.TenMon}' is currently sold out.\nPlease choose another dish!";
-
-                    string title = _isVietnamese ? "Rất tiếc" : "Sorry";
-                    MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(
+                        $"Món '{monAn.TenMon}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!",
+                        "Rất tiếc",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                     return;
                 }
 
@@ -148,9 +145,7 @@ namespace OrMan.Views.User
         {
             if (_vm.GioHang.Count == 0)
             {
-                string msg = _isVietnamese ? "Giỏ hàng đang trống! Vui lòng chọn món trước." : "Your cart is empty! Please select items first.";
-                string title = _isVietnamese ? "Thông báo" : "Notice";
-                MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Giỏ hàng đang trống! Vui lòng chọn món trước.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -162,12 +157,11 @@ namespace OrMan.Views.User
             {
                 if (_vm.SubmitOrder())
                 {
-                    string msg = _isVietnamese
-                        ? "Đã gửi đơn xuống bếp thành công!\nVui lòng đợi trong giây lát."
-                        : "Order sent to kitchen successfully!\nPlease wait a moment.";
-                    string title = _isVietnamese ? "Thành công" : "Success";
-
-                    MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(
+                        "Đã gửi đơn xuống bếp thành công!\nVui lòng đợi trong giây lát.",
+                        "Thành công",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                 }
             }
 
@@ -176,10 +170,7 @@ namespace OrMan.Views.User
 
         private void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
-            string msg = _isVietnamese ? "Bạn muốn kết thúc phiên gọi món?" : "Do you want to end this session?";
-            string title = _isVietnamese ? "Xác nhận" : "Confirm";
-
-            var result = MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show("Bạn muốn kết thúc phiên gọi món?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -190,39 +181,14 @@ namespace OrMan.Views.User
 
         private void BtnTichDiem_Click(object sender, RoutedEventArgs e)
         {
-            string msg = _isVietnamese ? "Tính năng Tích điểm đang được phát triển!" : "Loyalty feature is under development!";
-            MessageBox.Show(msg, _isVietnamese ? "Thông báo" : "Notice");
+            MessageBox.Show("Tính năng Tích điểm đang được phát triển!", "Thông báo");
         }
 
         private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
         {
-            string msg = _isVietnamese ? "Cảm ơn Quý khách đã quan tâm! Tính năng Đánh giá sẽ sớm ra mắt." : "Thank you! Rating feature is coming soon.";
-            MessageBox.Show(msg, _isVietnamese ? "Thông báo" : "Notice");
+            MessageBox.Show("Cảm ơn Quý khách đã quan tâm! Tính năng Đánh giá sẽ sớm ra mắt.", "Thông báo");
         }
 
-        private void BtnNgonNgu_Click(object sender, RoutedEventArgs e)
-        {
-            // Đổi trạng thái ngôn ngữ
-            _isVietnamese = !_isVietnamese;
-
-            // Cập nhật lại UI (những phần xử lý trong code C#)
-            UpdateGreeting();
-
-            // Gợi ý cho bạn: Đây là chỗ để chèn logic thay đổi ResourceDictionary cho toàn bộ App
-            /*
-            var dict = new ResourceDictionary();
-            if (_isVietnamese)
-                dict.Source = new Uri("..\\Resources\\Lang.vi-VN.xaml", UriKind.Relative);
-            else
-                dict.Source = new Uri("..\\Resources\\Lang.en-US.xaml", UriKind.Relative);
-            
-            // Xóa dictionary ngôn ngữ cũ và thêm cái mới vào MergedDictionaries của Application
-            // Application.Current.Resources.MergedDictionaries...
-            */
-
-            // Thông báo ngắn để người dùng biết đã đổi (Tạm thời)
-            string currentLang = _isVietnamese ? "Tiếng Việt" : "English";
-            // MessageBox.Show($"Đã chuyển ngôn ngữ sang: {currentLang}", "Language Changed");
-        }
+        // Đã xóa hàm BtnNgonNgu_Click vì không còn dùng nữa
     }
 }

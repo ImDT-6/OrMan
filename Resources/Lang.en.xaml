@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Sidebar -->
+    <s:String x:Key="StrCategory">CATEGORIES</s:String>
+    <s:String x:Key="StrTabNoodle">🔥 Spicy Noodle &amp; Pot</s:String>
+    <s:String x:Key="StrTabSnack">🥟 Snacks</s:String>
+    <s:String x:Key="StrTabDrink">🥤 Drinks</s:String>
+    <s:String x:Key="StrBtnPoints">Loyalty</s:String>
+    <s:String x:Key="StrBtnRate">Review</s:String>
+    <s:String x:Key="StrBtnLang">English</s:String>
+
+    <!-- Header -->
+    <s:String x:Key="StrSearchTooltip">Search for food...</s:String>
+    <s:String x:Key="StrBtnCallStaff">🔔 Call Staff</s:String>
+    <s:String x:Key="StrBtnTable">Table</s:String>
+    <s:String x:Key="StrBtnLogout">Exit</s:String>
+
+    <!-- Greeting Logic Strings -->
+    <s:String x:Key="GreetMorning">Morning</s:String>
+    <s:String x:Key="GreetNoon">Noon</s:String>
+    <s:String x:Key="GreetAfternoon">Afternoon</s:String>
+    <s:String x:Key="GreetEvening">Evening</s:String>
+    <s:String x:Key="GreetFormat">Good {0}, Dear Customer</s:String>
+
+    <!-- Menu Item -->
+    <s:String x:Key="StrSoldOut">SOLD OUT</s:String>
+
+    <!-- Footer -->
+    <s:String x:Key="StrSelectedCount">Selected {0} items</s:String>
+    <s:String x:Key="StrSubtotal">Subtotal:</s:String>
+    <s:String x:Key="StrBtnCheckout">VIEW CART &amp; ORDER</s:String>
+
+    <!-- Messages -->
+    <s:String x:Key="MsgSoldOut">'{0}' is currently sold out.\nPlease choose another dish!</s:String>
+    <s:String x:Key="TitleSorry">Sorry</s:String>
+    <s:String x:Key="MsgCartEmpty">Your cart is empty! Please select items first.</s:String>
+    <s:String x:Key="TitleNotice">Notice</s:String>
+    <s:String x:Key="MsgOrderSuccess">Order sent to kitchen successfully!\nPlease wait a moment.</s:String>
+    <s:String x:Key="TitleSuccess">Success</s:String>
+    <s:String x:Key="MsgConfirmLogout">Do you want to end this session?</s:String>
+    <s:String x:Key="TitleConfirm">Confirm</s:String>
+    <s:String x:Key="MsgFeatureDev">Feature is under development!</s:String>
+</ResourceDictionary>
