@@ -46,6 +46,10 @@ namespace OrMan.Helpers
                 {
                     passwordBox.Password = e.NewValue?.ToString() ?? string.Empty;
                 }
+
+                // [MỚI - QUAN TRỌNG] Cập nhật trạng thái HasText ngay lập tức
+                SetHasText(passwordBox, passwordBox.Password.Length > 0);
+
                 passwordBox.PasswordChanged += PasswordBox_PasswordChanged;
             }
         }

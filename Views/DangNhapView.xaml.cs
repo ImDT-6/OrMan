@@ -18,14 +18,43 @@ namespace OrMan.Views
             vm = new DangNhapViewModel();
             DataContext = vm;
         }
-
+        private void txtVisiblePass_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Bấm LÊN thì quay về ô Tài khoản
+            if (e.Key == Key.Up)
+            {
+                txtUser.Focus();
+                e.Handled = true;
+            }
+            // Bấm ENTER thì gọi lệnh Đăng nhập
+            else if (e.Key == Key.Enter)
+            {
+                Button_Click(sender, e);
+                e.Handled = true;
+            }
+        }
         // 1. XỬ LÝ TẠI Ô TÀI KHOẢN (Dùng PreviewKeyDown)
+
+
         private void txtUser_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Down)
             {
-                pwdBox.Focus();
-                e.Handled = true; // Chặn sự kiện lan truyền lên nút Đăng nhập
+                // [SỬA] Kiểm tra xem đang ở chế độ hiện mật khẩu hay ẩn
+                if (btnEye.IsChecked == true)
+                {
+                    // Nếu đang hiện pass -> Focus vào ô TextBox hiện
+                    txtVisiblePass.Focus();
+                    // Đặt con trỏ về cuối dòng cho tiện nhập tiếp
+                    txtVisiblePass.CaretIndex = txtVisiblePass.Text.Length;
+                }
+                else
+                {
+                    // Nếu đang ẩn pass -> Focus vào PasswordBox như cũ
+                    pwdBox.Focus();
+                }
+
+                e.Handled = true;
             }
         }
 

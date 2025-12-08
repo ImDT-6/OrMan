@@ -46,6 +46,7 @@
                              Text="{Binding MatKhau, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              Tag="{StaticResource IconLockVisible}"
                              ToolTip="Mật khẩu"
+                             PreviewKeyDown="txtVisiblePass_PreviewKeyDown"
                              Visibility="{Binding ElementName=btnEye, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                     <PasswordBox x:Name="pwdBox"
@@ -54,6 +55,7 @@
                                  local:PasswordBoxHelper.BoundPassword="{Binding MatKhau, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                                  Tag="{StaticResource IconLock}"
                                  ToolTip="Mật khẩu">
+                        
                         <PasswordBox.Style>
                             <Style TargetType="PasswordBox" BasedOn="{StaticResource GlassPasswordBox}">
                                 <Style.Triggers>
@@ -67,8 +69,9 @@
 
                     <ToggleButton x:Name="btnEye"
                                   Width="30" Height="30"
-                                  HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,10,0"
+                                  Focusable="False"
+                                  HorizontalAlignment="Right" VerticalAlignment="Top"
+                                  Margin="0,12.5,10,0"
                                   Background="Transparent" BorderThickness="0" Cursor="Hand">
                         <ToggleButton.Template>
                             <ControlTemplate TargetType="ToggleButton">
