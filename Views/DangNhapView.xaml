@@ -31,8 +31,22 @@
                 <TextBlock Text="RESTAURANT" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                 <TextBlock Text="MANAGEMENT SYSTEM" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,35" Opacity="0.8"/>
 
+                <Border Width="110" Height="110" CornerRadius="55" Margin="0,0,0,25"
+                        BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"
+                        Background="#15FFFFFF" HorizontalAlignment="Center">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>
+                    </Border.Effect>
+
+                    <Border CornerRadius="55" ClipToBounds="True">
+                        <Image x:Name="imgMascot" 
+                               Source="pack://application:,,,/Images/textbox_user_1.jpg" 
+                               Stretch="UniformToFill"/>
+                    </Border>
+                </Border>
                 <TextBox x:Name="txtUser"
                          PreviewKeyDown="txtUser_PreviewKeyDown" 
+                         TextChanged="txtUser_TextChanged" 
                          Style="{StaticResource GlassTextBox}"
                          Text="{Binding TaiKhoan, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                          Tag="{StaticResource IconUser}"
@@ -42,6 +56,7 @@
                 <Grid Margin="0,0,0,25">
 
                     <TextBox x:Name="txtVisiblePass"
+                             GotFocus="txtVisiblePass_GotFocus"
                              Style="{StaticResource GlassTextBox}"
                              Text="{Binding MatKhau, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              Tag="{StaticResource IconLockVisible}"
@@ -50,12 +65,13 @@
                              Visibility="{Binding ElementName=btnEye, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                     <PasswordBox x:Name="pwdBox"
+                                 GotFocus="pwdBox_GotFocus"
+                                 LostFocus="pwdBox_LostFocus"
                                  PreviewKeyDown="pwdBox_PreviewKeyDown"
                                  local:PasswordBoxHelper.BindPassword="True"
                                  local:PasswordBoxHelper.BoundPassword="{Binding MatKhau, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                                  Tag="{StaticResource IconLock}"
                                  ToolTip="Mật khẩu">
-                        
                         <PasswordBox.Style>
                             <Style TargetType="PasswordBox" BasedOn="{StaticResource GlassPasswordBox}">
                                 <Style.Triggers>
@@ -70,6 +86,7 @@
                     <ToggleButton x:Name="btnEye"
                                   Width="30" Height="30"
                                   Focusable="False"
+                                  Click="BtnEye_Click"
                                   HorizontalAlignment="Right" VerticalAlignment="Top"
                                   Margin="0,12.5,10,0"
                                   Background="Transparent" BorderThickness="0" Cursor="Hand">
