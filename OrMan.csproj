@@ -186,6 +186,7 @@
     <Compile Include="Helpers\HeightConverter.cs" />
     <Compile Include="Helpers\NullToBoolConverter.cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
+    <Compile Include="Helpers\SelectedConverter.cs" />
     <Compile Include="Models\BanAn.cs" />
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\ChiTietHoaDon.cs" />

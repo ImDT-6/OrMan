@@ -39,13 +39,46 @@ namespace OrMan.Services
             }
         }
 
+        // [MỚI] Thêm bàn mới
+        public void AddTable()
+        {
+            using (var context = new MenuContext())
+            {
+                int maxSoBan = context.BanAns.Any() ? context.BanAns.Max(b => b.SoBan) : 0;
+                // Constructor của BanAn nhận (SoBan, TrangThai)
+                var newBan = new BanAn(maxSoBan + 1, "Trống");
+                context.BanAns.Add(newBan);
+                context.SaveChanges();
+            }
+        }
+
+        // [MỚI] Xóa bàn
+        public bool DeleteTable(int soBan)
+        {
+            using (var context = new MenuContext())
+            {
+                var ban = context.BanAns.Find(soBan);
+                // Chỉ xóa được nếu bàn Trống và không nợ tiền
+                if (ban != null && ban.TrangThai == "Trống" && ban.YeuCauThanhToan == false)
+                {
+                    context.BanAns.Remove(ban);
+                    context.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public void UpdateStatus(int soBan, string status)
         {
-            var item = _context.BanAns.Find(soBan);
-            if (item != null)
+            using (var context = new MenuContext())
             {
-                item.TrangThai = status;
-                _context.SaveChanges();
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.TrangThai = status;
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -57,14 +90,12 @@ namespace OrMan.Services
                 if (item != null)
                 {
                     item.YeuCauThanhToan = true;
-                    // Nếu đang gọi thanh toán thì xóa yêu cầu hỗ trợ cũ đi cho đỡ rối
                     item.YeuCauHoTro = null;
                     context.SaveChanges();
                 }
             }
         }
 
-        // [MỚI] Gửi yêu cầu hỗ trợ kèm lời nhắn
         public void SendSupportRequest(int soBan, string message)
         {
             using (var context = new MenuContext())
@@ -80,18 +111,27 @@ namespace OrMan.Services
 
         public HoaDon GetActiveOrder(int soBan)
         {
-            return _context.HoaDons
+            // Cần context mới để lấy dữ liệu mới nhất
+            using (var context = new MenuContext())
+            {
+                return context.HoaDons
                            .Where(h => h.SoBan == soBan && !h.DaThanhToan)
                            .OrderByDescending(h => h.NgayTao)
                            .FirstOrDefault();
+            }
         }
 
         public List<ChiTietHoaDon> GetOrderDetails(string maHoaDon)
         {
-            return _context.ChiTietHoaDons
+            using (var context = new MenuContext())
+            {
+                return context.ChiTietHoaDons
+                           // .Include(ct => ct.MonAn) // Tạm bỏ include nếu model chưa update relation
                            .Where(ct => ct.MaHoaDon == maHoaDon)
                            .ToList();
+            }
         }
+
         public static event Action OnPaymentSuccess;
 
         public void CheckoutTable(int soBan, string maHoaDon)
@@ -106,14 +146,13 @@ namespace OrMan.Services
                 {
                     ban.TrangThai = "Trống";
                     ban.YeuCauThanhToan = false;
-                    ban.YeuCauHoTro = null; // Xóa luôn hỗ trợ
+                    ban.YeuCauHoTro = null;
                 }
                 context.SaveChanges();
                 OnPaymentSuccess?.Invoke();
             }
         }
 
-        // [CẬP NHẬT] Xử lý xong yêu cầu (cả thanh toán lẫn hỗ trợ)
         public void ResolvePaymentRequest(int soBan)
         {
             using (var context = new MenuContext())
@@ -122,7 +161,7 @@ namespace OrMan.Services
                 if (ban != null)
                 {
                     ban.YeuCauThanhToan = false;
-                    ban.YeuCauHoTro = null; // Xóa lời nhắn
+                    ban.YeuCauHoTro = null;
                     context.SaveChanges();
                 }
             }

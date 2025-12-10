@@ -10,16 +10,16 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using System;
 using System.Linq;
-using OrMan.Views.Admin; // [QUAN TRỌNG] Thêm dòng này để gọi ThanhToanWindow
+using OrMan.Views.Admin;
 
-namespace OrMan.ViewModels
+namespace OrMan.ViewModels.Admin
 {
     public class QuanLyBanViewModel : INotifyPropertyChanged
     {
-        // ... (Giữ nguyên các khai báo biến cũ) ...
         private readonly BanAnRepository _repository;
         private DispatcherTimer _timer;
 
+        // --- Các biến cũ ---
         private ObservableCollection<BanAn> _danhSachBan;
         public ObservableCollection<BanAn> DanhSachBan
         {
@@ -31,7 +31,21 @@ namespace OrMan.ViewModels
         public BanAn SelectedBan
         {
             get => _selectedBan;
-            set { _selectedBan = value; OnPropertyChanged(); LoadTableDetails(); }
+            set
+            {
+                _selectedBan = value;
+                OnPropertyChanged();
+
+                if (_selectedBan != null && !IsEditMode)
+                {
+                    LoadTableDetails();
+                }
+                else
+                {
+                    ChiTietDonHang = null;
+                    TongTienCanThu = 0;
+                }
+            }
         }
 
         private HoaDon _currentHoaDon;
@@ -49,9 +63,26 @@ namespace OrMan.ViewModels
             set { _tongTienCanThu = value; OnPropertyChanged(); }
         }
 
+        // --- Biến cho chế độ sửa ---
+        private bool _isEditMode;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set
+            {
+                _isEditMode = value;
+                OnPropertyChanged();
+                if (!value) SelectedBan = null;
+            }
+        }
+
+        // --- Commands ---
         public ICommand SelectTableCommand { get; private set; }
         public ICommand CheckoutCommand { get; private set; }
         public ICommand AssignTableCommand { get; private set; }
+        public ICommand ToggleEditModeCommand { get; private set; }
+        public ICommand AddTableCommand { get; private set; }
+        public ICommand DeleteTableCommand { get; private set; }
 
         public QuanLyBanViewModel()
         {
@@ -60,9 +91,59 @@ namespace OrMan.ViewModels
 
             LoadTables();
 
-            SelectTableCommand = new RelayCommand<BanAn>(ban => SelectedBan = ban);
+            SelectTableCommand = new RelayCommand<BanAn>(ban =>
+            {
+                if (IsEditMode) return;
+                SelectedBan = ban;
+            });
+
             CheckoutCommand = new RelayCommand<object>(Checkout);
             AssignTableCommand = new RelayCommand<object>(AssignTable);
+
+            ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
+
+            // [CẬP NHẬT] Logic thêm bàn với thông báo chi tiết
+            AddTableCommand = new RelayCommand<object>(p =>
+            {
+                _repository.AddTable();
+                LoadTables(); // Reload để lấy danh sách mới nhất từ DB
+
+                // Tìm bàn vừa thêm (là bàn có số bàn lớn nhất)
+                var banMoi = DanhSachBan.OrderByDescending(b => b.SoBan).FirstOrDefault();
+
+                if (banMoi != null)
+                {
+                    // Tự động chọn bàn mới để người dùng thấy ngay vị trí
+                    SelectedBan = banMoi;
+
+                    // Thông báo cụ thể hơn
+                    MessageBox.Show(
+                        $"Đã thêm {banMoi.TenBan} thành công!\nTổng số bàn hiện tại: {DanhSachBan.Count}",
+                        "Thêm bàn hoàn tất",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            });
+
+            DeleteTableCommand = new RelayCommand<BanAn>(ban =>
+            {
+                if (ban == null) return;
+                var confirm = MessageBox.Show($"Bạn có chắc muốn xóa {ban.TenBan}?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (confirm == MessageBoxResult.Yes)
+                {
+                    bool success = _repository.DeleteTable(ban.SoBan);
+                    if (success)
+                    {
+                        LoadTables();
+                        if (SelectedBan != null && SelectedBan.SoBan == ban.SoBan) SelectedBan = null;
+                        MessageBox.Show($"Đã xóa {ban.TenBan} khỏi hệ thống.", "Đã xóa", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể xóa bàn đang có khách hoặc chưa thanh toán!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            });
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(2);
@@ -129,12 +210,10 @@ namespace OrMan.ViewModels
             }
         }
 
-        // [ĐÃ SỬA] Cập nhật logic Thanh Toán
         private void Checkout(object obj)
         {
             if (SelectedBan == null) return;
 
-            // Trường hợp 1: Bàn có khách nhưng chưa gọi món -> Hủy bàn
             if (TongTienCanThu == 0 && SelectedBan.TrangThai != "Trống")
             {
                 if (MessageBox.Show($"Bàn chưa gọi món. Bạn muốn hủy bàn/trả bàn?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -149,26 +228,19 @@ namespace OrMan.ViewModels
 
             if (_currentHoaDon == null) return;
 
-            // Trường hợp 2: Có tiền -> Mở cửa sổ Thanh Toán mới
             var paymentWindow = new ThanhToanWindow(SelectedBan.TenBan, TongTienCanThu);
-
-            // Làm mờ cửa sổ chính
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
             if (paymentWindow.ShowDialog() == true)
             {
-                // Người dùng đã bấm "Xác nhận đã thu"
                 _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
-
                 SelectedBan.TrangThai = "Trống";
                 SelectedBan.YeuCauThanhToan = false;
-
                 LoadTableDetails();
                 MessageBox.Show("Thanh toán thành công! Bàn đã trống.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
-            // Trả lại độ sáng
             if (mainWindow != null) mainWindow.Opacity = 1;
         }
 

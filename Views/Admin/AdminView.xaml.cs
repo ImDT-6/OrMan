@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using OrMan.Models;
-using OrMan.ViewModels;
+using OrMan.ViewModels.Admin;
 
 namespace OrMan.Views.Admin
 {

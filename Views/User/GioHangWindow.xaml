@@ -13,61 +13,85 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="QtyBtnStyle" TargetType="Button">
+                <Setter Property="Width" Value="24"/>
+                <Setter Property="Height" Value="24"/>
+                <Setter Property="Background" Value="#40FFFFFF"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontFamily" Value="Arial"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="12">
+                                <ContentPresenter HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center" 
+                                      Margin="0,-0.5,0,0"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#60FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#30FFFFFF"/>
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.9" ScaleY="0.9" CenterX="12" CenterY="12"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
     <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
-        <Grid Margin="20">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <Grid Grid.Row="0" Margin="0,0,0,15">
-                <TextBlock Text="GIỎ HÀNG CỦA BẠN" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                <Button Click="BtnClose_Click" 
-        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
-        Width="40" Height="40"
-        Background="#50000000"
-        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <!-- Nền nút (Hình tròn hoặc bo góc) -->
-                                <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="20">
-                                    <!-- Nội dung (Icon) canh giữa -->
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <!-- [MỚI] Hiệu ứng khi di chuột: Đổi màu nền sang đỏ cam nhạt -->
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
-                                    <!-- Bạn có thể chỉnh màu khác, ví dụ "#AAEF4444"(đỏ cam) #80FFFFFF (trắng mờ) hoặc #AA000000 (đen mờ) -->
-                                </Trigger>
+            <TextBlock Grid.Row="0" 
+                       Text="GIỎ HÀNG CỦA BẠN" 
+                       FontSize="24" FontWeight="Bold" Foreground="White" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Margin="0,20,0,15"/>
 
-                                <!-- Hiệu ứng khi nhấn giữ -->
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
-                                    <Setter Property="RenderTransform">
-                                        <Setter.Value>
-                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="20" CenterY="20"/>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
+            <Button Grid.Row="0"
+                    Click="BtnClose_Click" 
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Margin="0,15,15,0"
+                    Width="36" Height="36"
+                    Background="#40000000" 
+                    Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bdr" Property="Background" Value="#FF5555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
 
-                    <!-- Icon X -->
-                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="14" Height="14"/>
-                </Button>
-            </Grid>
+                <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                      Fill="White" Stretch="Uniform" Width="14" Height="14"/>
+            </Button>
 
-            <!-- List Items -->
-            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" CornerRadius="15" Padding="10">
+            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" CornerRadius="15" Padding="10" Margin="20,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding GioHang}">
                         <ItemsControl.ItemTemplate>
@@ -78,24 +102,53 @@
                                             <ColumnDefinition Width="60"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Ảnh -->
-                                        <Border CornerRadius="8" ClipToBounds="True" Height="60" Width="60">
-                                            <Image Source="{Binding MonAn.HinhAnhUrl}" Stretch="UniformToFill"/>
+                                        <Border Grid.Column="0" 
+                                                Height="60" Width="60" 
+                                                CornerRadius="10" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Center">
+                                            <Border.Background>
+                                                <ImageBrush ImageSource="{Binding MonAn.HinhAnhUrl}" Stretch="UniformToFill"/>
+                                            </Border.Background>
                                         </Border>
 
-                                        <!-- Thông tin -->
                                         <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding TenHienThi}" Foreground="White" FontWeight="SemiBold" FontSize="14"/>
                                             <TextBlock Text="{Binding GhiChu}" Foreground="#94A3B8" FontSize="12" FontStyle="Italic" TextWrapping="Wrap"/>
                                             <TextBlock Text="{Binding ThanhTien, StringFormat='N0'}" Foreground="{StaticResource WarningYellow}" FontSize="13" FontWeight="Bold" Margin="0,2,0,0"/>
                                         </StackPanel>
 
-                                        <!-- Số lượng -->
-                                        <Border Grid.Column="2" Background="#20FFFFFF" CornerRadius="8" Padding="10,5" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding SoLuong, StringFormat='x{0}'}" Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                            <Button Content="-" Click="BtnDecrease_Click" Style="{StaticResource QtyBtnStyle}" Margin="0,0,8,0"/>
+                                            <TextBlock Text="{Binding SoLuong}" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" FontSize="14" MinWidth="20" TextAlignment="Center"/>
+                                            <Button Content="+" Click="BtnIncrease_Click" Style="{StaticResource QtyBtnStyle}" Margin="8,0,0,0"/>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="3" 
+                                                Click="BtnDelete_Click"
+                                                Width="30" Height="30"
+                                                Background="Transparent" BorderThickness="0"
+                                                Cursor="Hand"
+                                                ToolTip="Xóa món này">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="bdr" Background="Transparent" CornerRadius="5">
+                                                        <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
+                                                              Fill="#FF5555" 
+                                                              Stretch="Uniform" Width="16" Height="16"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="bdr" Property="Background" Value="#30FF0000"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -104,8 +157,7 @@
                 </ScrollViewer>
             </Border>
 
-            <!-- Footer Actions -->
-            <StackPanel Grid.Row="2" Margin="0,20,0,0">
+            <StackPanel Grid.Row="2" Margin="20,20,20,20">
                 <Grid Margin="0,0,0,15">
                     <TextBlock Text="Tổng cộng:" Foreground="White" FontSize="16"/>
                     <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>

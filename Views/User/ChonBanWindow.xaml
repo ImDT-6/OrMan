@@ -37,11 +37,32 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Content="{Binding}" Click="BtnChonBan_Click"
+                            <!-- [CẬP NHẬT] Binding Content vào SoBan (vì ItemsSource giờ là List<BanAn>) -->
+                            <Button Content="{Binding SoBan}" Click="BtnChonBan_Click"
                                     Width="80" Height="80" Margin="10"
                                     FontSize="24" FontWeight="Bold" Foreground="White"
-                                    Style="{StaticResource SocialButtonStyle}"
-                                    Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"/>
+                                    Style="{StaticResource SocialButtonStyle}">
+
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" CornerRadius="15" Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>
+                                            </Trigger>
+
+                                            <!-- [MỚI] Tự động đổi màu nếu bàn Đang có khách -->
+                                            <DataTrigger Binding="{Binding TrangThai}" Value="Có Khách">
+                                                <Setter TargetName="border" Property="Background" Value="#80EF4444"/>
+                                                <!-- Màu đỏ mờ -->
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#EF4444"/>
+                                            </DataTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using OrMan.Data; // [QUAN TRỌNG] Nhớ thêm cái này để dùng MenuContext
+using OrMan.Data;
 
 namespace OrMan.ViewModels.User
 {
@@ -18,20 +18,13 @@ namespace OrMan.ViewModels.User
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
 
-        // [THÊM MỚI] Biến lưu thông tin khách hàng đang đăng nhập
         private KhachHang _currentCustomer;
         public KhachHang CurrentCustomer
         {
             get => _currentCustomer;
-            set
-            {
-                _currentCustomer = value;
-                OnPropertyChanged();
-                // Có thể thêm logic cập nhật câu chào ở đây nếu muốn
-            }
+            set { _currentCustomer = value; OnPropertyChanged(); }
         }
 
-        // Biến lưu bàn hiện tại
         private int _currentTable;
         public int CurrentTable
         {
@@ -77,63 +70,9 @@ namespace OrMan.ViewModels.User
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
         }
 
-        private void OpenChonBanWindow(object obj)
-        {
-            var wd = new ChonBanWindow();
-            if (wd.ShowDialog() == true)
-            {
-                CurrentTable = wd.SelectedTableId;
-            }
-        }
+        // ... (Các hàm CheckMember, LoadData, FilterMenu giữ nguyên) ...
 
-        // [THÊM MỚI] Hàm kiểm tra và đăng ký Khách Hàng nhanh
-        public KhachHang CheckMember(string phoneNumber)
-        {
-            using (var db = new MenuContext())
-            {
-                // 1. Tìm trong DB xem có SĐT này chưa
-                var khach = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phoneNumber);
-
-                if (khach == null)
-                {
-                    // 2. Nếu chưa -> Tạo mới (Khách vãng lai đăng ký nhanh)
-                    khach = new KhachHang
-                    {
-                        SoDienThoai = phoneNumber,
-                        HoTen = "Khách Mới", // Tên tạm, sau này update sau
-                        HangThanhVien = "Mới",
-                        DiemTichLuy = 0
-                    };
-                    db.KhachHangs.Add(khach);
-                    db.SaveChanges();
-                }
-
-                // 3. Lưu vào biến toàn cục của ViewModel để giao diện hiển thị
-                CurrentCustomer = khach;
-
-                return khach;
-            }
-        }
-
-        private void LoadData()
-        {
-            _allMonAn = _repo.GetAvailableMenu();
-            FilterMenu("Mì Cay");
-        }
-
-        public void FilterMenu(string loai)
-        {
-            if (_allMonAn == null) return;
-
-            if (loai == "Mì Cay")
-            {
-                MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
-            }
-            else
-            {
-                MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
-            }
-        }
+        // --- [SECTION GIỎ HÀNG] ---
 
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
@@ -150,14 +89,98 @@ namespace OrMan.ViewModels.User
                 var item = new CartItem(mon, sl, capDo, ghiChu);
                 GioHang.Add(item);
             }
-
             UpdateCartInfo();
+        }
+
+        // [MỚI] Tăng số lượng 1 món
+        public void TangSoLuongMon(CartItem item)
+        {
+            if (item != null)
+            {
+                item.SoLuong++; // Class CartItem cần NotifyPropertyChanged để UI cập nhật số
+                UpdateCartInfo(); // Tính lại tổng tiền
+            }
+        }
+
+        // [MỚI] Giảm số lượng 1 món
+        public void GiamSoLuongMon(CartItem item)
+        {
+            if (item != null)
+            {
+                if (item.SoLuong > 1)
+                {
+                    item.SoLuong--;
+                    UpdateCartInfo();
+                }
+                else
+                {
+                    // Nếu đang là 1 mà bấm trừ -> Hỏi có muốn xóa luôn không
+                    var result = MessageBox.Show($"Bạn có muốn xóa món '{item.TenHienThi}' khỏi giỏ hàng?",
+                                                 "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        XoaMonKhoiGio(item);
+                    }
+                }
+            }
+        }
+
+        // Hàm xóa hẳn món khỏi giỏ
+        public void XoaMonKhoiGio(CartItem item)
+        {
+            if (item != null && GioHang.Contains(item))
+            {
+                GioHang.Remove(item);
+                UpdateCartInfo();
+            }
         }
 
         private void UpdateCartInfo()
         {
+            // Cần đảm bảo Property ThanhTien trong CartItem trả về (DonGia * SoLuong)
             TongTienCart = GioHang.Sum(x => x.ThanhTien);
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
+        }
+
+        // ... (Các hàm SubmitOrder, CallStaff giữ nguyên) ...
+
+        // --- CÁC HÀM CŨ GIỮ NGUYÊN BÊN DƯỚI ĐỂ ĐẢM BẢO KHÔNG LỖI ---
+        private void OpenChonBanWindow(object obj)
+        {
+            var wd = new ChonBanWindow();
+            if (wd.ShowDialog() == true)
+            {
+                CurrentTable = wd.SelectedTableId;
+            }
+        }
+
+        public KhachHang CheckMember(string phoneNumber)
+        {
+            using (var db = new MenuContext())
+            {
+                var khach = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phoneNumber);
+                if (khach == null)
+                {
+                    khach = new KhachHang { SoDienThoai = phoneNumber, HoTen = "Khách Mới", HangThanhVien = "Mới", DiemTichLuy = 0 };
+                    db.KhachHangs.Add(khach);
+                    db.SaveChanges();
+                }
+                CurrentCustomer = khach;
+                return khach;
+            }
+        }
+
+        private void LoadData()
+        {
+            _allMonAn = _repo.GetAvailableMenu();
+            FilterMenu("Mì Cay");
+        }
+
+        public void FilterMenu(string loai)
+        {
+            if (_allMonAn == null) return;
+            if (loai == "Mì Cay") MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
+            else MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
         }
 
         private void CallStaff(object obj)
@@ -206,26 +229,19 @@ namespace OrMan.ViewModels.User
         public bool SubmitOrder()
         {
             if (GioHang.Count == 0) return false;
-
             if (CurrentTable <= 0)
             {
                 MessageBox.Show("Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!", "Chưa chọn bàn", MessageBoxButton.OK, MessageBoxImage.Warning);
                 OpenChonBanWindow(null);
                 if (CurrentTable <= 0) return false;
             }
-
-            // [LƯU Ý] Hàm CreateOrder hiện tại của bạn chưa hỗ trợ lưu CustomerID.
-            // Tạm thời mình vẫn giữ nguyên để code chạy được. 
-            // Sau này nếu muốn lưu khách hàng vào hóa đơn, bạn cần sửa Repo nhận thêm tham số: (CurrentCustomer?.KhachHangID)
             _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
-
             GioHang.Clear();
             UpdateCartInfo();
             return true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
