@@ -1,10 +1,13 @@
-﻿using System.Linq;
-using System.Threading.Tasks; // Dùng cho Task.Delay
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input; // Dùng cho KeyEventArgs
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging; // Thư viện xử lý ảnh WPF
 using OrMan.Models;
 using OrMan.ViewModels;
+using System.Threading.Tasks;
 
 namespace OrMan.Views
 {
@@ -12,53 +15,115 @@ namespace OrMan.Views
     {
         private DangNhapViewModel vm;
 
+        // List chứa sẵn các ảnh đã load lên RAM để animation mượt mà không bị nháy
+        private List<ImageSource> mascotFrames = new List<ImageSource>();
+        private ImageSource blindfoldImage; // Ảnh che mắt
+        private ImageSource defaultImage;   // Ảnh mặc định
+
         public DangNhapView()
         {
             InitializeComponent();
             vm = new DangNhapViewModel();
             DataContext = vm;
-        }
-        private void txtVisiblePass_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            // Bấm LÊN thì quay về ô Tài khoản
-            if (e.Key == Key.Up)
-            {
-                txtUser.Focus();
-                e.Handled = true;
-            }
-            // Bấm ENTER thì gọi lệnh Đăng nhập
-            else if (e.Key == Key.Enter)
-            {
-                Button_Click(sender, e);
-                e.Handled = true;
-            }
-        }
-        // 1. XỬ LÝ TẠI Ô TÀI KHOẢN (Dùng PreviewKeyDown)
 
+            // Load trước hình ảnh vào bộ nhớ khi mở form
+            PreloadMascotImages();
+        }
+
+        private void PreloadMascotImages()
+        {
+            try
+            {
+                // 1. Load ảnh mặc định (dùng Frame 1)
+                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_user_1.jpg"));
+
+                // 2. Load ảnh che mắt
+                blindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_password.png"));
+
+                // 3. Load chuỗi ảnh animation (từ 1 đến 20)
+                // Giả sử bạn có 20 ảnh: textbox_user_1.jpg -> textbox_user_20.jpg
+                // Nếu bạn có nhiều hơn, hãy sửa số 20 thành số lượng thực tế
+                for (int i = 1; i <= 20; i++)
+                {
+                    string path = $"pack://application:,,,/Images/textbox_user_{i}.jpg";
+                    var bitmap = new BitmapImage(new Uri(path));
+                    mascotFrames.Add(bitmap);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Nếu thiếu ảnh thì thôi, không crash app
+                Console.WriteLine("Lỗi load ảnh Gấu: " + ex.Message);
+            }
+        }
+
+        // --- SỰ KIỆN 1: KHI GÕ TÀI KHOẢN (Gấu nhìn theo) ---
+        private void txtUser_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Nếu đang nhập mật khẩu thì không đổi hình (vì đang che mắt)
+            if (pwdBox.IsKeyboardFocusWithin || txtVisiblePass.IsKeyboardFocusWithin) return;
+
+            UpdateBearFace();
+        }
+
+        // Hàm cập nhật mặt gấu dựa trên độ dài chữ
+        private void UpdateBearFace()
+        {
+            if (mascotFrames.Count == 0) return;
+
+            int textLength = txtUser.Text.Length;
+
+            if (textLength <= 0)
+            {
+                imgMascot.Source = defaultImage;
+            }
+            else
+            {
+                // Mapping: 1 ký tự = 1 khung hình. 
+                // Nếu gõ dài hơn số ảnh có sẵn thì lấy ảnh cuối cùng.
+                // Trừ 1 vì List bắt đầu từ 0 (Frame 1 là index 0)
+                int frameIndex = textLength - 1;
+
+                if (frameIndex >= mascotFrames.Count)
+                    frameIndex = mascotFrames.Count - 1; // Giữ ở ảnh cuối
+
+                imgMascot.Source = mascotFrames[frameIndex];
+            }
+        }
+
+        // --- SỰ KIỆN 2: KHI VÀO Ô MẬT KHẨU (Che mắt) ---
+        private void pwdBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (blindfoldImage != null)
+                imgMascot.Source = blindfoldImage;
+        }
+
+        // --- SỰ KIỆN 3: KHI RỜI Ô MẬT KHẨU (Mở mắt lại) ---
+        private void pwdBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Quay lại trạng thái nhìn theo độ dài tài khoản
+            UpdateBearFace();
+        }
+
+        // --- CÁC LOGIC CŨ (GIỮ NGUYÊN) ---
 
         private void txtUser_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Down)
             {
-                // [SỬA] Kiểm tra xem đang ở chế độ hiện mật khẩu hay ẩn
                 if (btnEye.IsChecked == true)
                 {
-                    // Nếu đang hiện pass -> Focus vào ô TextBox hiện
                     txtVisiblePass.Focus();
-                    // Đặt con trỏ về cuối dòng cho tiện nhập tiếp
                     txtVisiblePass.CaretIndex = txtVisiblePass.Text.Length;
                 }
                 else
                 {
-                    // Nếu đang ẩn pass -> Focus vào PasswordBox như cũ
                     pwdBox.Focus();
                 }
-
                 e.Handled = true;
             }
         }
 
-        // 2. XỬ LÝ TẠI Ô MẬT KHẨU (Dùng PreviewKeyDown)
         private void pwdBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Up)
@@ -66,47 +131,88 @@ namespace OrMan.Views
                 txtUser.Focus();
                 e.Handled = true;
             }
+            else if (e.Key == Key.Enter)
+            {
+                Button_Click(sender, e);
+                e.Handled = true;
+            }
         }
 
-        // Xử lý nút Đăng nhập (Logic này giữ nguyên)
+        private void txtVisiblePass_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up)
+            {
+                txtUser.Focus();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                Button_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+        private void txtVisiblePass_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Khi bấm vào ô hiện mật khẩu -> Gấu phải mở mắt ra
+            UpdateBearFace();
+        }
+        private void BtnEye_Click(object sender, RoutedEventArgs e)
+        {
+            if (btnEye.IsChecked == true)
+            {
+                // TRƯỜNG HỢP: ĐANG HIỆN MẬT KHẨU (IsChecked = True)
+                // Hành động: Gấu bỏ tay ra, mở mắt nhìn
+
+                // Gọi hàm này để gấu quay về trạng thái bình thường 
+                // (hoặc nhìn theo độ dài tên đăng nhập nếu muốn)
+                UpdateBearFace();
+
+                // Tiện tay Focus luôn vào ô hiện mật khẩu để người dùng gõ tiếp
+                txtVisiblePass.Focus();
+                txtVisiblePass.CaretIndex = txtVisiblePass.Text.Length;
+            }
+            else
+            {
+                // TRƯỜNG HỢP: ĐANG ẨN MẬT KHẨU (IsChecked = False)
+                // Hành động: Gấu lấy tay CHE MẮT NGAY LẬP TỨC
+
+                if (blindfoldImage != null)
+                {
+                    imgMascot.Source = blindfoldImage;
+                }
+
+                // Tiện tay Focus lại vào ô ẩn mật khẩu
+                pwdBox.Focus();
+            }
+        }
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             vm.MatKhau = pwdBox.Password;
 
             if (!vm.ValidateInput())
             {
-                // Đợi 0.2 giây rồi mới focus
                 await Task.Delay(200);
-
-                // Nếu có lỗi, Focus vào ô lỗi đầu tiên tìm thấy
-                if (vm.GetErrors(nameof(vm.TaiKhoan)) != null)
-                {
-                    txtUser.Focus();
-                }
-                else if (vm.GetErrors(nameof(vm.MatKhau)) != null)
-                {
-                    pwdBox.Focus();
-                }
-                return; // Dừng lại, không xử lý đăng nhập tiếp
+                if (vm.GetErrors(nameof(vm.TaiKhoan)) != null) txtUser.Focus();
+                else if (vm.GetErrors(nameof(vm.MatKhau)) != null) pwdBox.Focus();
+                return;
             }
 
-            // --- LOGIC ĐĂNG NHẬP SAU KHI PASS VALIDATION ---
-            var admin = new OrMan.Models.Admin("admin", "123", "Quản lý nhà hàng");
-            var user = new OrMan.Models.User("user", "123", "Nguyễn Văn A", "VIP Gold", 1500);
+            var admin = new OrMan.Models.Admin("admin", "123", "Quản lý");
+            var user = new OrMan.Models.User("user", "123", "Nhân viên", "VIP", 0);
+
+            var mainWindow = Application.Current.MainWindow as MainWindow;
 
             if (vm.TaiKhoan == admin.TaiKhoan && vm.MatKhau == admin.MatKhau)
             {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ChuyenSangAdmin();
             }
             else if (vm.TaiKhoan == user.TaiKhoan && vm.MatKhau == user.MatKhau)
             {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ChuyenSangUser();
             }
             else
             {
-                MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 pwdBox.Clear();
                 pwdBox.Focus();
             }
