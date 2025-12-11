@@ -18,6 +18,14 @@ namespace OrMan.Models
             set { if (_trangThai != value) { _trangThai = value; OnPropertyChanged(); } }
         }
 
+        // [MỚI] Lưu hình thức thanh toán khách chọn (Tiền mặt, QR, Thẻ)
+        private string _hinhThucThanhToan;
+        public string HinhThucThanhToan
+        {
+            get => _hinhThucThanhToan;
+            set { if (_hinhThucThanhToan != value) { _hinhThucThanhToan = value; OnPropertyChanged(); } }
+        }
+
         private bool _yeuCauThanhToan;
         public bool YeuCauThanhToan
         {
@@ -59,6 +67,7 @@ namespace OrMan.Models
                 return "";
             }
         }
+
 
         public string TenBan => $"Bàn {SoBan:00}";
 

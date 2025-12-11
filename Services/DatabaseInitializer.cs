@@ -49,6 +49,18 @@ namespace OrMan.Services
                 }
                 catch { }
 
+                // [MỚI] Thêm cột HinhThucThanhToan nếu chưa có
+                try
+                {
+                    string sql = @"
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'HinhThucThanhToan' AND Object_ID = Object_ID(N'BanAn'))
+                        BEGIN
+                            ALTER TABLE BanAn ADD HinhThucThanhToan NVARCHAR(50) NULL;
+                        END";
+                    context.Database.ExecuteSqlRaw(sql);
+                }
+                catch { }
+
                 // 5. [MỚI] Tự động tạo bảng KhachHang nếu chưa có
                 try
                 {
@@ -60,7 +72,7 @@ namespace OrMan.Services
                                 [SoDienThoai] [nvarchar](20) NOT NULL,
                                 [HoTen] [nvarchar](100) NULL,
                                 [DiemTichLuy] [int] NOT NULL DEFAULT 0,
-                                [HangKhachHang] [nvarchar](20) DEFAULT N'Khách Hàng Mới',
+                                [HangKhachHang  ] [nvarchar](20) DEFAULT N'Khách Hàng Mới',
                                 CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([KhachHangID] ASC)
                             );
 

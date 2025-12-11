@@ -82,7 +82,9 @@ namespace OrMan.Services
             }
         }
 
-        public void RequestPayment(int soBan)
+        // File: BanAnRepository.cs
+        // Sửa hàm RequestPayment cũ thành:
+        public void RequestPayment(int soBan, string method = "Tiền mặt")
         {
             using (var context = new MenuContext())
             {
@@ -90,6 +92,7 @@ namespace OrMan.Services
                 if (item != null)
                 {
                     item.YeuCauThanhToan = true;
+                    item.HinhThucThanhToan = method; // [MỚI] Lưu phương thức
                     item.YeuCauHoTro = null;
                     context.SaveChanges();
                 }

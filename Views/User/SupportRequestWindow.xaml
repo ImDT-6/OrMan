@@ -91,7 +91,31 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <Style x:Key="ChipStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="#15FFFFFF"/>
+                <Setter Property="Foreground" Value="#CCCCCC"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Margin" Value="4"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="bdr" Background="{TemplateBinding Background}" CornerRadius="15" Padding="15,8">
+                                <ContentPresenter HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="bdr" Property="Background" Value="#F59E0B"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
+        
+        
     </Window.Resources>
 
     <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
@@ -144,19 +168,27 @@
 
                 <!-- 2. PHẦN THANH TOÁN (Chỉ hiện khi cần) -->
                 <StackPanel x:Name="pnlCheckout">
-                    <Border Height="1" Background="{StaticResource GlassBorder}" Margin="10,0,10,20"/>
+                    <Border Height="1" Background="{StaticResource GlassBorder}" Margin="10,0,10,15"/>
+
+                    <TextBlock Text="Chọn hình thức thanh toán:" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+                        <RadioButton x:Name="radTienMat" Content="💵 Tiền mặt" IsChecked="True" Style="{StaticResource ChipStyle}" Margin="5"/>
+                        <RadioButton x:Name="radCK" Content="📱 Chuyển khoản (QR)" Style="{StaticResource ChipStyle}" Margin="5"/>
+                        <RadioButton x:Name="radThe" Content="💳 Thẻ" Style="{StaticResource ChipStyle}" Margin="5"/>
+                    </StackPanel>
 
                     <Button x:Name="BtnCheckout" 
-                            Content="💵 YÊU CẦU THANH TOÁN" 
-                            Click="BtnCheckout_Click" 
-                            Style="{StaticResource GlassButtonStyle}" 
-                            Background="{StaticResource WarningYellow}" 
-                            Height="50" FontSize="15" FontWeight="Bold">
+            Content="GỬI YÊU CẦU THANH TOÁN" 
+            Click="BtnCheckout_Click" 
+            Style="{StaticResource GlassButtonStyle}" 
+            Background="{StaticResource WarningYellow}" 
+            Height="50" FontSize="14" FontWeight="Bold">
                         <Button.Effect>
                             <DropShadowEffect Color="#F59E0B" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
                         </Button.Effect>
                     </Button>
-                    <TextBlock Text="*Chỉ chọn khi bạn đã dùng bữa xong" Foreground="{StaticResource TextSecondary}" FontSize="11" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    <TextBlock Text="*Nhân viên sẽ mang phiếu tạm tính ra bàn" Foreground="{StaticResource TextSecondary}" FontSize="11" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                 </StackPanel>
 
             </StackPanel>

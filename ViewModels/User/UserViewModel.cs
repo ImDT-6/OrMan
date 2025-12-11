@@ -194,6 +194,7 @@ namespace OrMan.ViewModels.User
             var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
             bool hasActiveOrder = (activeOrder != null);
 
+            // Truyền trạng thái có đơn hay không vào cửa sổ
             var requestWindow = new SupportRequestWindow(hasActiveOrder);
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
@@ -204,6 +205,7 @@ namespace OrMan.ViewModels.User
                 {
                     if (activeOrder == null)
                     {
+                        // Trường hợp chưa có đơn mà đòi thanh toán
                         if (GioHang.Count > 0)
                             MessageBox.Show("Bạn chưa gửi đơn bếp. Vui lòng bấm 'Gửi Đơn' trước.", "Chưa có đơn", MessageBoxButton.OK, MessageBoxImage.Warning);
                         else
@@ -211,12 +213,19 @@ namespace OrMan.ViewModels.User
                     }
                     else
                     {
-                        _banRepo.RequestPayment(CurrentTable);
-                        MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN cho Bàn {CurrentTable}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // [ĐÃ SỬA] Trường hợp hợp lệ -> Lấy phương thức và gửi đi
+                        string method = requestWindow.SelectedPaymentMethod;
+
+                        // Gọi Repository với tham số method mới thêm
+                        _banRepo.RequestPayment(CurrentTable, method);
+
+                        MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN ({method}) cho Bàn {CurrentTable}!",
+                                        "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else if (requestWindow.SelectedRequest == RequestType.Support)
                 {
+                    // Trường hợp gọi hỗ trợ thường
                     string msg = requestWindow.SupportMessage;
                     _banRepo.SendSupportRequest(CurrentTable, msg);
                     MessageBox.Show($"Đã gửi lời nhắn đến nhân viên:\n\"{msg}\"\n\nNhân viên sẽ đến bàn {CurrentTable} ngay!", "Đã gửi yêu cầu", MessageBoxButton.OK, MessageBoxImage.Information);

@@ -214,36 +214,42 @@ namespace OrMan.ViewModels.Admin
         {
             if (SelectedBan == null) return;
 
-            if (TongTienCanThu == 0 && SelectedBan.TrangThai != "Trống")
-            {
-                if (MessageBox.Show($"Bàn chưa gọi món. Bạn muốn hủy bàn/trả bàn?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    _repository.UpdateStatus(SelectedBan.SoBan, "Trống");
-                    SelectedBan.TrangThai = "Trống";
-                    SelectedBan.YeuCauThanhToan = false;
-                    LoadTableDetails();
-                }
-                return;
-            }
+            // ... (Giữ nguyên đoạn kiểm tra bàn trống/hủy bàn ở trên) ...
 
             if (_currentHoaDon == null) return;
 
-            var paymentWindow = new ThanhToanWindow(SelectedBan.TenBan, TongTienCanThu);
+            // [CŨ - BẠN ĐANG DÙNG CÁI NÀY]
+            // var paymentWindow = new ThanhToanWindow(SelectedBan.TenBan, TongTienCanThu);
+
+            // [MỚI - SỬA THÀNH CÁI NÀY ĐỂ IN ĐƯỢC PHIẾU]
+            // Truyền đủ 4 tham số: Tên bàn, Hóa đơn, List món, Hình thức thanh toán
+            var printWindow = new OrMan.Views.Admin.HoaDonWindow(
+                SelectedBan.TenBan,
+                _currentHoaDon,
+                ChiTietDonHang,
+                SelectedBan.HinhThucThanhToan ?? "Tiền mặt" // Nếu null thì mặc định là Tiền mặt
+            );
+
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
-            if (paymentWindow.ShowDialog() == true)
+            // Sửa tên biến paymentWindow -> printWindow
+            if (printWindow.ShowDialog() == true)
             {
+                // Logic khi bấm "In Phiếu" hoặc "Xác nhận" -> Trả bàn & Lưu doanh thu
                 _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
+
+                // Reset trạng thái bàn trên giao diện
                 SelectedBan.TrangThai = "Trống";
                 SelectedBan.YeuCauThanhToan = false;
+                SelectedBan.HinhThucThanhToan = null; // Xóa hình thức thanh toán cũ
+
                 LoadTableDetails();
                 MessageBox.Show("Thanh toán thành công! Bàn đã trống.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             if (mainWindow != null) mainWindow.Opacity = 1;
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

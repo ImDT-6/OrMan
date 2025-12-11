@@ -109,22 +109,24 @@
                                             Style="{StaticResource NavButtonStyle}" Padding="0">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <!-- [CẬP NHẬT] Thêm Name để gọi trong Trigger -->
                                                 <Border x:Name="bdr" CornerRadius="20" BorderThickness="2" Background="#10FFFFFF" BorderBrush="#50FFFFFF" Cursor="Hand">
                                                     <Grid>
                                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                            <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="Bold" FontSize="18"/>
-                                                            <TextBlock x:Name="txtStatus" Text="{Binding TrangThai}" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0"/>
+                                                            <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center"/>
+
+                                                            <TextBlock x:Name="txtStatus" Text="{Binding TrangThai}" Foreground="#94A3B8" FontSize="14" Margin="0,5,0,0" HorizontalAlignment="Center"/>
                                                         </StackPanel>
 
                                                         <Border x:Name="PaymentAlert" Background="#AAEF4444" CornerRadius="18" Visibility="Collapsed">
-                                                            <TextBlock Text="Cần&#10;Thanh&#10;Toán" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+                                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                                <TextBlock Text="THANH TOÁN" Foreground="White" FontWeight="Bold" FontSize="10"/>
+                                                                <TextBlock Text="{Binding HinhThucThanhToan}" Foreground="Yellow" FontWeight="Bold" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
+                                                            </StackPanel>
                                                         </Border>
                                                     </Grid>
                                                 </Border>
 
                                                 <ControlTemplate.Triggers>
-                                                    <!-- Trigger cũ -->
                                                     <DataTrigger Binding="{Binding TrangThai}" Value="Có Khách">
                                                         <Setter TargetName="bdr" Property="Background" Value="#203B82F6"/>
                                                         <Setter TargetName="bdr" Property="BorderBrush" Value="#3B82F6"/>
@@ -134,36 +136,25 @@
                                                     <DataTrigger Binding="{Binding YeuCauThanhToan}" Value="True">
                                                         <Setter TargetName="PaymentAlert" Property="Visibility" Value="Visible"/>
                                                         <Setter TargetName="bdr" Property="BorderBrush" Value="{StaticResource DangerRed}"/>
+                                                        <Setter TargetName="txtStatus" Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
 
-                                                    <DataTrigger Binding="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                                                        <Setter TargetName="bdr" Property="Opacity" Value="0.6"/>
-                                                    </DataTrigger>
-
-                                                    <!-- [MỚI] TRIGGER QUAN TRỌNG: Hiệu ứng khi được CHỌN -->
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
-                                                            <!-- So sánh Bàn hiện tại vs SelectedBan trong ViewModel -->
                                                             <Condition Value="True">
                                                                 <Condition.Binding>
                                                                     <MultiBinding Converter="{StaticResource SelectedConverter}">
                                                                         <Binding Path="." />
-                                                                        <!-- Bàn hiện tại -->
                                                                         <Binding Path="DataContext.SelectedBan" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                                        <!-- Bàn đang chọn -->
                                                                     </MultiBinding>
                                                                 </Condition.Binding>
                                                             </Condition>
                                                         </MultiDataTrigger.Conditions>
-
-                                                        <!-- Hiệu ứng khi được chọn: Viền vàng cam, sáng lên -->
                                                         <Setter TargetName="bdr" Property="BorderBrush" Value="#F59E0B"/>
-                                                        <!-- Màu vàng cam -->
                                                         <Setter TargetName="bdr" Property="BorderThickness" Value="4"/>
                                                         <Setter TargetName="bdr" Property="Background" Value="#30F59E0B"/>
                                                         <Setter TargetName="bdr" Property="Opacity" Value="1"/>
                                                     </MultiDataTrigger>
-
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
@@ -267,13 +258,31 @@
                             <TextBlock Text="{Binding TongTienCanThu, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>
                         </Grid>
 
-                        <Button Content="THANH TOÁN &amp; TRẢ BÀN" 
-                                Command="{Binding CheckoutCommand}"
-                                Style="{StaticResource GlassButtonStyle}" 
-                                Background="{StaticResource SuccessGreen}" 
-                                Height="50" Margin="0,15,0,0" FontSize="14" FontWeight="Bold"
-                                IsEnabled="{Binding SelectedBan, Converter={StaticResource NullToBoolConverter}}"/>
+                        <Button Command="{Binding CheckoutCommand}"
+        Height="50" Margin="0,15,0,0" FontSize="14" FontWeight="Bold">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GlassButtonStyle}">
+                                    <Setter Property="Background" Value="{StaticResource SuccessGreen}"/>
+                                    <Setter Property="Content" Value="THANH TOÁN &amp; TRẢ BÀN"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedBan.TrangThai}" Value="Trống">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.3"/>
+                                            <Setter Property="Content" Value="BÀN TRỐNG"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding SelectedBan}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.3"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
+                    
                 </Grid>
             </Border>
         </Grid>
