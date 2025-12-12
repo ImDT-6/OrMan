@@ -57,22 +57,54 @@ namespace OrMan.Services
 
         public void ToggleSoldOut(string maMon) { /*...*/ } // Giữ nguyên code cũ
 
+        // Tìm đến hàm CreateOrder và thay thế bằng nội dung này:
         public void CreateOrder(int soBan, decimal tongTien, string ghiChu, IEnumerable<CartItem> gioHang)
         {
-            // ... (Logic CreateOrder giữ nguyên)
-            string maHD = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
-            var hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan);
-            _context.HoaDons.Add(hoaDon);
+            // [MỚI] 1. Kiểm tra xem bàn này đã có hóa đơn nào đang mở (chưa thanh toán) không?
+            var hoaDonHienTai = _context.HoaDons
+                                        .FirstOrDefault(h => h.SoBan == soBan && h.DaThanhToan == false);
 
+            string maHD;
+
+            if (hoaDonHienTai == null)
+            {
+                // TRƯỜNG HỢP 1: Bàn chưa có đơn -> Tạo hóa đơn mới (Logic cũ)
+                maHD = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                var hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan);
+                _context.HoaDons.Add(hoaDon);
+
+                // Cập nhật trạng thái bàn
+                var ban = _context.BanAns.Find(soBan);
+                if (ban == null)
+                {
+                    ban = new BanAn(soBan, "Có Khách");
+                    _context.BanAns.Add(ban);
+                }
+                else
+                {
+                    ban.TrangThai = "Có Khách";
+                    ban.YeuCauThanhToan = false;
+                }
+            }
+            else
+            {
+                // TRƯỜNG HỢP 2: Bàn đã có đơn -> Dùng lại hóa đơn cũ
+                maHD = hoaDonHienTai.MaHoaDon;
+
+                // Cộng dồn tổng tiền
+                hoaDonHienTai.TongTien += tongTien;
+
+                // (Tùy chọn) Cập nhật người sửa hoặc thời gian nếu cần
+            }
+
+            // 2. Thêm các món mới vào bảng ChiTietHoaDon
             foreach (var item in gioHang)
             {
+                // Lưu món mới vào DB với maHD (dù là mới hay cũ)
                 var chiTiet = new ChiTietHoaDon(maHD, item.MonAn, item.SoLuong, item.CapDoCay, item.GhiChu);
                 _context.ChiTietHoaDons.Add(chiTiet);
             }
 
-            var ban = _context.BanAns.Find(soBan);
-            if (ban == null) { ban = new BanAn(soBan, "Có Khách"); _context.BanAns.Add(ban); }
-            else { ban.TrangThai = "Có Khách"; ban.YeuCauThanhToan = false; }
             _context.SaveChanges();
         }
 

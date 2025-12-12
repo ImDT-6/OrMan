@@ -15,6 +15,9 @@ namespace OrMan.Models
         public int CapDoCay { get; set; }    // Cho Mì Cay
         public string GhiChu { get; set; }
 
+        // Thêm thuộc tính này vào class ChiTietHoaDon nếu chưa có hoặc đang để protected
+        [ForeignKey("MaMon")]
+        public virtual MonAn MonAn { get; set; }
         public decimal ThanhTien => SoLuong * DonGia;
 
         // [SỬA LỖI] Đổi từ protected sang public để có thể khởi tạo đối tượng 

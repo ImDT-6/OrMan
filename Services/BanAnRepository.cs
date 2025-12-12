@@ -129,7 +129,7 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 return context.ChiTietHoaDons
-                           // .Include(ct => ct.MonAn) // Tạm bỏ include nếu model chưa update relation
+                           .Include(ct => ct.MonAn) // Tạm bỏ include nếu model chưa update relation
                            .Where(ct => ct.MaHoaDon == maHoaDon)
                            .ToList();
             }

@@ -180,19 +180,27 @@ namespace OrMan.ViewModels.Admin
 
         private void RefreshTableStatus()
         {
+            // 1. Cập nhật trạng thái các bàn (Code cũ giữ nguyên)
             var newData = _repository.GetAll();
             foreach (var banMoi in newData)
             {
                 var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
                 if (banCu != null)
                 {
-                    // Chỉ cập nhật trạng thái từ DB, KHÔNG cập nhật DaInTamTinh
                     if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
                     if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
 
-                    // XÓA hoặc COMMENT dòng này đi:
-                    // if (banCu.DaInTamTinh != banMoi.DaInTamTinh) banCu.DaInTamTinh = banMoi.DaInTamTinh;
+                    // Cập nhật các thông tin khác nếu cần
+                    if (banCu.HinhThucThanhToan != banMoi.HinhThucThanhToan) banCu.HinhThucThanhToan = banMoi.HinhThucThanhToan;
                 }
+            }
+
+            // [MỚI - QUAN TRỌNG] 
+            // Nếu đang chọn một bàn và bàn đó đang có khách -> Tải lại chi tiết đơn hàng
+            if (SelectedBan != null && SelectedBan.TrangThai == "Có Khách")
+            {
+                // Gọi lại hàm này để nó lấy danh sách món mới nhất từ DB lên
+                LoadTableDetails();
             }
         }
 

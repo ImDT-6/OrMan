@@ -237,11 +237,16 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding MonAn.TenMon}" Foreground="White" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding GhiChu}" Foreground="#94A3B8" FontSize="11" FontStyle="Italic" TextWrapping="Wrap"/>
+
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding TenMonHienThi}" Foreground="White" FontWeight="SemiBold" TextWrapping="Wrap"/>
+
+                                            <TextBlock Text="{Binding GhiChu}" 
+                       Visibility="{Binding GhiChu, Converter={StaticResource NullToBoolConverter}}"
+                       Foreground="#94A3B8" FontSize="11" FontStyle="Italic" TextWrapping="Wrap"/>
                                         </StackPanel>
-                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding ThanhTien, StringFormat='N0'}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Right"/>
                                             <TextBlock Text="{Binding SoLuong, StringFormat='x{0}'}" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Right"/>
                                         </StackPanel>

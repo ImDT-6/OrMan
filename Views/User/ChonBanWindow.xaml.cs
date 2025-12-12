@@ -33,11 +33,11 @@ namespace OrMan.Views.User
             if (btn != null && btn.DataContext is BanAn ban)
             {
                 // Kiểm tra nếu bàn đang có khách thì cảnh báo (tùy chọn)
-                if (ban.TrangThai == "Có Khách")
-                {
-                    MessageBox.Show($"Bàn {ban.SoBan} đang có khách!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                //if (ban.TrangThai == "Có Khách")
+                //{
+                //    MessageBox.Show($"Bàn {ban.SoBan} đang có khách!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                //    return;
+                //}
 
                 SelectedTableId = ban.SoBan;
                 this.DialogResult = true;
