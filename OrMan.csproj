@@ -404,6 +404,15 @@
     <Resource Include="Images\textbox_user_0.JPG" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images2\MienBulgogi.png" />
+    <Resource Include="Images2\MyKimchiBachTuoc.png" />
+    <Resource Include="Images2\MyKimchiBo.png" />
+    <Resource Include="Images2\MyKimchiBoMy.png" />
+    <Resource Include="Images2\MyKimchiGa.png" />
+    <Resource Include="Images2\MyKimchiHaiSan.png" />
+    <Resource Include="Images2\MyKimchiThapCam.png" />
+    <Resource Include="Images2\MyTokbokkiPhoMai.png" />
+    <Resource Include="Images2\MyUdonBulgogi.png" />
     <Content Include="Images2\textbox_user_Clicked.JPG" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
