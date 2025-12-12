@@ -55,5 +55,11 @@
     <sys:String x:Key="Str_Rank_Gold">Vàng</sys:String>
     <sys:String x:Key="Str_Rank_Diamond">Kim Cương</sys:String>
     <sys:String x:Key="Str_Guest1">Khách Mới</sys:String>
+    <sys:String x:Key="Str_PhoneNumber_Label">Số điện thoại</sys:String>
+    <sys:String x:Key="Str_Name_Input_Label">Tên khách hàng (Đăng ký mới)</sys:String>
+    <sys:String x:Key="Str_Name_Placeholder">Nhập tên của bạn</sys:String>
+    <sys:String x:Key="Str_Points_Label_Short">Điểm:</sys:String>
+    <sys:String x:Key="Str_Msg_NewPhoneRegister">Số điện thoại mới. Nhập tên để tạo tài khoản!</sys:String>
+    <sys:String x:Key="Str_Btn_Register">ĐĂNG KÝ</sys:String>
 </ResourceDictionary>
     

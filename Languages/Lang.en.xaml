@@ -59,4 +59,10 @@
     <sys:String x:Key="Str_Rank_Gold">Gold</sys:String>
     <sys:String x:Key="Str_Rank_Diamond">Diamond</sys:String>
     <sys:String x:Key="Str_Guest1">Guest</sys:String>
+    <sys:String x:Key="Str_PhoneNumber_Label">Phone Number</sys:String>
+    <sys:String x:Key="Str_Name_Input_Label">Customer Name (New Register)</sys:String>
+    <sys:String x:Key="Str_Name_Placeholder">Enter your name</sys:String>
+    <sys:String x:Key="Str_Points_Label_Short">Points:</sys:String>
+    <sys:String x:Key="Str_Msg_NewPhoneRegister">New phone number. Please enter name to register!</sys:String>
+    <sys:String x:Key="Str_Btn_Register">REGISTER</sys:String>
 </ResourceDictionary>
