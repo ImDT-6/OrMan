@@ -6,9 +6,10 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using OrMan.Models;
 using OrMan.ViewModels.User;
-
+using OrMan.Helpers;
 namespace OrMan.Views.User
 {
+
     public partial class UserView : UserControl
     {
         private UserViewModel _vm;
@@ -51,23 +52,26 @@ namespace OrMan.Views.User
         {
             var now = DateTime.Now;
             int hour = now.Hour;
-            string timeSession;
+            string greetingKey;
 
-            // Logic khung giờ Tiếng Việt
-            if (hour >= 5 && hour < 11)
-                timeSession = "buổi sáng";
-            else if (hour >= 11 && hour < 14)
-                timeSession = "buổi trưa";
-            else if (hour >= 14 && hour < 18)
-                timeSession = "buổi chiều";
-            else
-                timeSession = "buổi tối";
+            if (hour >= 5 && hour < 11) greetingKey = "Str_GoodMorning";
+            else if (hour >= 11 && hour < 14) greetingKey = "Str_GoodAfternoon";
+            else if (hour >= 14 && hour < 18) greetingKey = "Str_GoodEvening";
+            else greetingKey = "Str_GoodNight";
 
-            string greeting = $"Chào {timeSession}, Quý khách";
+            // Lấy chuỗi từ Resource Dictionary hiện tại
+            string greetingText = Application.Current.TryFindResource(greetingKey) as string;
+            string guestText = Application.Current.TryFindResource("Str_Guest") as string;
 
-            if (txtGreeting != null && txtGreeting.Text != greeting)
+            // Fallback nếu không tìm thấy resource
+            if (string.IsNullOrEmpty(greetingText)) greetingText = "Hello";
+            if (string.IsNullOrEmpty(guestText)) guestText = "Guest";
+
+            string fullGreeting = $"{greetingText}, {guestText}";
+
+            if (txtGreeting != null)
             {
-                txtGreeting.Text = greeting;
+                txtGreeting.Text = fullGreeting;
             }
         }
 
@@ -110,11 +114,11 @@ namespace OrMan.Views.User
             {
                 if (monAn.IsSoldOut)
                 {
-                    MessageBox.Show(
-                        $"Món '{monAn.TenMon}' hiện đang tạm hết hàng.\nVui lòng chọn món khác nhé!",
-                        "Rất tiếc",
-                        MessageBoxButton.OK,
+                    string msg = string.Format(GetRes("Str_Msg_ProductSoldOut"), monAn.TenMon);
+                    MessageBox.Show(msg, GetRes("Str_Title_Notice"), 
+                        MessageBoxButton.OK, 
                         MessageBoxImage.Information);
+                   
                     return;
                 }
 
@@ -145,7 +149,8 @@ namespace OrMan.Views.User
         {
             if (_vm.GioHang.Count == 0)
             {
-                MessageBox.Show("Giỏ hàng đang trống! Vui lòng chọn món trước.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // [ĐÃ SỬA] Dùng GetRes
+                MessageBox.Show(GetRes("Str_Msg_CartEmpty"), GetRes("Str_Title_Notice"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -157,9 +162,10 @@ namespace OrMan.Views.User
             {
                 if (_vm.SubmitOrder())
                 {
+                    // [ĐÃ SỬA] Dùng GetRes
                     MessageBox.Show(
-                        "Đã gửi đơn xuống bếp thành công!\nVui lòng đợi trong giây lát.",
-                        "Thành công",
+                        GetRes("Str_Msg_OrderSuccess"),
+                        GetRes("Str_Title_Success"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
@@ -170,7 +176,8 @@ namespace OrMan.Views.User
 
         private void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Bạn muốn kết thúc phiên gọi món?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            // [ĐÃ SỬA] Dùng GetRes
+            var result = MessageBox.Show(GetRes("Str_Msg_ConfirmLogout"), GetRes("Str_Title_Confirm"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -204,5 +211,34 @@ namespace OrMan.Views.User
         }
 
         // Đã xóa hàm BtnNgonNgu_Click vì không còn dùng nữa
+        private void BtnLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn != null && btn.ContextMenu != null)
+            {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.IsOpen = true;
+            }
+        }
+        private void MenuItem_VN_Click(object sender, RoutedEventArgs e)
+        {
+            LanguageHelper.SetLanguage("vi");
+            txtLangFlag.Text = "🇻🇳";
+            txtLangName.Text = "Tiếng Việt";
+            UpdateGreeting(); // Cập nhật lại câu chào ngay
+        }
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+        private void MenuItem_EN_Click(object sender, RoutedEventArgs e)
+        {
+            LanguageHelper.SetLanguage("en");
+            txtLangFlag.Text = "🇺🇸";
+            txtLangName.Text = "English";
+            UpdateGreeting(); // Cập nhật lại câu chào ngay
+        }
+
     }
+
 }

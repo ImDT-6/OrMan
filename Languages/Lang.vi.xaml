@@ -1,0 +1,59 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Str_Menu_Noodles">🔥 Mì Cay &amp; Lẩu</sys:String>
+    <sys:String x:Key="Str_Menu_Snacks">🥟 Ăn Vặt</sys:String>
+    <sys:String x:Key="Str_Menu_Drinks">🥤 Nước Uống</sys:String>
+    <sys:String x:Key="Str_Points">💎 Tích điểm</sys:String>
+    <sys:String x:Key="Str_Review">⭐ Đánh giá</sys:String>
+
+    <sys:String x:Key="Str_Search_Placeholder">Tìm món ăn...</sys:String>
+    <sys:String x:Key="Str_Call_Staff">🔔 Gọi Phục Vụ</sys:String>
+    <sys:String x:Key="Str_Table">Bàn</sys:String>
+    <sys:String x:Key="Str_Exit">Thoát</sys:String>
+
+   
+    <sys:String x:Key="Str_GoodMorning">Chào buổi sáng</sys:String>
+    <sys:String x:Key="Str_GoodAfternoon">Chào buổi trưa</sys:String>
+    <sys:String x:Key="Str_GoodEvening">Chào buổi chiều</sys:String>
+    <sys:String x:Key="Str_GoodNight">Chào buổi tối</sys:String>
+    <sys:String x:Key="Str_Guest">Quý khách</sys:String>
+    <sys:String x:Key="Str_SelectTable_Header">VUI LÒNG CHỌN BÀN CỦA BẠN</sys:String>
+    <sys:String x:Key="Str_Btn_ViewCart">XEM GIỎ HÀNG &amp; GỬI ĐƠN</sys:String>
+
+    <sys:String x:Key="Str_Title_Notice">Thông báo</sys:String>
+    <sys:String x:Key="Str_Title_Success">Thành công</sys:String>
+    <sys:String x:Key="Str_Title_Warning">Cảnh báo</sys:String>
+    <sys:String x:Key="Str_Title_Confirm">Xác nhận</sys:String>
+    <sys:String x:Key="Str_Title_Error">Lỗi</sys:String>
+
+    <sys:String x:Key="Str_Msg_CartEmpty">Giỏ hàng đang trống! Vui lòng chọn món trước.</sys:String>
+    <sys:String x:Key="Str_Msg_OrderSuccess">Đã gửi đơn xuống bếp thành công!&#x0a;Vui lòng đợi trong giây lát.</sys:String>
+    <sys:String x:Key="Str_Msg_ConfirmLogout">Bạn muốn kết thúc phiên gọi món?</sys:String>
+    <sys:String x:Key="Str_Msg_SelectTable">Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!</sys:String>
+    <sys:String x:Key="Str_Msg_ProductSoldOut">Món '{0}' hiện đang tạm hết hàng.&#x0a;Vui lòng chọn món khác nhé!</sys:String>
+    <sys:String x:Key="Str_Logo_Title">MÌ CAY</sys:String>
+    <sys:String x:Key="Str_Logo_Subtitle">OMEGA 3/2</sys:String>
+    <sys:String x:Key="Str_Address">P5.02 Tòa B, UIT</sys:String>
+    <sys:String x:Key="Str_Category_Title">DANH MỤC</sys:String>
+    <sys:String x:Key="Str_SoldOut">TẠM HẾT</sys:String>
+    <sys:String x:Key="Str_Selected_Prefix">Đã chọn</sys:String>
+    <sys:String x:Key="Str_Selected_Suffix">món</sys:String>
+    <sys:String x:Key="Str_Subtotal">Tạm tính:</sys:String>
+    <sys:String x:Key="Str_Loyalty_Title">TÍCH ĐIỂM KHÁCH HÀNG</sys:String>
+    <sys:String x:Key="Str_Loyalty_Subtitle">Nhập số điện thoại để tích điểm &amp; nhận ưu đãi</sys:String>
+    <sys:String x:Key="Str_Btn_CheckRegister">TRA CỨU / ĐĂNG KÝ</sys:String>
+    <sys:String x:Key="Str_Msg_InvalidPhone">Vui lòng nhập số điện thoại hợp lệ!</sys:String>
+    <sys:String x:Key="Str_Hello_Prefix">Xin chào:</sys:String>
+    <sys:String x:Key="Str_Points_Suffix"> điểm</sys:String>
+    <sys:String x:Key="Str_Btn_Done">HOÀN TẤT</sys:String>
+    <sys:String x:Key="Str_Rank_Label">Hạng:</sys:String>
+    <sys:String x:Key="Str_Points_Label">| Điểm:</sys:String>
+    <sys:String x:Key="Str_Rank_New">Mới</sys:String>
+    <sys:String x:Key="Str_Rank_Silver">Bạc</sys:String>
+    <sys:String x:Key="Str_Rank_Gold">Vàng</sys:String>
+    <sys:String x:Key="Str_Rank_Diamond">Kim Cương</sys:String>
+    <sys:String x:Key="Str_Guest1">Khách Mới</sys:String>
+</ResourceDictionary>
+    

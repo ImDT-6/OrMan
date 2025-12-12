@@ -180,6 +180,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\LanguageHelper.cs" />
     <Compile Include="Helpers\IndexConverter.cs" />
     <Compile Include="Helpers\RankToColorConverter.cs" />
     <Compile Include="Data\MenuContext.cs" />
@@ -255,6 +256,14 @@
     <Compile Include="Views\User\UserView.xaml.cs">
       <DependentUpon>UserView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Languages\Lang.vi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Languages\Lang.en.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

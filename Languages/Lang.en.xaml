@@ -1,0 +1,62 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Str_Menu_Noodles">🔥 Spicy Noodles</sys:String>
+    <sys:String x:Key="Str_Menu_Snacks">🥟 Snacks</sys:String>
+    <sys:String x:Key="Str_Menu_Drinks">🥤 Drinks</sys:String>
+    <sys:String x:Key="Str_Points">💎 Loyalty Points</sys:String>
+    <sys:String x:Key="Str_Review">⭐ Review</sys:String>
+
+    <sys:String x:Key="Str_Search_Placeholder">Search food...</sys:String>
+    <sys:String x:Key="Str_Call_Staff">🔔 Call Staff</sys:String>
+    <sys:String x:Key="Str_Table">Table</sys:String>
+    <sys:String x:Key="Str_Exit">Exit</sys:String>
+
+    <sys:String x:Key="Str_GoodMorning">Good Morning</sys:String>
+    <sys:String x:Key="Str_GoodAfternoon">Good Afternoon</sys:String>
+    <sys:String x:Key="Str_GoodEvening">Good Evening</sys:String>
+    <sys:String x:Key="Str_GoodNight">Good Evening</sys:String>
+    <sys:String x:Key="Str_Guest">Guest</sys:String>
+
+    <sys:String x:Key="Str_SelectTable_Header">PLEASE SELECT YOUR TABLE</sys:String>
+
+    <sys:String x:Key="Str_Btn_ViewCart">VIEW CART &amp; ORDER</sys:String>
+
+    <sys:String x:Key="Str_Title_Notice">Notice</sys:String>
+    <sys:String x:Key="Str_Title_Success">Success</sys:String>
+    <sys:String x:Key="Str_Title_Warning">Warning</sys:String>
+    <sys:String x:Key="Str_Title_Confirm">Confirmation</sys:String>
+    <sys:String x:Key="Str_Title_Error">Error</sys:String>
+
+    <sys:String x:Key="Str_Msg_CartEmpty">Your cart is empty! Please select items first.</sys:String>
+    <sys:String x:Key="Str_Msg_OrderSuccess">Order sent to kitchen successfully!&#x0a;Please wait a moment.</sys:String>
+    <sys:String x:Key="Str_Msg_ConfirmLogout">Do you want to end this session?</sys:String>
+    <sys:String x:Key="Str_Msg_SelectTable">Please select your table number before ordering!</sys:String>
+    <sys:String x:Key="Str_Msg_ProductSoldOut">Item '{0}' is currently sold out.&#x0a;Please choose another item!</sys:String>
+
+    <sys:String x:Key="Str_Logo_Title">SPICY NOODLES</sys:String>
+    <sys:String x:Key="Str_Logo_Subtitle">OMEGA 3/2</sys:String>
+    <sys:String x:Key="Str_Address">Room 5.02 Block B, UIT</sys:String>
+    <sys:String x:Key="Str_Category_Title">MENU</sys:String>
+    <sys:String x:Key="Str_SoldOut">SOLD OUT</sys:String>
+
+    <sys:String x:Key="Str_Selected_Prefix">Selected</sys:String>
+    <sys:String x:Key="Str_Selected_Suffix">items</sys:String>
+    <sys:String x:Key="Str_Subtotal">Subtotal:</sys:String>
+
+    <sys:String x:Key="Str_Loyalty_Title">LOYALTY PROGRAM</sys:String>
+    <sys:String x:Key="Str_Loyalty_Subtitle">Enter phone number to earn points &amp; get rewards</sys:String>
+    <sys:String x:Key="Str_Btn_CheckRegister">CHECK / REGISTER</sys:String>
+    <sys:String x:Key="Str_Msg_InvalidPhone">Please enter a valid phone number!</sys:String>
+    <sys:String x:Key="Str_Hello_Prefix">Hello:</sys:String>
+    <sys:String x:Key="Str_Points_Suffix"> points</sys:String>
+    <sys:String x:Key="Str_Btn_Done">DONE</sys:String>
+    <sys:String x:Key="Str_Rank_Label">Rank:</sys:String>
+    <sys:String x:Key="Str_Points_Label">| Points:</sys:String>
+    <sys:String x:Key="Str_Rank_New">New</sys:String>
+    <sys:String x:Key="Str_Rank_Silver">Silver</sys:String>
+    <sys:String x:Key="Str_Rank_Gold">Gold</sys:String>
+    <sys:String x:Key="Str_Rank_Diamond">Diamond</sys:String>
+    <sys:String x:Key="Str_Guest1">Guest</sys:String>
+</ResourceDictionary>

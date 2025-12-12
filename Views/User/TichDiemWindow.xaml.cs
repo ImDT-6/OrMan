@@ -36,26 +36,81 @@ namespace OrMan.Views.User
         private void PerformCheck()
         {
             string phone = txtPhone.Text.Trim();
+
+            // Validate số điện thoại
             if (string.IsNullOrEmpty(phone) || phone.Length < 9)
             {
-                MessageBox.Show("Vui lòng nhập số điện thoại hợp lệ!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // [ĐÃ SỬA] Lấy thông báo từ file ngôn ngữ thay vì chữ cứng
+                string msg = Application.Current.TryFindResource("Str_Msg_InvalidPhone") as string;
+                string title = Application.Current.TryFindResource("Str_Title_Error") as string; // Key này đã tạo ở bước trước
+
+                MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             // Gọi ViewModel để check database
             var khach = _vm.CheckMember(phone);
 
-            // Hiển thị kết quả lên giao diện
             pnlResult.Visibility = Visibility.Visible;
-            lblTenKhach.Text = $"Xin chào: {khach.HoTen}";
-            lblHang.Text = khach.HangThanhVien;
-            lblDiem.Text = khach.DiemTichLuy.ToString("N0") + " điểm";
 
+            // 1. Xử lý Tên Khách ("Khách Mới" -> "New Customer")
+            string helloPrefix = Application.Current.TryFindResource("Str_Hello_Prefix") as string;
+            string tenHienThi = khach.HoTen;
+
+            // Nếu tên trong DB là "Khách Mới" (mặc định), ta dịch nó luôn
+            if (tenHienThi == "Khách Mới" || tenHienThi == "Khách Hàng Mới")
+            {
+                // Lấy chữ "New" từ tài nguyên, ghép thêm chữ Customer/Khách nếu cần
+                // Hoặc đơn giản là hiển thị tên gốc nếu bạn không muốn dịch tên người
+                // Ở đây ví dụ dịch chữ "Khách Mới" -> "New Customer" nếu bạn muốn:
+                // tenHienThi = Application.Current.TryFindResource("Str_Guest") as string; 
+                string guestName = Application.Current.TryFindResource("Str_Guest1") as string;
+                if (!string.IsNullOrEmpty(guestName))
+                {
+                    tenHienThi = guestName;
+                }
+            }
+            lblTenKhach.Text = $"{helloPrefix}{tenHienThi}";
+
+
+            // 2. Xử lý Hạng (QUAN TRỌNG: Mapping từ DB sang Resource)
+          
+            string rankTranslated = GetTranslatedRank(khach.HangThanhVien); // Hàm tự viết bên dưới
+
+            lblHang.Text = $"{rankTranslated}";
+
+
+            // 3. Xử lý Điểm
+            lblDiem.Text = $"{khach.DiemTichLuy:N0}";
             // Ẩn nút check đi, đổi thành nút Xong
-            btnCheck.Content = "HOÀN TẤT";
+            // [ĐÃ SỬA] Lấy chuỗi "HOÀN TẤT" từ Resource
+            btnCheck.Content = Application.Current.TryFindResource("Str_Btn_Done") as string;
+
             btnCheck.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#22C55E"); // Màu xanh lá
             btnCheck.Click -= BtnCheck_Click;
             btnCheck.Click += (s, ev) => this.Close();
+        }
+        private string GetTranslatedRank(string dbRank)
+        {
+            string resourceKey = "";
+
+            // So sánh dữ liệu gốc trong Database
+            switch (dbRank)
+            {
+                case "Mới":
+                case "Khách Hàng Mới":
+                    resourceKey = "Str_Rank_New"; break;
+                case "Bạc":
+                    resourceKey = "Str_Rank_Silver"; break;
+                case "Vàng":
+                    resourceKey = "Str_Rank_Gold"; break;
+                case "Kim Cương":
+                    resourceKey = "Str_Rank_Diamond"; break;
+                default:
+                    return dbRank; // Nếu không khớp cái nào thì giữ nguyên
+            }
+
+            return Application.Current.TryFindResource(resourceKey) as string;
         }
     }
 }
