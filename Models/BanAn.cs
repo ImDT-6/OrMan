@@ -68,6 +68,15 @@ namespace OrMan.Models
             }
         }
 
+        // [MỚI] Biến để kiểm soát trạng thái nút In/Thu tiền
+        private bool _daInTamTinh;
+
+        [NotMapped] // Quan trọng: Dòng này báo cho DB biết là không cần lưu cột này vào SQL
+        public bool DaInTamTinh
+        {
+            get => _daInTamTinh;
+            set { if (_daInTamTinh != value) { _daInTamTinh = value; OnPropertyChanged(); } }
+        }
 
         public string TenBan => $"Bàn {SoBan:00}";
 
@@ -79,6 +88,7 @@ namespace OrMan.Models
             TrangThai = trangThai;
             YeuCauThanhToan = false;
             YeuCauHoTro = null;
+            DaInTamTinh = false;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

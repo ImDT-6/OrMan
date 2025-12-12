@@ -1,15 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 using OrMan.Helpers;
 using OrMan.Models;
 using OrMan.Services;
-using System.Collections.Generic;
-using System.Windows.Threading;
-using System;
-using System.Linq;
 using OrMan.Views.Admin;
 
 namespace OrMan.ViewModels.Admin
@@ -19,7 +19,7 @@ namespace OrMan.ViewModels.Admin
         private readonly BanAnRepository _repository;
         private DispatcherTimer _timer;
 
-        // --- Các biến cũ ---
+        // --- Các biến Binding ---
         private ObservableCollection<BanAn> _danhSachBan;
         public ObservableCollection<BanAn> DanhSachBan
         {
@@ -36,6 +36,7 @@ namespace OrMan.ViewModels.Admin
                 _selectedBan = value;
                 OnPropertyChanged();
 
+                // Khi chọn bàn, nếu không phải chế độ sửa thì load chi tiết đơn
                 if (_selectedBan != null && !IsEditMode)
                 {
                     LoadTableDetails();
@@ -63,7 +64,6 @@ namespace OrMan.ViewModels.Admin
             set { _tongTienCanThu = value; OnPropertyChanged(); }
         }
 
-        // --- Biến cho chế độ sửa ---
         private bool _isEditMode;
         public bool IsEditMode
         {
@@ -83,6 +83,7 @@ namespace OrMan.ViewModels.Admin
         public ICommand ToggleEditModeCommand { get; private set; }
         public ICommand AddTableCommand { get; private set; }
         public ICommand DeleteTableCommand { get; private set; }
+        public ICommand PrintBillCommand { get; private set; }
 
         public QuanLyBanViewModel()
         {
@@ -97,34 +98,23 @@ namespace OrMan.ViewModels.Admin
                 SelectedBan = ban;
             });
 
-            CheckoutCommand = new RelayCommand<object>(Checkout);
             AssignTableCommand = new RelayCommand<object>(AssignTable);
-
             ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
 
-            // [CẬP NHẬT] Logic thêm bàn với thông báo chi tiết
+            // --- Logic Thêm Bàn ---
             AddTableCommand = new RelayCommand<object>(p =>
             {
                 _repository.AddTable();
-                LoadTables(); // Reload để lấy danh sách mới nhất từ DB
-
-                // Tìm bàn vừa thêm (là bàn có số bàn lớn nhất)
+                LoadTables();
                 var banMoi = DanhSachBan.OrderByDescending(b => b.SoBan).FirstOrDefault();
-
                 if (banMoi != null)
                 {
-                    // Tự động chọn bàn mới để người dùng thấy ngay vị trí
                     SelectedBan = banMoi;
-
-                    // Thông báo cụ thể hơn
-                    MessageBox.Show(
-                        $"Đã thêm {banMoi.TenBan} thành công!\nTổng số bàn hiện tại: {DanhSachBan.Count}",
-                        "Thêm bàn hoàn tất",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show($"Đã thêm {banMoi.TenBan} thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             });
 
+            // --- Logic Xóa Bàn ---
             DeleteTableCommand = new RelayCommand<BanAn>(ban =>
             {
                 if (ban == null) return;
@@ -136,19 +126,51 @@ namespace OrMan.ViewModels.Admin
                     {
                         LoadTables();
                         if (SelectedBan != null && SelectedBan.SoBan == ban.SoBan) SelectedBan = null;
-                        MessageBox.Show($"Đã xóa {ban.TenBan} khỏi hệ thống.", "Đã xóa", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"Đã xóa {ban.TenBan}.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Không thể xóa bàn đang có khách hoặc chưa thanh toán!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Không thể xóa bàn đang có khách!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             });
 
+            // --- Timer cập nhật trạng thái bàn real-time ---
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(2);
             _timer.Tick += (s, e) => RefreshTableStatus();
             _timer.Start();
+
+            // ==========================================================
+            // [QUAN TRỌNG] Logic Nút IN TẠM TÍNH (Sửa lỗi In/Hủy)
+            // ==========================================================
+            PrintBillCommand = new RelayCommand<object>(p =>
+            {
+                if (SelectedBan == null || _currentHoaDon == null) return;
+
+                var printWindow = new HoaDonWindow(
+                    SelectedBan.TenBan,
+                    _currentHoaDon,
+                    ChiTietDonHang,
+                    SelectedBan.HinhThucThanhToan ?? "Tiền mặt"
+                );
+
+                // ShowDialog trả về true nết bấm In, false/null nếu bấm Hủy
+                bool? ketQua = printWindow.ShowDialog();
+
+                if (ketQua == true)
+                {
+                    // Chỉ khi bấm IN thật thì mới set trạng thái này
+                    // Lúc này giao diện (nếu Binding đúng) sẽ tự đổi sang chữ "In Lại"
+                    SelectedBan.DaInTamTinh = true;
+                    MessageBox.Show("Đã nhận lệnh In thành công! Trạng thái bàn đã đổi.", "Test");
+                }
+            });
+
+            // ==========================================================
+            // Logic THANH TOÁN & TRẢ BÀN
+            // ==========================================================
+            CheckoutCommand = new RelayCommand<object>(Checkout);
         }
 
         private void LoadTables()
@@ -164,8 +186,12 @@ namespace OrMan.ViewModels.Admin
                 var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
                 if (banCu != null)
                 {
+                    // Chỉ cập nhật trạng thái từ DB, KHÔNG cập nhật DaInTamTinh
                     if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
                     if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
+
+                    // XÓA hoặc COMMENT dòng này đi:
+                    // if (banCu.DaInTamTinh != banMoi.DaInTamTinh) banCu.DaInTamTinh = banMoi.DaInTamTinh;
                 }
             }
         }
@@ -181,7 +207,7 @@ namespace OrMan.ViewModels.Admin
             }
             else
             {
-                MessageBox.Show("Bàn này đang có khách hoặc đã đặt!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Bàn này đang có khách!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -210,46 +236,47 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
+        // Trong file QuanLyBanViewModel.cs
         private void Checkout(object obj)
         {
-            if (SelectedBan == null) return;
+            if (SelectedBan == null || _currentHoaDon == null) return;
 
-            // ... (Giữ nguyên đoạn kiểm tra bàn trống/hủy bàn ở trên) ...
+            // 1. Tạo nội dung thông báo xác nhận
+            string thongBao = $"Bạn có chắc chắn muốn kết thúc đơn hàng bàn {SelectedBan.TenBan}?\n" +
+                              $"Tổng tiền thu: {TongTienCanThu:N0} VNĐ";
 
-            if (_currentHoaDon == null) return;
+            // 2. Hiện MessageBox hỏi Yes/No
+            var ketQua = MessageBox.Show(thongBao, "Xác nhận thanh toán",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Question);
 
-            // [CŨ - BẠN ĐANG DÙNG CÁI NÀY]
-            // var paymentWindow = new ThanhToanWindow(SelectedBan.TenBan, TongTienCanThu);
-
-            // [MỚI - SỬA THÀNH CÁI NÀY ĐỂ IN ĐƯỢC PHIẾU]
-            // Truyền đủ 4 tham số: Tên bàn, Hóa đơn, List món, Hình thức thanh toán
-            var printWindow = new OrMan.Views.Admin.HoaDonWindow(
-                SelectedBan.TenBan,
-                _currentHoaDon,
-                ChiTietDonHang,
-                SelectedBan.HinhThucThanhToan ?? "Tiền mặt" // Nếu null thì mặc định là Tiền mặt
-            );
-
-            var mainWindow = Application.Current.MainWindow;
-            if (mainWindow != null) mainWindow.Opacity = 0.4;
-
-            // Sửa tên biến paymentWindow -> printWindow
-            if (printWindow.ShowDialog() == true)
+            // 3. Nếu chọn Yes thì mới xử lý
+            if (ketQua == MessageBoxResult.Yes)
             {
-                // Logic khi bấm "In Phiếu" hoặc "Xác nhận" -> Trả bàn & Lưu doanh thu
-                _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
+                try
+                {
+                    // Gọi xuống DB để chốt đơn
+                    _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
 
-                // Reset trạng thái bàn trên giao diện
-                SelectedBan.TrangThai = "Trống";
-                SelectedBan.YeuCauThanhToan = false;
-                SelectedBan.HinhThucThanhToan = null; // Xóa hình thức thanh toán cũ
+                    // Reset trạng thái bàn về Trống
+                    SelectedBan.TrangThai = "Trống";
+                    SelectedBan.YeuCauThanhToan = false;
+                    SelectedBan.HinhThucThanhToan = null;
+                    SelectedBan.DaInTamTinh = false; // Reset trạng thái in
+                    SelectedBan.YeuCauHoTro = null;
 
-                LoadTableDetails();
-                MessageBox.Show("Thanh toán thành công! Bàn đã trống.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Load lại giao diện
+                    LoadTableDetails();
+
+                    MessageBox.Show("Thanh toán thành công! Đã trả bàn.", "Hoàn tất", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi thanh toán: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-
-            if (mainWindow != null) mainWindow.Opacity = 1;
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
