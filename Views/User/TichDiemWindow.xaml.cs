@@ -8,7 +8,7 @@ namespace OrMan.Views.User
     public partial class TichDiemWindow : Window
     {
         private UserViewModel _vm;
-        private bool _isRegisterMode = false; // Cờ để biết đang ở chế độ nào
+        private bool _isRegisterMode = false;
 
         public TichDiemWindow(UserViewModel vm)
         {
@@ -24,6 +24,7 @@ namespace OrMan.Views.User
             if (e.Key == Key.Enter) HandleAction();
         }
 
+        // [SỬA LẠI TÊN HÀM CHO KHỚP VỚI XAML]
         private void BtnAction_Click(object sender, RoutedEventArgs e)
         {
             HandleAction();
@@ -31,135 +32,131 @@ namespace OrMan.Views.User
 
         private void HandleAction()
         {
-            lblError.Visibility = Visibility.Collapsed;
+            if (lblError != null) lblError.Visibility = Visibility.Collapsed;
+
             string phone = txtPhone.Text.Trim();
 
-            // Validate số điện thoại
+            // 1. Validate
             if (string.IsNullOrEmpty(phone) || phone.Length < 9)
             {
-                // [ĐÃ SỬA] Lấy thông báo từ file ngôn ngữ
-                string msg = Application.Current.TryFindResource("Str_Msg_InvalidPhone") as string;
-                ShowError(msg ?? "Số điện thoại không hợp lệ");
+                string msg = GetRes("Str_Msg_InvalidPhone");
+                ShowError(msg);
                 return;
             }
 
-            // TRƯỜNG HỢP 1: ĐANG Ở CHẾ ĐỘ ĐĂNG KÝ
+            // 2. Chế độ Đăng ký
             if (_isRegisterMode)
             {
                 string name = txtName.Text.Trim();
                 if (string.IsNullOrEmpty(name))
                 {
-                    string msg = Application.Current.TryFindResource("Str_Msg_EnterName") as string;
-                    ShowError(msg ?? "Vui lòng nhập tên");
+                    ShowError("Vui lòng nhập tên.");
                     txtName.Focus();
                     return;
                 }
 
-                // Gọi hàm đăng ký mới
+                // Gọi ViewModel đăng ký (Cần đảm bảo VM có hàm này)
                 var newKhach = _vm.RegisterCustomer(phone, name);
                 ShowCustomerInfo(newKhach);
                 return;
             }
 
-            // TRƯỜNG HỢP 2: TRA CỨU SỐ ĐIỆN THOẠI
-            var khach = _vm.FindCustomer(phone);
+            // 3. Chế độ Tra cứu
+            var khach = _vm.CheckMember(phone);
 
-            if (khach != null)
+            // Logic kiểm tra khách mới hay cũ
+            if (khach.HoTen == "Khách Mới" || khach.HoTen == "Khách Hàng Mới" || khach.KhachHangID == 0)
             {
-                // -> Có khách: Hiển thị thông tin
-                ShowCustomerInfo(khach);
+                SwitchToRegisterMode();
             }
             else
             {
-                // -> Không có khách: Chuyển sang chế độ đăng ký
-                _isRegisterMode = true;
-
-                // Thay đổi giao diện
-                pnlNameInput.Visibility = Visibility.Visible; // Hiện ô nhập tên
-
-                // Đổi tên nút thành "ĐĂNG KÝ HỘI VIÊN" (Lấy từ Resource)
-                btnAction.Content = Application.Current.TryFindResource("Str_Btn_Register") as string;
-                btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#F59E0B"); // Màu cam
-
-                string msg = Application.Current.TryFindResource("Str_Msg_PhoneNotFound") as string;
-                ShowError(msg ?? "SĐT mới. Vui lòng nhập tên!");
-
-                // Đổi màu thông báo thành cam (cảnh báo nhẹ)
-                lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#F59E0B");
-
-                txtName.Focus();
+                ShowCustomerInfo(khach);
             }
+        }
+
+        private void SwitchToRegisterMode()
+        {
+            _isRegisterMode = true;
+            pnlNameInput.Visibility = Visibility.Visible;
+
+            // [ĐÃ SỬA] Đổi tên biến btnCheck -> btnAction
+            btnAction.Content = GetRes("Str_Btn_Register");
+            btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#F59E0B"); // Màu cam
+
+            string msg = GetRes("Str_Msg_NewPhoneRegister");
+            ShowError(msg);
+            if (lblError != null) lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#F59E0B");
+
+            txtName.Focus();
         }
 
         private void ShowCustomerInfo(OrMan.Models.KhachHang khach)
         {
-            // Ẩn các ô nhập liệu
             txtPhone.IsEnabled = false;
             pnlNameInput.Visibility = Visibility.Collapsed;
-            lblError.Visibility = Visibility.Collapsed;
+            if (lblError != null) lblError.Visibility = Visibility.Collapsed;
 
-            // Hiện bảng kết quả
             pnlResult.Visibility = Visibility.Visible;
 
-            // 1. Xử lý Tên Khách ("Hello + Tên")
-            string helloPrefix = Application.Current.TryFindResource("Str_Hello_Prefix") as string;
+            string helloPrefix = GetRes("Str_Hello_Prefix");
             string tenHienThi = khach.HoTen;
 
-            // Nếu tên trong DB là mặc định "Khách Mới", dịch sang ngôn ngữ hiện tại
             if (tenHienThi == "Khách Mới" || tenHienThi == "Khách Hàng Mới")
             {
-                string guestName = Application.Current.TryFindResource("Str_Guest1") as string;
+                string guestName = GetRes("Str_Guest");
                 if (!string.IsNullOrEmpty(guestName)) tenHienThi = guestName;
             }
-            lblTenKhach.Text = $"{helloPrefix} {tenHienThi}";
+            lblTenKhach.Text = $"{helloPrefix}{tenHienThi}";
 
-            // 2. Xử lý Hạng (Mapping từ DB sang Resource)
-            string rankTranslated = GetTranslatedRank(khach.HangThanhVien);
-            lblHang.Text = rankTranslated;
+            string rankLabel = GetRes("Str_Rank_Label");
+            string rankName = GetTranslatedRank(khach.HangThanhVien);
+            lblHang.Text = $"{rankLabel}{rankName}";
 
-            // 3. Xử lý Điểm
+           
             lblDiem.Text = $"{khach.DiemTichLuy:N0}";
 
-            // Cập nhật khách hàng hiện tại vào ViewModel chính
             _vm.CurrentCustomer = khach;
 
-            // Đổi nút thành HOÀN TẤT
-            btnAction.Content = Application.Current.TryFindResource("Str_Btn_Done") as string;
-            btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#22C55E"); // Màu xanh lá
+            // [ĐÃ SỬA] Đổi tên biến btnCheck -> btnAction
+            btnAction.Content = GetRes("Str_Btn_Done");
+            btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#22C55E"); // Xanh lá
 
-            // Bấm lần nữa là đóng
             btnAction.Click -= BtnAction_Click;
             btnAction.Click += (s, e) => this.Close();
         }
 
         private void ShowError(string msg)
         {
-            lblError.Text = msg;
-            lblError.Visibility = Visibility.Visible;
-            lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#EF4444"); // Đỏ mặc định
+            if (lblError != null)
+            {
+                lblError.Text = msg;
+                lblError.Visibility = Visibility.Visible;
+                lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#EF4444");
+            }
+            else
+            {
+                MessageBox.Show(msg);
+            }
         }
 
-        // Hàm Mapping Hạng thành viên từ Database sang Resource
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         private string GetTranslatedRank(string dbRank)
         {
             string resourceKey = "";
-
             switch (dbRank)
             {
-                case "Mới":
-                case "Khách Hàng Mới":
-                    resourceKey = "Str_Rank_New"; break;
-                case "Bạc":
-                    resourceKey = "Str_Rank_Silver"; break;
-                case "Vàng":
-                    resourceKey = "Str_Rank_Gold"; break;
-                case "Kim Cương":
-                    resourceKey = "Str_Rank_Diamond"; break;
-                default:
-                    return dbRank; // Không khớp thì trả về nguyên gốc
+                case "Mới": case "Khách Hàng Mới": resourceKey = "Str_Rank_New"; break;
+                case "Bạc": resourceKey = "Str_Rank_Silver"; break;
+                case "Vàng": resourceKey = "Str_Rank_Gold"; break;
+                case "Kim Cương": resourceKey = "Str_Rank_Diamond"; break;
+                default: return dbRank;
             }
-
-            return Application.Current.TryFindResource(resourceKey) as string;
+            return GetRes(resourceKey);
         }
     }
 }
