@@ -250,6 +250,42 @@ namespace OrMan.ViewModels.User
             return true;
         }
 
+        // Thêm 2 hàm này vào UserViewModel
+
+        // 1. Chỉ tìm kiếm, không tự tạo mới
+        public KhachHang FindCustomer(string phone)
+        {
+            using (var db = new MenuContext())
+            {
+                return db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
+            }
+        }
+
+        // 2. Đăng ký khách hàng mới với tên cụ thể
+        public KhachHang RegisterCustomer(string phone, string name)
+        {
+            using (var db = new MenuContext())
+            {
+                // Kiểm tra lại lần nữa cho chắc
+                var existing = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
+                if (existing != null) return existing;
+
+                var newKhach = new KhachHang
+                {
+                    SoDienThoai = phone,
+                    HoTen = name, // Lưu tên đúng
+                    HangThanhVien = "Mới",
+                    DiemTichLuy = 0
+                };
+
+                db.KhachHangs.Add(newKhach);
+                db.SaveChanges();
+
+                CurrentCustomer = newKhach;
+                return newKhach;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
