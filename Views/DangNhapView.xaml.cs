@@ -19,6 +19,7 @@ namespace OrMan.Views
         private List<ImageSource> mascotFrames = new List<ImageSource>();
         private ImageSource blindfoldImage; // Ảnh che mắt
         private ImageSource defaultImage;   // Ảnh mặc định
+        private ImageSource noblindfoldImage; // Ảnh không che mắt
 
         public DangNhapView()
         {
@@ -40,6 +41,7 @@ namespace OrMan.Views
                 imgMascot.Source = defaultImage;
                 // 2. Load ảnh che mắt
                 blindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_password.png"));
+                noblindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/nocover.jpg"));
 
                 // 3. Load chuỗi ảnh animation (từ 1 đến 20)
                 // Giả sử bạn có 20 ảnh: textbox_user_1.jpg -> textbox_user_20.jpg
@@ -103,6 +105,7 @@ namespace OrMan.Views
         private void pwdBox_LostFocus(object sender, RoutedEventArgs e)
         {
             // Quay lại trạng thái nhìn theo độ dài tài khoản
+            imgMascot.Source = defaultImage;
             UpdateBearFace();
         }
 
@@ -155,7 +158,7 @@ namespace OrMan.Views
         private void txtVisiblePass_GotFocus(object sender, RoutedEventArgs e)
         {
             // Khi bấm vào ô hiện mật khẩu -> Gấu phải mở mắt ra
-            UpdateBearFace();
+            imgMascot.Source = noblindfoldImage;
         }
         private void BtnEye_Click(object sender, RoutedEventArgs e)
         {
@@ -166,8 +169,8 @@ namespace OrMan.Views
 
                 // Gọi hàm này để gấu quay về trạng thái bình thường 
                 // (hoặc nhìn theo độ dài tên đăng nhập nếu muốn)
+               
                 UpdateBearFace();
-
                 // Tiện tay Focus luôn vào ô hiện mật khẩu để người dùng gõ tiếp
                 txtVisiblePass.Focus();
                 txtVisiblePass.CaretIndex = txtVisiblePass.Text.Length;
@@ -185,6 +188,14 @@ namespace OrMan.Views
                 // Tiện tay Focus lại vào ô ẩn mật khẩu
                 pwdBox.Focus();
             }
+        }
+        private void txtUser_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Yêu cầu: Cả 2 trường hợp (bật mắt hay tắt mắt) đều hiện trạng thái mặc định.
+            // Không cần kiểm tra if (btnEye.IsChecked == true) nữa.
+
+            // Gọi hàm này để gấu quay về trạng thái nhìn theo chữ (hoặc nhìn thẳng nếu ô trống)
+            UpdateBearFace();
         }
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
