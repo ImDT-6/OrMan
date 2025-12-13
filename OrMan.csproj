@@ -410,9 +410,10 @@
     <Resource Include="Images\textbox_user_7.jpg" />
     <Resource Include="Images\textbox_user_8.jpg" />
     <Resource Include="Images\textbox_user_9.jpg" />
-    <Resource Include="Images\textbox_user_0.JPG" />
+    <Resource Include="Images\textbox_user_0.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\debut.png" />
     <Resource Include="Images2\MienBulgogi.png" />
     <Resource Include="Images2\MyKimchiBachTuoc.png" />
     <Resource Include="Images2\MyKimchiBo.png" />
