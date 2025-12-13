@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+                <ResourceDictionary Source="/Resochaurces/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -77,7 +77,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="Auto"/>
             <!-- Header gọn lại -->
             <RowDefinition Height="*"/>
             <RowDefinition Height="80"/>
@@ -173,49 +173,108 @@
         </Border>
 
         <!-- HEADER AREA (Cột phải, Hàng trên) -->
-        <Grid Grid.Row="0" Grid.Column="1" Margin="20,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <!-- Lời chào -->
-                <ColumnDefinition Width="Auto"/>
-                <!-- Search Box -->
-                <ColumnDefinition Width="*"/>
-                <!-- Spacer -->
-                <ColumnDefinition Width="Auto"/>
-                <!-- Action Buttons -->
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="1" Height="120" Margin="20,20,20,10" CornerRadius="20" ClipToBounds="True">
 
-            <!-- Lời chào (Real-time) -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,25,0">
-                <TextBlock Text="👋" Foreground="White" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <TextBlock x:Name="txtGreeting" Text="Chào ..., Quý khách" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
-            </StackPanel>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="#1A103C" Offset="0"/>
+                    <GradientStop Color="#2D1B69" Offset="0.4"/>
+                    <GradientStop Color="#4A3088" Offset="0.8"/>
+                    <GradientStop Color="#5D4099" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
 
-            <!-- Thanh tìm kiếm (Đã dời sang phải lời chào) -->
-            <TextBox Grid.Column="1" Style="{StaticResource SearchTextBoxStyle}" ToolTip="{DynamicResource Str_Search_Placeholder}" Width="300" Height="45" VerticalAlignment="Center"/>
+            <Grid>
+                <Canvas>
+                    <Ellipse Width="3" Height="3" Fill="White" Opacity="0.8" Canvas.Left="50" Canvas.Top="30"/>
+                    <Ellipse Width="4" Height="4" Fill="White" Opacity="0.9" Canvas.Left="400" Canvas.Top="15"/>
+                    <Ellipse Width="2" Height="2" Fill="White" Opacity="0.5" Canvas.Right="200" Canvas.Top="30"/>
+                    <Path Data="M10,0 L12,7 L19,7 L13,11 L15,18 L10,14 L5,18 L7,11 L1,7 L8,7 Z" Fill="#FFFFE0" Canvas.Right="80" Canvas.Top="50" Width="8" Height="8" Opacity="0.7"/>
+                </Canvas>
 
-            <!-- Action Buttons -->
-            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" Width="150" Height="45" Margin="0,0,10,0" Background="#20F59E0B" ToolTip="Gọi phục vụ">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{DynamicResource Str_Call_Staff}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="250,-40,0,10" Width="130" Height="130">
+                    <Ellipse Width="110" Height="110" Fill="#40FFFFFF" Margin="95,12,-75,8">
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="35"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                    <Path Data="M20,10 A40,40 0 1,1 10,70 A30,30 0 1,0 20,10 Z" 
+          Fill="#FFFDD0" Stretch="Uniform" Width="45" Height="45" Margin="128,45,-43,40">
+                        <Path.Effect>
+                            <DropShadowEffect Color="White" BlurRadius="20" ShadowDepth="0" Opacity="0.8"/>
+                        </Path.Effect>
+                    </Path>
+                </Grid>
+
+                <Grid VerticalAlignment="Bottom" Height="60">
+                    <Path Data="M0,40 C200,20 400,60 600,40 S900,20 1200,50 V60 H0 Z" Fill="#20000000" Stretch="Fill"/>
+                    <Path Data="M0,60 C150,40 300,70 450,50 S700,20 900,50 S1200,30 1500,60 V80 H0 Z" Fill="#3E2778" Stretch="Fill" Margin="0,10,0,-10"/>
+                </Grid>
+
+                <Grid VerticalAlignment="Top" Margin="30,25,40,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="70" Height="70" CornerRadius="35" BorderBrush="White" BorderThickness="1" Background="#15FFFFFF">
+                            <Viewbox Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5">
+                                <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+              Fill="White"/>
+                            </Viewbox>
+                        </Border>
+
+                        <StackPanel VerticalAlignment="Center" Margin="20,0,0,0">
+                            <TextBlock Name="txtGreeting" Text="Chào buổi tối" Foreground="White" FontSize="26" FontWeight="Bold">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="2" Opacity="0.3"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <TextBlock Text="{Binding TenHienThi, FallbackValue='Hôm nay của bạn thế nào?'}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                <Border Background="#40FFFFFF" CornerRadius="10" Margin="10,0,0,0" Padding="10,2">
+                                    <TextBlock Text="Ăn ngon miệng nha" Foreground="#EEE" FontSize="11" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
-                </Button>
 
-                <Button Command="{Binding ChonBanCommand}" 
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <TextBox Style="{StaticResource SearchTextBoxStyle}" 
+                         ToolTip="{DynamicResource Str_Search_Placeholder}" 
+                         Width="220" Height="45" 
+                         VerticalAlignment="Center" Margin="0,0,20,0"/>
+
+                        <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" 
+                        Width="150" Height="45" Margin="0,0,10,0" 
+                        Background="#20F59E0B" ToolTip="Gọi phục vụ">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{DynamicResource Str_Call_Staff}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ChonBanCommand}" 
                         Style="{StaticResource SocialButtonStyle}" 
                         Height="45" Width="90" Margin="0,0,10,0" Padding="15,0"
                         Background="#20FFFFFF" ToolTip="{DynamicResource Str_Table}">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="{DynamicResource Str_Table}" Foreground="White" Margin="0,3,5,0"/>
-                        <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="16"/>
-                        <TextBlock Text=" ▼" Foreground="White" Margin="1,2,5,0" FontSize="10" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource Str_Table}" Foreground="White" Margin="0,3,5,0"/>
+                                <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text=" ▼" Foreground="White" Margin="1,2,5,0" FontSize="10" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                <Button Content="{DynamicResource Str_Exit}" Tag="{StaticResource IconLogoutGeo}" Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
-            </StackPanel>
-        </Grid>
+                        <Button Content="{DynamicResource Str_Exit}" Tag="{StaticResource IconLogoutGeo}" 
+                        Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" 
+                        Foreground="{StaticResource DangerRed}" Background="#10EF4444" 
+                        Height="45" Padding="15,0" Margin="0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
 
         <!-- MENU SCROLLVIEWER -->
         <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="20,0,20,0" VerticalScrollBarVisibility="Auto">

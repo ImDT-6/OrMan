@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace OrMan.Views.User
 {
@@ -6,8 +7,10 @@ namespace OrMan.Views.User
 
     public partial class SupportRequestWindow : Window
     {
+        // Properties để lưu kết quả trả về
         public RequestType SelectedRequest { get; private set; } = RequestType.None;
-        public string SupportMessage { get; private set; } = ""; // Lưu lời nhắn
+        public string SupportMessage { get; private set; } = "";
+        public string SelectedPaymentMethod { get; private set; } = "Tiền mặt";
 
         private bool _hasActiveOrder = false;
 
@@ -16,46 +19,55 @@ namespace OrMan.Views.User
             InitializeComponent();
             _hasActiveOrder = hasActiveOrder;
 
-            // Nếu chưa có đơn (Khách mới vào), ẩn phần thanh toán
+            // Xử lý giao diện: Nếu khách mới vào (chưa có đơn), ẩn phần thanh toán
             if (!_hasActiveOrder)
             {
-                pnlCheckout.Visibility = Visibility.Collapsed;
+                // Ẩn nút thanh toán
+                if (BtnCheckout != null) BtnCheckout.Visibility = Visibility.Collapsed;
+
+                // Ẩn các lựa chọn phương thức
+                if (radTienMat != null) radTienMat.Visibility = Visibility.Collapsed;
+                if (radCK != null) radCK.Visibility = Visibility.Collapsed;
+                if (radThe != null) radThe.Visibility = Visibility.Collapsed;
             }
         }
 
         private void BtnSupport_Click(object sender, RoutedEventArgs e)
         {
             SelectedRequest = RequestType.Support;
-            SupportMessage = cboMessage.Text; // Lấy nội dung khách nhập hoặc chọn
+
+            // Lấy nội dung từ ComboBox (Text là phần người dùng nhập hoặc chọn)
+            SupportMessage = cboMessage.Text;
 
             if (string.IsNullOrWhiteSpace(SupportMessage))
-                SupportMessage = "Cần hỗ trợ"; // Mặc định
+            {
+                SupportMessage = "Cần hỗ trợ"; // Nội dung mặc định nếu để trống
+            }
 
             this.DialogResult = true;
             this.Close();
         }
-
-        
-
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
-            this.Close();
-        }
-
-        // [MỚI] Biến lưu phương thức khách chọn
-        public string SelectedPaymentMethod { get; private set; } = "Tiền mặt";
 
         private void BtnCheckout_Click(object sender, RoutedEventArgs e)
         {
             SelectedRequest = RequestType.Checkout;
 
-            // Kiểm tra xem khách chọn gì
-            if (radTienMat.IsChecked == true) SelectedPaymentMethod = "Tiền mặt";
-            else if (radCK.IsChecked == true) SelectedPaymentMethod = "Chuyển khoản";
-            else if (radThe.IsChecked == true) SelectedPaymentMethod = "Thẻ";
+            // Xác định phương thức thanh toán khách chọn
+            if (radTienMat.IsChecked == true)
+                SelectedPaymentMethod = "Tiền mặt";
+            else if (radCK.IsChecked == true)
+                SelectedPaymentMethod = "Chuyển khoản";
+            else if (radThe.IsChecked == true)
+                SelectedPaymentMethod = "Thẻ";
 
             this.DialogResult = true;
+            this.Close();
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedRequest = RequestType.None;
+            this.DialogResult = false;
             this.Close();
         }
     }
