@@ -28,6 +28,7 @@ namespace OrMan.Views
 
             // Load trước hình ảnh vào bộ nhớ khi mở form
             PreloadMascotImages();
+            UpdateBearFace();
         }
 
         private void PreloadMascotImages()
@@ -35,15 +36,15 @@ namespace OrMan.Views
             try
             {
                 // 1. Load ảnh mặc định (dùng Frame 1)
-                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_user_1.jpg"));
-
+                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/debut.png"));
+                imgMascot.Source = defaultImage;
                 // 2. Load ảnh che mắt
                 blindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_password.png"));
 
                 // 3. Load chuỗi ảnh animation (từ 1 đến 20)
                 // Giả sử bạn có 20 ảnh: textbox_user_1.jpg -> textbox_user_20.jpg
                 // Nếu bạn có nhiều hơn, hãy sửa số 20 thành số lượng thực tế
-                for (int i = 1; i <= 20; i++)
+                for (int i = 0; i <= 24; i++)
                 {
                     string path = $"pack://application:,,,/Images/textbox_user_{i}.jpg";
                     var bitmap = new BitmapImage(new Uri(path));

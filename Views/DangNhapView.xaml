@@ -31,18 +31,18 @@
                 <TextBlock Text="RESTAURANT" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                 <TextBlock Text="MANAGEMENT SYSTEM" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,35" Opacity="0.8"/>
 
-                <Border Width="110" Height="110" CornerRadius="55" Margin="0,0,0,25"
-                        BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"
-                        Background="#15FFFFFF" HorizontalAlignment="Center">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>
-                    </Border.Effect>
+                <Border Width="200" Height="200" Margin="0,0,0,25" HorizontalAlignment="Center"
+                    Background="Transparent" BorderThickness="0">
 
-                    <Border CornerRadius="55" ClipToBounds="True">
-                        <Image x:Name="imgMascot" 
-                               Source="pack://application:,,,/Images/textbox_user_1.jpg" 
-                               Stretch="UniformToFill"/>
-                    </Border>
+                    <Image x:Name="imgMascot"
+                        Source="/Images/debut.JPG"
+                        Width="150" Height="150"
+                        Stretch="UniformToFill"
+                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,30,0,0">
+                        <Image.Clip>
+                            <EllipseGeometry Center="75,75" RadiusX="75" RadiusY="75" />
+                        </Image.Clip>
+                    </Image>
                 </Border>
                 <TextBox x:Name="txtUser"
                          PreviewKeyDown="txtUser_PreviewKeyDown" 
