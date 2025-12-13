@@ -1,29 +1,34 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel; // Cần thiết
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices; // Cần thiết
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows.Threading;
-using GymManagement.Data;
-using GymManagement.Helpers;
-using GymManagement.Models;
-using GymManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace GymManagement.ViewModels
+// 1. Đổi Namespace cho khớp với Project hiện tại
+using OrMan.Data;
+using OrMan.Helpers;
+using OrMan.Models;
+
+namespace OrMan.ViewModels.Admin
 {
+    // Class đại diện cho 1 món ăn hiển thị trên màn hình bếp
     public class BepOrderItem
     {
         public int SoBan { get; set; }
         public string ThoiGianOrder { get; set; }
+
+        // Giữ nguyên object ChiTietHoaDon từ Database
         public ChiTietHoaDon ChiTiet { get; set; }
     }
 
-    // [FIX] Thêm kế thừa INotifyPropertyChanged
     public class BepViewModel : INotifyPropertyChanged
     {
         private DispatcherTimer _timer;
 
+        // Collection để Binding lên ItemsControl bên XAML
         private ObservableCollection<BepOrderItem> _danhSachCanLam;
         public ObservableCollection<BepOrderItem> DanhSachCanLam
         {
@@ -35,49 +40,73 @@ namespace GymManagement.ViewModels
 
         public BepViewModel()
         {
+            // Kết nối lệnh "Đã Xong" với hàm xử lý
             XongMonCommand = new RelayCommand<BepOrderItem>(XongMon);
+
             LoadData();
 
+            // Setup Timer để tự động refresh dữ liệu mỗi 10 giây (Real-time giả lập)
             _timer = new DispatcherTimer();
-            _timer.Interval = System.TimeSpan.FromSeconds(10);
+            _timer.Interval = TimeSpan.FromSeconds(10);
             _timer.Tick += (s, e) => LoadData();
             _timer.Start();
         }
 
         private void LoadData()
         {
-            using (var context = new MenuContext())
+            try
             {
-                var query = from ct in context.ChiTietHoaDons
-                            join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
-                            where !hd.DaThanhToan && ct.TrangThaiCheBien == 0
-                            orderby hd.NgayTao
-                            select new BepOrderItem
-                            {
-                                SoBan = hd.SoBan,
-                                ThoiGianOrder = hd.NgayTao.ToString("HH:mm"),
-                                ChiTiet = ct
-                            };
+                using (var context = new MenuContext())
+                {
+                    // Query lấy các món chưa chế biến (TrangThaiCheBien == 0) của các hóa đơn chưa thanh toán
+                    var query = from ct in context.ChiTietHoaDons
+                                join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
+                                where !hd.DaThanhToan && ct.TrangThaiCheBien == 0
+                                orderby hd.NgayTao
+                                select new BepOrderItem
+                                {
+                                    SoBan = hd.SoBan,
+                                    ThoiGianOrder = hd.NgayTao.ToString("HH:mm"),
+                                    ChiTiet = ct
+                                };
 
-                DanhSachCanLam = new ObservableCollection<BepOrderItem>(query.ToList());
+                    // Cập nhật lên giao diện
+                    DanhSachCanLam = new ObservableCollection<BepOrderItem>(query.ToList());
+                }
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi kết nối database nếu có (tránh crash app)
+                System.Diagnostics.Debug.WriteLine("Lỗi LoadData Bếp: " + ex.Message);
             }
         }
 
         private void XongMon(BepOrderItem item)
         {
-            using (var context = new MenuContext())
+            if (item == null || item.ChiTiet == null) return;
+
+            try
             {
-                var ct = context.ChiTietHoaDons.Find(item.ChiTiet.Id);
-                if (ct != null)
+                using (var context = new MenuContext())
                 {
-                    ct.TrangThaiCheBien = 1;
-                    context.SaveChanges();
+                    var ct = context.ChiTietHoaDons.Find(item.ChiTiet.Id);
+                    if (ct != null)
+                    {
+                        // Cập nhật trạng thái thành 1 (Đã xong)
+                        ct.TrangThaiCheBien = 1;
+                        context.SaveChanges();
+                    }
                 }
+                // Tải lại dữ liệu ngay lập tức để cập nhật giao diện
+                LoadData();
             }
-            LoadData();
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Lỗi cập nhật món: " + ex.Message);
+            }
         }
 
-        // [FIX LỖI] Triển khai Interface INotifyPropertyChanged
+        // Implementation INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {

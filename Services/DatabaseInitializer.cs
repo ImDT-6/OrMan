@@ -123,7 +123,34 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sqlCongThuc);
                 }
                 catch { }
+
+                // 8. [MỚI - SỬA LỖI] Thêm cột TrangThaiCheBien cho bảng ChiTietHoaDons
+                try
+                {
+                    // Lưu ý: Tên bảng trong SQL thường là 'ChiTietHoaDons' (có s) do EF tự đặt
+                    string sqlBep = @"
+        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDons'))
+        BEGIN
+            ALTER TABLE ChiTietHoaDons ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+        END";
+                    context.Database.ExecuteSqlRaw(sqlBep);
+                }
+                catch (Exception ex)
+                {
+                    // Nếu lỗi tên bảng, thử tên không có 's'
+                    try
+                    {
+                        string sqlBepBackup = @"
+            IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
+            BEGIN
+                ALTER TABLE ChiTietHoaDon ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+            END";
+                        context.Database.ExecuteSqlRaw(sqlBepBackup);
+                    }
+                    catch { }
+                }
             }
+
         }
     }
 }

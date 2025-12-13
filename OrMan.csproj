@@ -202,6 +202,7 @@
     <Compile Include="Services\DoanhThuRepository.cs" />
     <Compile Include="Services\ThucDonRepository.cs" />
     <Compile Include="ViewModels\Admin\AdminViewModel.cs" />
+    <Compile Include="ViewModels\Admin\BepViewModel.cs" />
     <Compile Include="ViewModels\Admin\KhoViewModel.cs" />
     <Compile Include="ViewModels\DangNhapViewModel.cs" />
     <Compile Include="ViewModels\Admin\DashboardVIewModel.cs" />
@@ -213,6 +214,9 @@
     <Compile Include="ViewModels\ValidationBase.cs" />
     <Compile Include="Views\Admin\AdminView.xaml.cs">
       <DependentUpon>AdminView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\BepView.xaml.cs">
+      <DependentUpon>BepView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Admin\HoaDonWindow.xaml.cs">
       <DependentUpon>HoaDonWindow.xaml</DependentUpon>
@@ -293,6 +297,10 @@
     <Page Include="Views\Admin\AdminView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\BepView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Admin\HoaDonWindow.xaml">
       <SubType>Designer</SubType>

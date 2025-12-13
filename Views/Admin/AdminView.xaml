@@ -87,6 +87,11 @@
              GroupName="AdminMenu"
              Click="MenuButton_Click" 
              Style="{StaticResource NavRadioButtonStyle}"/>
+                        <RadioButton Content="Bếp" 
+             Tag="{StaticResource IconFoodGeo}" 
+             GroupName="AdminMenu"
+             Click="MenuButton_Click" 
+             Style="{StaticResource NavRadioButtonStyle}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

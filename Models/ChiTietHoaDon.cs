@@ -14,6 +14,8 @@ namespace OrMan.Models
         public decimal DonGia { get; set; }  // Lưu cứng giá tại thời điểm bán
         public int CapDoCay { get; set; }    // Cho Mì Cay
         public string GhiChu { get; set; }
+        // [THÊM DÒNG NÀY] 0: Chờ chế biến, 1: Đã xong
+        public int TrangThaiCheBien { get; set; }
 
         // Thêm thuộc tính này vào class ChiTietHoaDon nếu chưa có hoặc đang để protected
         [ForeignKey("MaMon")]

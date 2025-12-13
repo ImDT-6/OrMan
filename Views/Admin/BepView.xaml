@@ -1,11 +1,12 @@
-﻿<UserControl x:Class="GymManagement.Views.Admin.BepView"
+﻿<UserControl x:Class="OrMan.Views.Admin.BepView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:helpers="clr-namespace:GymManagement.Helpers"
+             xmlns:helpers="clr-namespace:OrMan.Helpers"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1100"
+             FontFamily="Segoe UI">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -13,64 +14,150 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- [FIX LỖI] Khai báo Converter ở đây -->
             <helpers:NullToBoolConverter x:Key="NullToBoolConverter"/>
+
+            <Style x:Key="SegmentRadioButtonStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#A0AEC0"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Width" Value="100"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border Background="Transparent">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Background="{StaticResource MainBackgroundGradient}">
-        <Grid Margin="20">
+        <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="DANH SÁCH CHỜ CHẾ BIẾN" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
+            <StackPanel Grid.Row="0" Margin="0,0,0,25">
+                <TextBlock Text="BẾP &amp; QUẦY BAR" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Quản lý danh sách món chờ chế biến và ra món" Foreground="{StaticResource TextSecondary}" FontSize="14" Margin="0,5,0,0"/>
+            </StackPanel>
 
-            <ScrollViewer Grid.Row="1">
-                <ItemsControl ItemsSource="{Binding DanhSachCanLam}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Width="300" Background="#20FFFFFF" CornerRadius="10" Margin="0,0,15,15" Padding="15" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                                    <Grid Grid.Row="0" Margin="0,0,0,10">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border Background="#EF4444" CornerRadius="5" Padding="8,3">
-                                                <TextBlock Text="{Binding SoBan, StringFormat='Bàn {0}'}" FontWeight="Bold" Foreground="White"/>
+                <TextBox Grid.Column="0" 
+                         Style="{StaticResource SearchTextBoxStyle}" 
+                         Tag="{StaticResource IconSearch}"
+                         ToolTip="Tìm theo tên món hoặc số bàn..."
+                         Height="45" Width="300" 
+                         HorizontalAlignment="Left"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <RadioButton Content="Đang chờ" IsChecked="True" Style="{StaticResource SegmentRadioButtonStyle}"/>
+                    <RadioButton Content="Lịch sử" Style="{StaticResource SegmentRadioButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="2" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding DanhSachCanLam}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="280" Margin="0,0,15,15" CornerRadius="15" 
+                                        BorderThickness="1" BorderBrush="{StaticResource GlassBorder}"
+                                        ClipToBounds="True">
+
+                                    <Border.Background>
+                                        <SolidColorBrush Color="White" Opacity="0.08"/>
+                                    </Border.Background>
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
+                                    </Border.Effect>
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Grid.Row="0" Margin="15,15,15,5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0" Background="{StaticResource AccentGradient}" CornerRadius="8" Padding="10,4">
+                                                <TextBlock Text="{Binding SoBan, StringFormat='Bàn {0}'}" FontWeight="Bold" Foreground="White" FontSize="13"/>
                                             </Border>
-                                            <TextBlock Text="{Binding ThoiGianOrder}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock Text="🕒" FontSize="12" Margin="0,0,4,0"/>
+                                                <TextBlock Text="{Binding ThoiGianOrder}" Foreground="{StaticResource TextSecondary}" FontSize="12" FontStyle="Italic"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="1" Margin="15,5,15,15">
+                                            <TextBlock Text="{Binding ChiTiet.TenMonHienThi}" 
+                                                       FontSize="18" FontWeight="Bold" Foreground="White" 
+                                                       TextWrapping="Wrap" LineHeight="24" Margin="0,0,0,5"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                <TextBlock Text="Số lượng:" Foreground="{StaticResource TextSecondary}" FontSize="13"/>
+                                                <TextBlock Text="{Binding ChiTiet.SoLuong, StringFormat=' x{0}'}" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                                            </StackPanel>
+
+                                            <Border Background="#20F59E0B" CornerRadius="6" Padding="8,5" 
+                                                    Visibility="{Binding ChiTiet.GhiChu, Converter={StaticResource NullToBoolConverter}}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="📝" Margin="0,0,5,0" Foreground="#F59E0B"/>
+                                                    <TextBlock Text="{Binding ChiTiet.GhiChu}" Foreground="#F59E0B" FontStyle="Italic" TextWrapping="Wrap" FontSize="12"/>
+                                                </StackPanel>
+                                            </Border>
                                         </StackPanel>
+
+                                        <Button Grid.Row="2" 
+                                                Command="{Binding DataContext.XongMonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource GlassButtonStyle}" 
+                                                Background="{StaticResource SuccessGreen}" 
+                                                Height="45"
+                                                BorderThickness="0,1,0,0" BorderBrush="{StaticResource GlassBorder}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="✅" Margin="0,0,8,0"/>
+                                                <TextBlock Text="ĐÃ XONG / RA MÓN" FontWeight="Bold" FontSize="13"/>
+                                            </StackPanel>
+                                        </Button>
                                     </Grid>
-
-                                    <TextBlock Grid.Row="1" Text="{Binding ChiTiet.TenMonHienThi}" FontSize="18" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
-
-                                    <StackPanel Grid.Row="2" Margin="0,5,0,15">
-                                        <TextBlock Text="{Binding ChiTiet.GhiChu}" Foreground="{StaticResource WarningYellow}" FontStyle="Italic" Visibility="{Binding ChiTiet.GhiChu, Converter={StaticResource NullToBoolConverter}}"/>
-                                        <TextBlock Text="{Binding ChiTiet.SoLuong, StringFormat='Số lượng: {0}'}" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
-                                    </StackPanel>
-
-                                    <Button Grid.Row="3" Content="ĐÃ XONG / RA MÓN" 
-                                            Command="{Binding DataContext.XongMonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource GlassButtonStyle}" Background="{StaticResource SuccessGreen}" Height="40"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
