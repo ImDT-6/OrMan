@@ -5,6 +5,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Microsoft.Win32; // Cho SaveFileDialog
+using System.IO;       // Cho StreamWriter
+using System.Text;     // Cho StringBuilder
+using System.Diagnostics; // Cho Process.Start
 
 namespace OrMan.Views.Admin
 {
@@ -137,6 +141,66 @@ namespace OrMan.Views.Admin
                 DateTime toDate = dpDenNgay.SelectedDate.Value.Date.AddDays(1).AddTicks(-1); // 23:59:59
 
                 _viewModel.LocTheoKhoangThoiGian(fromDate, toDate);
+            }
+        }
+
+        // --- 4. XỬ LÝ XUẤT EXCEL (CSV) ---
+        private void BtnXuatExcel_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Kiểm tra dữ liệu
+            if (_viewModel == null || _viewModel.DanhSachHoaDon == null || _viewModel.DanhSachHoaDon.Count == 0)
+            {
+                MessageBox.Show("Không có dữ liệu để xuất!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 2. Mở hộp thoại lưu file
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Excel File (*.csv)|*.csv", // Lưu dưới dạng CSV để Excel đọc
+                FileName = $"BaoCaoDoanhThu_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    // 3. Tạo nội dung file CSV
+                    StringBuilder csvContent = new StringBuilder();
+
+                    // -- Tạo tiêu đề cột --
+                    // Sử dụng tab (\t) hoặc phẩy (,) tùy vào Region của máy, nhưng \t thường an toàn hơn với Excel tiếng Việt
+                    csvContent.AppendLine("Mã Hóa Đơn,Thời Gian,Bàn,Nhân Viên,Tổng Tiền");
+
+                    // -- Duyệt qua danh sách và ghi dữ liệu --
+                    foreach (var item in _viewModel.DanhSachHoaDon)
+                    {
+                        // Format dữ liệu để tránh lỗi khi có dấu phẩy trong nội dung
+                        string ngayTao = item.NgayTao.ToString("dd/MM/yyyy HH:mm");
+                        string tongTien = item.TongTien.ToString("N0").Replace(",", "."); // Bỏ dấu phẩy ngăn cách nghìn nếu cần
+
+                        // Ghi một dòng:
+                        // Lưu ý: Nếu dữ liệu có chứa dấu phẩy, nên bao quanh bằng dấu ngoặc kép ""
+                        string newLine = $"{item.MaHoaDon},{ngayTao},Bàn {item.SoBan},{item.NguoiTao},{item.TongTien}";
+                        csvContent.AppendLine(newLine);
+                    }
+
+                    // 4. Ghi xuống file (Encoding UTF8 để hiển thị tiếng Việt)
+                    File.WriteAllText(saveFileDialog.FileName, csvContent.ToString(), Encoding.UTF8);
+
+                    // 5. Hỏi người dùng có muốn mở file ngay không
+                    var result = MessageBox.Show("Xuất file thành công! Bạn có muốn mở file ngay không?",
+                                                 "Thành công", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Process.Start(saveFileDialog.FileName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Có lỗi khi xuất file: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
     }

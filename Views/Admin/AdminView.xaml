@@ -94,7 +94,7 @@
                             <TextBlock Text="Xin chào, Admin" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
                             <TextBlock Text="Chi nhánh 1" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Right"/>
                         </StackPanel>
-                        <RadioButton Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="Button_DangXuat_Click" Style="{StaticResource NavRadioButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
+                        <Button Content="Thoát" Tag="{StaticResource IconLogoutGeo}" Click="Button_DangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="40" Padding="15,0" Margin="0"/>
                     </StackPanel>
                 </Grid>
             </Border>

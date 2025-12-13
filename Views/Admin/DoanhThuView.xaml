@@ -538,9 +538,10 @@
              Width="200" HorizontalAlignment="Right" Margin="0,0,15,0"/>
 
                 <Button Grid.Column="5" Content="Xuất Excel" 
-            Style="{StaticResource GlassButtonStyle}" 
-            Width="100" Height="40" FontSize="13" 
-            Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"/>
+        Click="BtnXuatExcel_Click"
+        Style="{StaticResource GlassButtonStyle}" 
+        Width="100" Height="40" FontSize="13" 
+        Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"/>
             </Grid>
 
             <Border Grid.Row="3" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
