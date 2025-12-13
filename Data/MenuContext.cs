@@ -13,7 +13,10 @@ namespace OrMan.Data
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
         public DbSet<KhachHang> KhachHangs { get; set; }
-
+        // ...
+        public DbSet<NguyenLieu> NguyenLieus { get; set; }
+        public DbSet<CongThuc> CongThucs { get; set; }
+        // ...
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Cấu hình chuỗi kết nối tới SQL Server

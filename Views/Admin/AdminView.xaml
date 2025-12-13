@@ -82,7 +82,11 @@
                                      GroupName="AdminMenu"
                                      Click="MenuButton_Click" 
                                      Style="{StaticResource NavRadioButtonStyle}"/>
-                        
+                        <RadioButton Content="Kho Hàng" 
+             Tag="{StaticResource IconDashboardGeo}" 
+             GroupName="AdminMenu"
+             Click="MenuButton_Click" 
+             Style="{StaticResource NavRadioButtonStyle}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

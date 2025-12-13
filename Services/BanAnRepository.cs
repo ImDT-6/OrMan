@@ -142,7 +142,33 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 var hd = context.HoaDons.Find(maHoaDon);
-                if (hd != null) hd.DaThanhToan = true;
+                if (hd != null)
+                {
+                    hd.DaThanhToan = true;
+
+                    // [MỚI] --- LOGIC TRỪ KHO ---
+                    // 1. Lấy tất cả món đã ăn trong hóa đơn này
+                    var chiTietHD = context.ChiTietHoaDons.Where(x => x.MaHoaDon == maHoaDon).ToList();
+
+                    foreach (var item in chiTietHD)
+                    {
+                        // 2. Tìm công thức của từng món
+                        var congThucs = context.CongThucs.Where(ct => ct.MaMon == item.MaMon).ToList();
+
+                        foreach (var ct in congThucs)
+                        {
+                            // 3. Tìm nguyên liệu trong kho
+                            var nguyenLieu = context.NguyenLieus.Find(ct.NguyenLieuId);
+                            if (nguyenLieu != null)
+                            {
+                                // 4. Trừ tồn kho: (Định lượng 1 món) * (Số lượng khách gọi)
+                                double soLuongTru = ct.SoLuongCan * item.SoLuong;
+                                nguyenLieu.SoLuongTon -= soLuongTru;
+                            }
+                        }
+                    }
+                    // ---------------------------
+                }
 
                 var ban = context.BanAns.Find(soBan);
                 if (ban != null)
@@ -150,6 +176,7 @@ namespace OrMan.Services
                     ban.TrangThai = "Trống";
                     ban.YeuCauThanhToan = false;
                     ban.YeuCauHoTro = null;
+                    ban.DaInTamTinh = false;
                 }
                 context.SaveChanges();
                 OnPaymentSuccess?.Invoke();

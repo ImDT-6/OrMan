@@ -14,6 +14,7 @@ namespace OrMan.Views.Admin
         private ThucDonView _menuView;
         private DoanhThuView _revenueView;
         private KhachHangView _customerView;
+        private KhoView _khoView;
         public AdminView()
         {
             InitializeComponent();
@@ -68,6 +69,10 @@ namespace OrMan.Views.Admin
                 case "Khách Hàng":
                     if (_customerView == null) _customerView = new KhachHangView();
                     viewToLoad = _customerView;
+                    break;
+                case "Kho Hàng":
+                    if (_khoView == null) _khoView = new KhoView();
+                    viewToLoad = _khoView;
                     break;
             }
 

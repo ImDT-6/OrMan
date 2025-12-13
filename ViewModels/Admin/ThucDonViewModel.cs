@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
 using OrMan.Services;
 using OrMan.Views.Admin;
+using static OrMan.Views.Admin.ThemSuaMonWindow;
 
 namespace OrMan.ViewModels.Admin
 {
@@ -100,6 +103,8 @@ namespace OrMan.ViewModels.Admin
                 }
                 _repository.Add(monMoi);
                 _danhSachGoc.Add(monMoi);
+                // 2. [MỚI] Lưu Công Thức
+                SaveRecipe(monMoi.MaMon, window.ListCongThucResult);
                 RefeshList();
             }
         }
@@ -114,10 +119,33 @@ namespace OrMan.ViewModels.Admin
                 mon.DonViTinh = window.MonAnResult.DonViTinh;
                 mon.HinhAnhUrl = window.MonAnResult.HinhAnhUrl;
                 _repository.Update(mon);
+                SaveRecipe(mon.MaMon, window.ListCongThucResult);
                 RefeshList();
             }
         }
 
+        private void SaveRecipe(string maMon, List<CongThucDTO> listDTO)
+        {
+            using (var db = new MenuContext())
+            {
+                // a. Xóa công thức cũ
+                var oldList = db.CongThucs.Where(x => x.MaMon == maMon);
+                db.CongThucs.RemoveRange(oldList);
+
+                // b. Thêm công thức mới
+                foreach (var dto in listDTO)
+                {
+                    var ct = new CongThuc
+                    {
+                        MaMon = maMon,
+                        NguyenLieuId = dto.NguyenLieuId,
+                        SoLuongCan = dto.SoLuongCan
+                    };
+                    db.CongThucs.Add(ct);
+                }
+                db.SaveChanges();
+            }
+        }
         public string TuKhoaTimKiem
         {
             get => _tuKhoaTimKiem;

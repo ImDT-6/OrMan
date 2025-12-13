@@ -87,6 +87,42 @@ namespace OrMan.Services
                     // Nếu lỗi thì ghi ra console để biết đường sửa
                     Console.WriteLine("Lỗi tạo bảng KhachHang: " + ex.Message);
                 }
+                // 6. [MỚI] Tạo bảng Nguyên Liệu
+                try
+                {
+                    string sqlNguyenLieu = @"
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[NguyenLieu]') AND type in (N'U'))
+        BEGIN
+            CREATE TABLE [dbo].[NguyenLieu](
+                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                [TenNguyenLieu] [nvarchar](100) NOT NULL,
+                [DonViTinh] [nvarchar](20) NULL,
+                [SoLuongTon] [float] NOT NULL DEFAULT 0,
+                [GiaVon] [decimal](18, 0) NOT NULL DEFAULT 0,
+                [DinhMucToiThieu] [float] NOT NULL DEFAULT 0
+            );
+        END";
+                    context.Database.ExecuteSqlRaw(sqlNguyenLieu);
+                }
+                catch { }
+
+                // 7. [MỚI] Tạo bảng Công Thức
+                try
+                {
+                    string sqlCongThuc = @"
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CongThuc]') AND type in (N'U'))
+        BEGIN
+            CREATE TABLE [dbo].[CongThuc](
+                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                [MaMon] [nvarchar](450) NOT NULL, -- Chú ý kiểu dữ liệu phải khớp MaMon cũ
+                [NguyenLieuId] [int] NOT NULL,
+                [SoLuongCan] [float] NOT NULL DEFAULT 0
+            );
+            -- Tạo Foreign Key (Tùy chọn, để đảm bảo dữ liệu chuẩn)
+        END";
+                    context.Database.ExecuteSqlRaw(sqlCongThuc);
+                }
+                catch { }
             }
         }
     }

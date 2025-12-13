@@ -191,15 +191,18 @@
     <Compile Include="Models\BanAn.cs" />
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\ChiTietHoaDon.cs" />
+    <Compile Include="Models\CongThuc.cs" />
     <Compile Include="Models\HoaDon.cs" />
     <Compile Include="Models\KhachHang.cs" />
     <Compile Include="Models\MonAn.cs" />
     <Compile Include="Models\NguoiDung.cs" />
+    <Compile Include="Models\NguyenLieu.cs" />
     <Compile Include="Services\BanAnRepository.cs" />
     <Compile Include="Services\DatabaseInitializer.cs" />
     <Compile Include="Services\DoanhThuRepository.cs" />
     <Compile Include="Services\ThucDonRepository.cs" />
     <Compile Include="ViewModels\Admin\AdminViewModel.cs" />
+    <Compile Include="ViewModels\Admin\KhoViewModel.cs" />
     <Compile Include="ViewModels\DangNhapViewModel.cs" />
     <Compile Include="ViewModels\Admin\DashboardVIewModel.cs" />
     <Compile Include="ViewModels\Admin\DoanhThuViewModel.cs" />
@@ -217,8 +220,14 @@
     <Compile Include="Views\Admin\KhachHangView.xaml.cs">
       <DependentUpon>KhachHangView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Admin\KhoView.xaml.cs">
+      <DependentUpon>KhoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Admin\ThanhToanWindow.xaml.cs">
       <DependentUpon>ThanhToanWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Admin\ThemNguyenLieuWindow.xaml.cs">
+      <DependentUpon>ThemNguyenLieuWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DangNhapView.xaml.cs">
       <DependentUpon>DangNhapView.xaml</DependentUpon>
@@ -293,7 +302,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Admin\KhoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Admin\ThanhToanWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Admin\ThemNguyenLieuWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
