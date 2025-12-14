@@ -96,7 +96,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
                             <TextBlock Text="BÀN HOẠT ĐỘNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
-                            <TextBlock Text="🍽️" FontSize="12" HorizontalAlignment="Right"/>
+                            <TextBlock Text="🍽️" FontSize="12" HorizontalAlignment="Right" Foreground="Orange"/>
                         </Grid>
                         <TextBlock Text="8 / 15" Foreground="#F59E0B" FontWeight="Bold" FontSize="22"/>
                         <TextBlock Text="Công suất: 53%" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
@@ -107,7 +107,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
                             <TextBlock Text="KHÁCH HÀNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
-                            <TextBlock Text="👥" FontSize="12" HorizontalAlignment="Right"/>
+                            <TextBlock Text="👥" FontSize="12" HorizontalAlignment="Right" Foreground="HotPink" />
                         </Grid>
                         <TextBlock Text="124" Foreground="#EC4899" FontWeight="Bold" FontSize="22"/>
                         <TextBlock Text="3 khách mới" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
