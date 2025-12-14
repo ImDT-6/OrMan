@@ -196,5 +196,19 @@ namespace OrMan.Services
                 }
             }
         }
+
+        // [MỚI] Hàm cập nhật thông tin bàn (Tên gọi,...)
+        public void UpdateTableInfo(int soBan, string tenGoi)
+        {
+            using (var context = new MenuContext())
+            {
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.TenGoi = tenGoi;
+                    context.SaveChanges();
+                }
+            }
+        }
     }
 }

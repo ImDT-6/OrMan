@@ -148,6 +148,20 @@ namespace OrMan.Services
                         context.Database.ExecuteSqlRaw(sqlBepBackup);
                     }
                     catch { }
+
+                    // ... (Các đoạn code cũ tạo bảng KhachHang, NguyenLieu...)
+
+                    // 9. [MỚI] Thêm cột TenGoi cho bảng BanAn
+                    try
+                    {
+                        string sqlTenGoi = @"
+        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TenGoi' AND Object_ID = Object_ID(N'BanAn'))
+        BEGIN
+            ALTER TABLE BanAn ADD TenGoi NVARCHAR(50) NULL;
+        END";
+                        context.Database.ExecuteSqlRaw(sqlTenGoi);
+                    }
+                    catch { }
                 }
             }
 

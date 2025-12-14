@@ -11,6 +11,25 @@ namespace OrMan.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int SoBan { get; set; }
 
+        // [MỚI] Lưu tên riêng của bàn (Ví dụ: "VIP 1", "Góc Sân")
+        private string _tenGoi;
+        public string TenGoi
+        {
+            get => _tenGoi;
+            set
+            {
+                if (_tenGoi != value)
+                {
+                    _tenGoi = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(TenBan)); // Cập nhật luôn hiển thị
+                }
+            }
+        }
+
+        // [SỬA] Logic hiển thị tên: Ưu tiên TenGoi, nếu không có thì lấy "Bàn XX"
+        public string TenBan => string.IsNullOrEmpty(TenGoi) ? $"Bàn {SoBan:00}" : TenGoi;
+
         private string _trangThai;
         public string TrangThai
         {
@@ -18,7 +37,6 @@ namespace OrMan.Models
             set { if (_trangThai != value) { _trangThai = value; OnPropertyChanged(); } }
         }
 
-        // [MỚI] Lưu hình thức thanh toán khách chọn (Tiền mặt, QR, Thẻ)
         private string _hinhThucThanhToan;
         public string HinhThucThanhToan
         {
@@ -36,12 +54,11 @@ namespace OrMan.Models
                 {
                     _yeuCauThanhToan = value;
                     OnPropertyChanged();
-                    OnPropertyChanged(nameof(HienThiYeuCau)); // Cập nhật text hiển thị
+                    OnPropertyChanged(nameof(HienThiYeuCau));
                 }
             }
         }
 
-        // [MỚI] Lưu nội dung yêu cầu hỗ trợ (Ví dụ: "Xin thêm nước")
         private string _yeuCauHoTro;
         public string YeuCauHoTro
         {
@@ -52,12 +69,11 @@ namespace OrMan.Models
                 {
                     _yeuCauHoTro = value;
                     OnPropertyChanged();
-                    OnPropertyChanged(nameof(HienThiYeuCau)); // Cập nhật text hiển thị
+                    OnPropertyChanged(nameof(HienThiYeuCau));
                 }
             }
         }
 
-        // [MỚI] Property phụ trợ để hiển thị trên Dashboard Admin
         public string HienThiYeuCau
         {
             get
@@ -68,17 +84,13 @@ namespace OrMan.Models
             }
         }
 
-        // [MỚI] Biến để kiểm soát trạng thái nút In/Thu tiền
         private bool _daInTamTinh;
-
-        [NotMapped] // Quan trọng: Dòng này báo cho DB biết là không cần lưu cột này vào SQL
+        [NotMapped]
         public bool DaInTamTinh
         {
             get => _daInTamTinh;
             set { if (_daInTamTinh != value) { _daInTamTinh = value; OnPropertyChanged(); } }
         }
-
-        public string TenBan => $"Bàn {SoBan:00}";
 
         protected BanAn() { }
 

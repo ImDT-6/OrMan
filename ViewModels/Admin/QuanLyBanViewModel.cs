@@ -84,7 +84,8 @@ namespace OrMan.ViewModels.Admin
         public ICommand AddTableCommand { get; private set; }
         public ICommand DeleteTableCommand { get; private set; }
         public ICommand PrintBillCommand { get; private set; }
-
+        // [MỚI] Command lưu cài đặt bàn (Đổi tên)
+        public ICommand SaveTableSettingsCommand { get; private set; }
         public QuanLyBanViewModel()
         {
             _repository = new BanAnRepository();
@@ -94,7 +95,6 @@ namespace OrMan.ViewModels.Admin
 
             SelectTableCommand = new RelayCommand<BanAn>(ban =>
             {
-                if (IsEditMode) return;
                 SelectedBan = ban;
             });
 
@@ -165,6 +165,18 @@ namespace OrMan.ViewModels.Admin
                     SelectedBan.DaInTamTinh = true;
                     MessageBox.Show("Đã nhận lệnh In thành công! Trạng thái bàn đã đổi.", "Test");
                 }
+            });
+
+            // [MỚI] Logic lưu cài đặt bàn
+            SaveTableSettingsCommand = new RelayCommand<object>(p =>
+            {
+                if (SelectedBan == null) return;
+
+                // Gọi xuống Repository để lưu vào SQL
+                _repository.UpdateTableInfo(SelectedBan.SoBan, SelectedBan.TenGoi);
+
+                MessageBox.Show($"Đã lưu thông tin {SelectedBan.TenBan} thành công!",
+                                "Đã Lưu", MessageBoxButton.OK, MessageBoxImage.Information);
             });
 
             // ==========================================================
