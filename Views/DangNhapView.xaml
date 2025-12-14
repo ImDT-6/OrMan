@@ -53,6 +53,7 @@
                          Text="{Binding TaiKhoan, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                          Tag="{StaticResource IconUser}"
                          ToolTip="Tên đăng nhập" 
+                         Padding="45,0,45,0"
                          Margin="0,0,0,10"/>
 
                 <Grid Margin="0,0,0,25">
@@ -63,6 +64,7 @@
                              Text="{Binding MatKhau, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              Tag="{StaticResource IconLockVisible}"
                              ToolTip="Mật khẩu"
+                             Padding="45,0,45,0"
                              PreviewKeyDown="txtVisiblePass_PreviewKeyDown"
                              Visibility="{Binding ElementName=btnEye, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
@@ -76,6 +78,7 @@
                                  ToolTip="Mật khẩu">
                         <PasswordBox.Style>
                             <Style TargetType="PasswordBox" BasedOn="{StaticResource GlassPasswordBox}">
+                                <Setter Property="Padding" Value="45,0,45,0"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ElementName=btnEye, Path=IsChecked}" Value="True">
                                         <Setter Property="Visibility" Value="Collapsed"/>
