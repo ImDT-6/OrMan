@@ -174,41 +174,328 @@
 
         <!-- HEADER AREA (Cột phải, Hàng trên) -->
         <Border Grid.Row="0" Grid.Column="1" Height="120" Margin="20,20,20,10" CornerRadius="20" ClipToBounds="True">
-
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                    <GradientStop Color="#1A103C" Offset="0"/>
-                    <GradientStop Color="#2D1B69" Offset="0.4"/>
-                    <GradientStop Color="#4A3088" Offset="0.8"/>
-                    <GradientStop Color="#5D4099" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
-
             <Grid>
-                <Canvas>
-                    <Ellipse Width="3" Height="3" Fill="White" Opacity="0.8" Canvas.Left="50" Canvas.Top="30"/>
-                    <Ellipse Width="4" Height="4" Fill="White" Opacity="0.9" Canvas.Left="400" Canvas.Top="15"/>
-                    <Ellipse Width="2" Height="2" Fill="White" Opacity="0.5" Canvas.Right="200" Canvas.Top="30"/>
-                    <Path Data="M10,0 L12,7 L19,7 L13,11 L15,18 L10,14 L5,18 L7,11 L1,7 L8,7 Z" Fill="#FFFFE0" Canvas.Right="80" Canvas.Top="50" Width="8" Height="8" Opacity="0.7"/>
-                </Canvas>
+                <Grid x:Name="GridMorning" Visibility="Collapsed">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#4FC3F7" Offset="0"/>
+                            <GradientStop Color="#B3E5FC" Offset="0.4"/>
+                            <GradientStop Color="#C8E6C9" Offset="0.7"/>
+                            <GradientStop Color="LightGreen" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
 
-                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="250,-40,0,10" Width="130" Height="130">
-                    <Ellipse Width="110" Height="110" Fill="#40FFFFFF" Margin="95,12,-75,8">
+                    <Canvas>
+                        <Ellipse Fill="#80FFFFFF" Width="120" Height="70" Canvas.Left="-30" Canvas.Top="25" Opacity="0.6"/>
+                        <Ellipse Fill="#80FFFFFF" Width="150" Height="80" Canvas.Left="60" Canvas.Top="15" Opacity="0.4"/>
+                        <Ellipse Fill="#80FFFFFF" Width="130" Height="70" Canvas.Right="-20" Canvas.Top="30" Opacity="0.5"/>
+                    </Canvas>
+
+                    <Ellipse Width="65" Height="65" Fill="#FFF9C4" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,70,0">
                         <Ellipse.Effect>
-                            <BlurEffect Radius="35"/>
+                            <DropShadowEffect Color="#FFF176" BlurRadius="35" ShadowDepth="0" Opacity="0.9"/>
                         </Ellipse.Effect>
                     </Ellipse>
-                    <Path Data="M20,10 A40,40 0 1,1 10,70 A30,30 0 1,0 20,10 Z" 
-          Fill="#FFFDD0" Stretch="Uniform" Width="45" Height="45" Margin="128,45,-43,40">
-                        <Path.Effect>
-                            <DropShadowEffect Color="White" BlurRadius="20" ShadowDepth="0" Opacity="0.8"/>
-                        </Path.Effect>
-                    </Path>
+
+                    <Canvas>
+                        <Ellipse Fill="#B0FFFFFF" Width="90" Height="55" Canvas.Left="30" Canvas.Top="55"/>
+                        <Ellipse Fill="#B0FFFFFF" Width="110" Height="65" Canvas.Left="100" Canvas.Top="50"/>
+                        <Ellipse Fill="#B0FFFFFF" Width="100" Height="60" Canvas.Right="40" Canvas.Top="60"/>
+                    </Canvas>
+
+                    <Grid VerticalAlignment="Bottom" Height="60">
+                        <Path Data="M0,35 Q200,10 400,35 T800,35 V60 H0 Z" Fill="#81C784" Stretch="Fill"/>
+                        <Path Data="M0,45 Q300,20 600,45 T1200,45 V60 H0 Z" Fill="#9CCC65" Stretch="Fill" Margin="0,5,0,0"/>
+                    </Grid>
+
+                    <Grid VerticalAlignment="Bottom" Margin="0,0,0,5">
+                        <Canvas Margin="30,0,0,0" HorizontalAlignment="Left" Width="50" Height="70">
+                            <Rectangle Fill="#795548" Width="6" Height="30" Canvas.Left="22" Canvas.Top="40"/>
+                            <Ellipse Fill="#66BB6A" Width="50" Height="50" Canvas.Top="0"/>
+                        </Canvas>
+                        <Canvas Margin="85,0,0,5" HorizontalAlignment="Left" Width="35" Height="55">
+                            <Rectangle Fill="#795548" Width="5" Height="25" Canvas.Left="15" Canvas.Top="30"/>
+                            <Ellipse Fill="#4CAF50" Width="35" Height="40" Canvas.Top="0"/>
+                        </Canvas>
+
+                        <Canvas Margin="0,0,60,0" HorizontalAlignment="Right" Width="50" Height="70">
+                            <Rectangle Fill="#795548" Width="6" Height="30" Canvas.Left="22" Canvas.Top="40"/>
+                            <Ellipse Fill="#66BB6A" Width="50" Height="50" Canvas.Top="0"/>
+                        </Canvas>
+                        <Canvas Margin="0,0,20,5" HorizontalAlignment="Right" Width="40" Height="60">
+                            <Rectangle Fill="#795548" Width="5" Height="25" Canvas.Left="17.5" Canvas.Top="35"/>
+                            <Ellipse Fill="#81C784" Width="40" Height="45" Canvas.Top="0"/>
+                        </Canvas>
+                        <Canvas Margin="0,0,120,10" HorizontalAlignment="Right" Width="30" Height="45">
+                            <Rectangle Fill="#795548" Width="4" Height="20" Canvas.Left="13" Canvas.Top="25"/>
+                            <Ellipse Fill="#4CAF50" Width="30" Height="35" Canvas.Top="0"/>
+                        </Canvas>
+                    </Grid>
                 </Grid>
 
-                <Grid VerticalAlignment="Bottom" Height="60">
-                    <Path Data="M0,40 C200,20 400,60 600,40 S900,20 1200,50 V60 H0 Z" Fill="#20000000" Stretch="Fill"/>
-                    <Path Data="M0,60 C150,40 300,70 450,50 S700,20 900,50 S1200,30 1500,60 V80 H0 Z" Fill="#3E2778" Stretch="Fill" Margin="0,10,0,-10"/>
+                <Grid x:Name="GridNoon" Visibility="Visible">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#0277BD" Offset="0"/>
+                            <GradientStop Color="#29B6F6" Offset="0.3"/>
+                            <GradientStop Color="#81D4FA" Offset="0.55"/>
+                            <GradientStop Color="#FFF9C4" Offset="0.8"/>
+                            <GradientStop Color="#FFFFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.RenderTransform>
+                            <TranslateTransform Y="-80"/>
+                        </Grid.RenderTransform>
+
+                        <Ellipse Width="1000" Height="1000" Opacity="0.4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#60FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#30FFF176" Offset="0.3"/>
+                                    <GradientStop Color="Transparent" Offset="0.8"/>
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+
+                        <Grid x:Name="SunRaysContainer">
+                            <Grid.Resources>
+                                <Style TargetType="Rectangle" x:Key="SoftRayStyle">
+                                    <Setter Property="Width" Value="60"/>
+                                    <Setter Property="Height" Value="800"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Top"/>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,1"/>
+                                    <Setter Property="Margin" Value="0,-800,0,0"/>
+                                    <Setter Property="Fill">
+                                        <Setter.Value>
+                                            <RadialGradientBrush Center="0.5,1" GradientOrigin="0.5,1" RadiusX="0.5" RadiusY="2">
+                                                <GradientStop Color="#A0FFFFE0" Offset="0"/>
+                                                <GradientStop Color="#40FFF59D" Offset="0.3"/>
+                                                <GradientStop Color="Transparent" Offset="0.7"/>
+                                            </RadialGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <BlurEffect Radius="20" RenderingBias="Performance"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Grid.Resources>
+
+                            <Rectangle Style="{StaticResource SoftRayStyle}"/>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="30"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="60"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="90"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="120"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="150"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="180"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="210"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="240"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="270"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="300"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="330"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="15"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="45"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="75"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="105"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="135"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="165"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="195"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="225"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="255"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="285"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="315"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Style="{StaticResource SoftRayStyle}" Opacity="0.5" Width="40">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="345"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+
+                        <Ellipse Width="140" Height="140" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse.Fill>
+                                <SolidColorBrush Color="#FFFFFF"/>
+                            </Ellipse.Fill>
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#FFFFF176" BlurRadius="80" ShadowDepth="0" Opacity="1"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <Ellipse Width="110" Height="110" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5">
+                                    <GradientStop Color="#FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#FFFFEB3B" Offset="0.5"/>
+                                    <GradientStop Color="#FFFBC02D" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+
+                    <Grid VerticalAlignment="Bottom" Height="40">
+                        <Path Data="M0,40 C300,10 600,60 900,20 V40 H0 Z" Fill="#80DEEA" Stretch="Fill"/>
+                        <Path Data="M0,40 C300,10 600,60 900,20 V40 H0 Z" Fill="#40B2DFDB" Stretch="Fill" Margin="-50,5,0,0"/>
+                    </Grid>
+
+                    <Grid VerticalAlignment="Bottom" Margin="0,0,40,5" HorizontalAlignment="Right" Opacity="0.9">
+                        <Ellipse Width="25" Height="8" Fill="#004D40" Margin="0,23,0,0" Opacity="0.6"/>
+                        <Path Data="M5,30 L10,0 L15,30 Z" Fill="#00695C" Height="25" Width="8" Stretch="Fill"/>
+                        <Ellipse Width="30" Height="30" Fill="#009688" Margin="-10,0,0,18"/>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="GridAfternoon" Visibility="Collapsed">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#FF7043" Offset="0"/>
+                            <GradientStop Color="#4A148C" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,-30">
+                        <Ellipse Width="260" Height="260" Fill="#20FFEB3B"/>
+                        <Ellipse Width="180" Height="180" Fill="#40FFC107"/>
+                        <Ellipse Width="100" Height="100">
+                            <Ellipse.Fill>
+                                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                    <GradientStop Color="#FFEE58" Offset="0"/>
+                                    <GradientStop Color="#FF9800" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+                    <Grid VerticalAlignment="Bottom" Height="60">
+                        <Path Data="M0,30 C200,50 400,10 600,30 S900,50 1200,20 V60 H0 Z" Fill="#311B92" Opacity="0.7" Stretch="Fill"/>
+                        <Path Data="M0,40 C150,20 300,50 450,30 S700,0 900,30 S1200,10 1500,40 V60 H0 Z" Fill="#1A237E" Stretch="Fill" Margin="0,10,0,0"/>
+                    </Grid>
+                    <Grid VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,0">
+                        <Path Data="M10,80 L30,10 L50,80 Z" Fill="#1A237E" Margin="0,0,0,-10" Height="60" Stretch="Fill" Width="30"/>
+                        <Path Data="M40,60 L55,20 L70,60 Z" Fill="#1A237E" Margin="30,0,0,0" Height="40" Stretch="Fill" Width="20"/>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="GridNight" Visibility="Visible">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#1A103C" Offset="0"/>
+                            <GradientStop Color="#4A3088" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Canvas>
+                        <Ellipse Width="3" Height="3" Fill="White" Opacity="0.8" Canvas.Left="50" Canvas.Top="30"/>
+                        <Ellipse Width="4" Height="4" Fill="White" Opacity="0.9" Canvas.Left="400" Canvas.Top="15"/>
+                        <Path Data="M10,0 L12,7 L19,7 L13,11 L15,18 L10,14 L5,18 L7,11 L1,7 L8,7 Z" Fill="#FFFFE0" Canvas.Right="80" Canvas.Top="50" Width="8" Height="8" Opacity="0.7"/>
+                    </Canvas>
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="250,-40,0,10" Width="130" Height="130">
+                        <Ellipse Width="110" Height="110" Fill="#40FFFFFF" Margin="95,12,-75,8">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="35"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        <Path Data="M20,10 A40,40 0 1,1 10,70 A30,30 0 1,0 20,10 Z" Fill="#FFFDD0" Stretch="Uniform" Width="45" Height="45" Margin="128,45,-43,40">
+                            <Path.Effect>
+                                <DropShadowEffect Color="White" BlurRadius="20" ShadowDepth="0" Opacity="0.8"/>
+                            </Path.Effect>
+                        </Path>
+                    </Grid>
+                    <Grid VerticalAlignment="Bottom" Height="60">
+                        <Path Data="M0,60 C150,40 300,70 450,50 S700,20 900,50 S1200,30 1500,60 V80 H0 Z" Fill="#3E2778" Stretch="Fill" Margin="0,10,0,-10"/>
+                    </Grid>
+                    <Grid VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,50,0">
+                        <Path Data="M20,100 Q40,0 60,100 Z" Fill="#24124d" Height="70" Stretch="Fill" Width="40" Margin="0,0,0,-10"/>
+                        <Path Data="M0,80 Q15,20 30,80 Z" Fill="#24124d" Height="50" Stretch="Fill" Width="25" Margin="-20,0,0,-5"/>
+                    </Grid>
                 </Grid>
 
                 <Grid VerticalAlignment="Top" Margin="30,25,40,0">
@@ -220,59 +507,60 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <Border Width="70" Height="70" CornerRadius="35" BorderBrush="White" BorderThickness="1" Background="#15FFFFFF">
-                            <Viewbox Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5">
-                                <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
-              Fill="White"/>
+                            <Viewbox Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.8">
+                                <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" Fill="White"/>
                             </Viewbox>
                         </Border>
-
                         <StackPanel VerticalAlignment="Center" Margin="20,0,0,0">
                             <TextBlock Name="txtGreeting" Text="Chào buổi tối" Foreground="White" FontSize="26" FontWeight="Bold">
                                 <TextBlock.Effect>
-                                    <DropShadowEffect ShadowDepth="2" BlurRadius="2" Opacity="0.3"/>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.5"/>
                                 </TextBlock.Effect>
                             </TextBlock>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="{Binding TenHienThi, FallbackValue='Hôm nay của bạn thế nào?'}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding TenHienThi, FallbackValue='Hôm nay của bạn thế nào?'}" Foreground="White" FontSize="16" FontWeight="SemiBold">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.5"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
                                 <Border Background="#40FFFFFF" CornerRadius="10" Margin="10,0,0,0" Padding="10,2">
-                                    <TextBlock Text="Ăn ngon miệng nha" Foreground="#EEE" FontSize="11" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Phục vụ" Foreground="#EEE" FontSize="11" VerticalAlignment="Center"/>
                                 </Border>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-
-                        <TextBox Style="{StaticResource SearchTextBoxStyle}" 
-                         ToolTip="{DynamicResource Str_Search_Placeholder}" 
-                         Width="220" Height="45" 
-                         VerticalAlignment="Center" Margin="0,0,20,0"/>
-
-                        <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" 
-                        Width="150" Height="45" Margin="0,0,10,0" 
-                        Background="#20F59E0B" ToolTip="Gọi phục vụ">
+                        <TextBox Style="{StaticResource SearchTextBoxStyle}" ToolTip="{DynamicResource Str_Search_Placeholder}" Width="220" Height="45" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                        <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" Width="150" Height="45" Margin="0,0,10,0" Background="#20F59E0B" ToolTip="Gọi phục vụ">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{DynamicResource Str_Call_Staff}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Button>
-
-                        <Button Command="{Binding ChonBanCommand}" 
-                        Style="{StaticResource SocialButtonStyle}" 
-                        Height="45" Width="90" Margin="0,0,10,0" Padding="15,0"
-                        Background="#20FFFFFF" ToolTip="{DynamicResource Str_Table}">
+                        <Button Command="{Binding ChonBanCommand}" Style="{StaticResource SocialButtonStyle}" Height="45" Width="90" Margin="0,0,10,0" Padding="15,0" Background="#20FFFFFF" ToolTip="{DynamicResource Str_Table}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{DynamicResource Str_Table}" Foreground="White" Margin="0,3,5,0"/>
                                 <TextBlock Text="{Binding TableDisplayText}" Foreground="White" FontWeight="Bold" FontSize="16"/>
                                 <TextBlock Text=" ▼" Foreground="White" Margin="1,2,5,0" FontSize="10" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-
-                        <Button Content="{DynamicResource Str_Exit}" Tag="{StaticResource IconLogoutGeo}" 
-                        Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" 
-                        Foreground="{StaticResource DangerRed}" Background="#10EF4444" 
-                        Height="45" Padding="15,0" Margin="0"/>
+                        <Button Content="{DynamicResource Str_Exit}" Tag="{StaticResource IconLogoutGeo}" Click="BtnDangXuat_Click" Style="{StaticResource NavButtonStyle}" Foreground="{StaticResource DangerRed}" Background="#10EF4444" Height="45" Padding="15,0" Margin="0"/>
                     </StackPanel>
                 </Grid>
+                <Border VerticalAlignment="Top" HorizontalAlignment="Center" 
+        Background="#80000000" Margin="0,10,0,0" 
+        Padding="10,5" CornerRadius="15">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Giờ giả lập: " Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ElementName=TestTimeSlider, Path=Value, StringFormat={}{0:00}h}" 
+                   Foreground="#FFEB3B" FontWeight="Bold" Width="30" VerticalAlignment="Center"/>
+
+                        <Slider x:Name="TestTimeSlider" Width="150" Minimum="0" Maximum="23" Value="8" 
+                IsSnapToTickEnabled="True" TickFrequency="1" 
+                VerticalAlignment="Center" Margin="10,0"
+                ValueChanged="TestTimeSlider_ValueChanged"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 

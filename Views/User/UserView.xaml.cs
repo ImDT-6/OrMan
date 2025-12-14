@@ -48,30 +48,79 @@ namespace OrMan.Views.User
             _clockTimer?.Stop();
         }
 
-        private void UpdateGreeting()
+        private void TestTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Khi kéo slider, gọi hàm update với giá trị của slider
+            // Ép kiểu double sang int
+            if (_vm != null) // check null cho chắc
+            {
+                UpdateGreeting((int)e.NewValue);
+
+                // Mẹo: Tạm dừng cái ClockTimer lại để nó không tự reset về giờ thật sau 30s
+                if (_clockTimer != null && _clockTimer.IsEnabled)
+                    _clockTimer.Stop();
+            }
+        }
+        private void UpdateGreeting(int? fakeHour = null)
         {
             var now = DateTime.Now;
-            int hour = now.Hour;
-            string greetingKey;
+            int hour = fakeHour ?? now.Hour;
 
-            if (hour >= 5 && hour < 11) greetingKey = "Str_GoodMorning";
-            else if (hour >= 11 && hour < 14) greetingKey = "Str_GoodAfternoon";
-            else if (hour >= 14 && hour < 18) greetingKey = "Str_GoodEvening";
-            else greetingKey = "Str_GoodNight";
+            // Reset ẩn hết các background
+            if (GridMorning != null) GridMorning.Visibility = Visibility.Collapsed;
+            if (GridNoon != null) GridNoon.Visibility = Visibility.Collapsed;
+            if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Collapsed;
+            if (GridNight != null) GridNight.Visibility = Visibility.Collapsed;
 
-            // Lấy chuỗi từ Resource Dictionary hiện tại
-            string greetingText = Application.Current.TryFindResource(greetingKey) as string;
-            string guestText = Application.Current.TryFindResource("Str_Guest") as string;
+            string greetingText = "Xin chào";
 
-            // Fallback nếu không tìm thấy resource
-            if (string.IsNullOrEmpty(greetingText)) greetingText = "Hello";
-            if (string.IsNullOrEmpty(guestText)) guestText = "Guest";
+            // --- LOGIC CHIA GIỜ VÀ SET TEXT ---
+            if (hour >= 5 && hour < 11) // Sáng (5h - 11h)
+            {
+                if (GridMorning != null) GridMorning.Visibility = Visibility.Visible;
 
-            string fullGreeting = $"{greetingText}, {guestText}";
+                // Cố gắng lấy từ Resource, nếu không có thì gán cứng
+                string res = Application.Current.TryFindResource("Str_GoodMorning") as string;
+                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi sáng";
+            }
+            else if (hour >= 11 && hour < 14) // Trưa (11h - 14h)
+            {
+                if (GridNoon != null) GridNoon.Visibility = Visibility.Visible;
 
+                // Có thể bạn chưa có key "Str_GoodNoon", nên dùng fallback
+                string res = Application.Current.TryFindResource("Str_GoodNoon") as string;
+                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi trưa";
+            }
+            else if (hour >= 14 && hour < 18) // Chiều (14h - 18h)
+            {
+                if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Visible;
+
+                string res = Application.Current.TryFindResource("Str_GoodAfternoon") as string;
+                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi chiều";
+            }
+            else // Tối (18h - 5h sáng hôm sau)
+            {
+                if (GridNight != null) GridNight.Visibility = Visibility.Visible;
+
+                // Tối muộn thì Chúc ngủ ngon, còn mới tối thì Chào buổi tối
+                string key = (hour >= 22 || hour < 4) ? "Str_GoodNight" : "Str_GoodEvening";
+
+                string res = Application.Current.TryFindResource(key) as string;
+                // Fallback text Việt hóa luôn cho chắc
+                if (string.IsNullOrEmpty(res))
+                {
+                    greetingText = (key == "Str_GoodNight") ? "Chúc ngủ ngon" : "Chào buổi tối";
+                }
+                else
+                {
+                    greetingText = res;
+                }
+            }
+
+            // Cập nhật lên giao diện
             if (txtGreeting != null)
             {
-                txtGreeting.Text = fullGreeting;
+                txtGreeting.Text = greetingText;
             }
         }
 
