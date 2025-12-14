@@ -145,22 +145,24 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Style="{StaticResource DataGridActionButtonStyle}" 
-                                                ToolTip="Sửa thông tin"
-                                                Background="Transparent" Foreground="#A0AEC0" 
-                                                Padding="5" Margin="0,0,5,0">
+                                        <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                        CommandParameter="{Binding}"
+                        Style="{StaticResource DataGridActionButtonStyle}" 
+                        ToolTip="Sửa thông tin"
+                        Background="Transparent" Foreground="#A0AEC0" 
+                        Padding="5" Margin="0,0,5,0">
                                             <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" 
-                                                  Fill="#3B82F6" Width="14" Height="14" Stretch="Uniform"/>
+                          Fill="#3B82F6" Width="14" Height="14" Stretch="Uniform"/>
                                         </Button>
 
                                         <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource DataGridActionButtonStyle}" 
-                                                ToolTip="Xóa khách hàng"
-                                                Background="Transparent" Foreground="#EF4444" 
-                                                Padding="5">
+                        CommandParameter="{Binding}"
+                        Style="{StaticResource DataGridActionButtonStyle}" 
+                        ToolTip="Xóa khách hàng"
+                        Background="Transparent" Foreground="#EF4444" 
+                        Padding="5">
                                             <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" 
-                                                  Fill="#EF4444" Width="14" Height="14" Stretch="Uniform"/>
+                          Fill="#EF4444" Width="14" Height="14" Stretch="Uniform"/>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
