@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging; // Quan trọng: Để xử lý ảnh Bitmap
+using System.Windows.Media;           // [QUAN TRỌNG] Thêm dòng này để dùng FontFamily
+using System.Windows.Media.Imaging;   // Để xử lý ảnh Bitmap (QR Code)
+using System.Windows.Documents;       // [QUAN TRỌNG] Để dùng FlowDocument, Paragraph...
+using System.Windows.Markup;          // Để dùng XamlWriter (nếu cần)
 using OrMan.Models;
 
 namespace OrMan.Views.Admin
@@ -71,8 +74,6 @@ namespace OrMan.Views.Admin
                 // Nếu là Tiền mặt hoặc Thẻ -> Ẩn QR
                 if (pnlQR != null) pnlQR.Visibility = Visibility.Collapsed;
             }
-
-
         }
 
         private void BtnIn_Click(object sender, RoutedEventArgs e)
@@ -80,14 +81,76 @@ namespace OrMan.Views.Admin
             PrintDialog printDialog = new PrintDialog();
             if (printDialog.ShowDialog() == true)
             {
-                // Chuẩn bị in: Tắt bóng đổ và margin để in sát lề
-                BillArea.Effect = null;
-                BillArea.Margin = new Thickness(0);
+                // [CÁCH MỚI] Tạo FlowDocument để in sắc nét
+                FlowDocument doc = new FlowDocument();
+                doc.PagePadding = new Thickness(10);
+                doc.ColumnWidth = printDialog.PrintableAreaWidth; // Tự chỉnh theo khổ giấy
 
-                // Lệnh in vùng BillArea
-                printDialog.PrintVisual(BillArea, "Hoa Don Thanh Toan");
+                // [ĐÃ SỬA] Dòng này sẽ hết lỗi vì đã có using System.Windows.Media
+                doc.FontFamily = new FontFamily("Arial");
 
-                // In xong thì đóng cửa sổ và báo thành công
+                // 1. Tiêu đề
+                Paragraph title = new Paragraph(new Run("HÓA ĐƠN THANH TOÁN"));
+                title.FontSize = 16;
+                title.FontWeight = FontWeights.Bold;
+                title.TextAlignment = TextAlignment.Center;
+                doc.Blocks.Add(title);
+
+                // 2. Thông tin chung
+                Paragraph info = new Paragraph();
+                info.FontSize = 12;
+                info.Inlines.Add(new Run($"Bàn: {txtBan.Text}\n"));
+                info.Inlines.Add(new Run($"{txtMaHD.Text}\n"));
+                info.Inlines.Add(new Run($"Ngày: {txtNgay.Text}"));
+                info.TextAlignment = TextAlignment.Left;
+                doc.Blocks.Add(info);
+
+                // 3. Kẻ ngang
+                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")) { TextAlignment = TextAlignment.Center });
+
+                // 4. Danh sách món (Lấy từ ItemsSource của ListBox)
+                var listMon = ListMonAn.ItemsSource as IEnumerable<OrMan.Models.ChiTietHoaDon>;
+                if (listMon != null)
+                {
+                    Table table = new Table();
+                    // Định nghĩa 3 cột: Tên, SL, Tiền
+                    table.Columns.Add(new TableColumn() { Width = new GridLength(3, GridUnitType.Star) }); // Tên rộng nhất
+                    table.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) }); // SL
+                    table.Columns.Add(new TableColumn() { Width = new GridLength(1.5, GridUnitType.Star) }); // Thành tiền
+
+                    TableRowGroup group = new TableRowGroup();
+                    foreach (var item in listMon)
+                    {
+                        TableRow row = new TableRow();
+                        row.Cells.Add(new TableCell(new Paragraph(new Run(item.TenMonHienThi))));
+                        row.Cells.Add(new TableCell(new Paragraph(new Run(item.SoLuong.ToString())) { TextAlignment = TextAlignment.Center }));
+                        row.Cells.Add(new TableCell(new Paragraph(new Run(item.ThanhTien.ToString("N0"))) { TextAlignment = TextAlignment.Right }));
+                        group.Rows.Add(row);
+                    }
+                    table.RowGroups.Add(group);
+                    doc.Blocks.Add(table);
+                }
+
+                // 5. Kẻ ngang & Tổng tiền
+                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")) { TextAlignment = TextAlignment.Center });
+                Paragraph total = new Paragraph();
+                total.FontSize = 14;
+                total.FontWeight = FontWeights.Bold;
+                total.Inlines.Add(new Run("TỔNG CỘNG: " + txtTongTien.Text));
+                total.TextAlignment = TextAlignment.Right;
+                doc.Blocks.Add(total);
+
+                // 6. Footer
+                Paragraph footer = new Paragraph(new Run("Cảm ơn quý khách & Hẹn gặp lại!"));
+                footer.FontSize = 10;
+                footer.FontStyle = FontStyles.Italic;
+                footer.TextAlignment = TextAlignment.Center;
+                doc.Blocks.Add(footer);
+
+                // In Document thay vì in Visual
+                IDocumentPaginatorSource idpSource = doc;
+                printDialog.PrintDocument(idpSource.DocumentPaginator, "Hoa Don Ban " + txtBan.Text);
+
                 this.DialogResult = true;
             }
         }

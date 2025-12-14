@@ -150,23 +150,7 @@ namespace OrMan.Services
                     // 1. Lấy tất cả món đã ăn trong hóa đơn này
                     var chiTietHD = context.ChiTietHoaDons.Where(x => x.MaHoaDon == maHoaDon).ToList();
 
-                    foreach (var item in chiTietHD)
-                    {
-                        // 2. Tìm công thức của từng món
-                        var congThucs = context.CongThucs.Where(ct => ct.MaMon == item.MaMon).ToList();
-
-                        foreach (var ct in congThucs)
-                        {
-                            // 3. Tìm nguyên liệu trong kho
-                            var nguyenLieu = context.NguyenLieus.Find(ct.NguyenLieuId);
-                            if (nguyenLieu != null)
-                            {
-                                // 4. Trừ tồn kho: (Định lượng 1 món) * (Số lượng khách gọi)
-                                double soLuongTru = ct.SoLuongCan * item.SoLuong;
-                                nguyenLieu.SoLuongTon -= soLuongTru;
-                            }
-                        }
-                    }
+                    
                     // ---------------------------
                 }
 

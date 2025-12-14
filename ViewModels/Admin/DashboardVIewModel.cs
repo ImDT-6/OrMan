@@ -129,7 +129,7 @@ namespace OrMan.ViewModels
                 }
             }
         }
-
+        private int _previousRequestCount = 0;
         private void LoadDashboardData()
         {
             decimal totalToday = _doanhThuRepo.GetTodayRevenue();
@@ -160,6 +160,16 @@ namespace OrMan.ViewModels
 
             var allTables = _banRepo.GetAll();
             var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
+            // [CODE MỚI - LOGIC ÂM THANH]
+            if (urgentTables.Count > _previousRequestCount)
+            {
+                // Có yêu cầu mới -> Phát âm thanh hệ thống
+                System.Media.SystemSounds.Exclamation.Play();
+                // Hoặc nếu muốn tiếng Beep rõ hơn: 
+                // Console.Beep(800, 500); 
+            }
+            _previousRequestCount = urgentTables.Count;
+            // [HẾT CODE MỚI]
             if (BanCanXuLy == null || BanCanXuLy.Count != urgentTables.Count)
                 BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
 

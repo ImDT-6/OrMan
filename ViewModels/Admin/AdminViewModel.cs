@@ -1,49 +1,60 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using OrMan.Services; // Thêm namespace này
 
 namespace OrMan.ViewModels
 {
     public class AdminViewModel : INotifyPropertyChanged
     {
-        // Các biến lưu dữ liệu
-        private int _banDaDat;
-        private string _doanhThu;
-        private int _donChoBep;
+        // Khai báo Repository
+        private readonly BanAnRepository _banRepo;
+        private readonly DoanhThuRepository _doanhThuRepo;
 
-        // Property để Binding ra màn hình
+        private int _banDaDat;
         public int BanDaDat
         {
             get => _banDaDat;
             set { _banDaDat = value; OnPropertyChanged(); }
         }
 
+        private string _doanhThu;
         public string DoanhThu
         {
             get => _doanhThu;
             set { _doanhThu = value; OnPropertyChanged(); }
         }
 
-        public int DonChoBep
-        {
-            get => _donChoBep;
-            set { _donChoBep = value; OnPropertyChanged(); }
-        }
+        // Đã xóa DonChoBep vì logic bếp nằm ở ViewModel khác, 
+        // hoặc bạn có thể giữ lại và query từ ChiTietHoaDon nếu muốn.
 
         public AdminViewModel()
         {
-            // Giả lập load dữ liệu từ Database
+            _banRepo = new BanAnRepository();
+            _doanhThuRepo = new DoanhThuRepository();
             LoadDashboardData();
         }
 
         private void LoadDashboardData()
         {
-            // Số liệu giả
-            BanDaDat = 18;      // 18/30 bàn
-            DoanhThu = "8.5M";  // 8.5 Triệu
-            DonChoBep = 3;      // 3 đơn đang chờ
+            // [CODE MỚI - LẤY DỮ LIỆU THẬT]
+
+            // 1. Đếm số bàn có khách
+            var danhSachBan = _banRepo.GetAll();
+            // Đếm bàn có trạng thái không phải "Trống"
+            BanDaDat = System.Linq.Enumerable.Count(danhSachBan, b => b.TrangThai != "Trống");
+
+            // 2. Tính doanh thu hôm nay
+            decimal tongTien = _doanhThuRepo.GetTodayRevenue();
+
+            // Format rút gọn: 1.500.000 -> 1.5M
+            if (tongTien >= 1000000)
+                DoanhThu = (tongTien / 1000000).ToString("0.##") + "M";
+            else if (tongTien >= 1000)
+                DoanhThu = (tongTien / 1000).ToString("0.##") + "k";
+            else
+                DoanhThu = tongTien.ToString("N0");
         }
 
-        // Code chuẩn MVVM để thông báo thay đổi dữ liệu
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {

@@ -9,6 +9,8 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using OrMan.Data;
+using System.Windows.Threading; // [QUAN TRỌNG] Để dùng Timer
+using System; // Để dùng TimeSpan
 
 namespace OrMan.ViewModels.User
 {
@@ -17,6 +19,7 @@ namespace OrMan.ViewModels.User
         private readonly ThucDonRepository _repo;
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
+        private DispatcherTimer _timerCheckUpdate; // [MỚI] Timer để tự động cập nhật
 
         private KhachHang _currentCustomer;
         public KhachHang CurrentCustomer
@@ -57,6 +60,9 @@ namespace OrMan.ViewModels.User
             set { _tongSoLuong = value; OnPropertyChanged(); }
         }
 
+        // Biến lưu loại món đang xem (Mì Cay/Đồ Chiên...) để khi reload không bị nhảy về tab đầu
+        private string _currentCategoryTag = "Mì Cay";
+
         public ICommand CallStaffCommand { get; private set; }
         public ICommand ChonBanCommand { get; private set; }
 
@@ -64,11 +70,41 @@ namespace OrMan.ViewModels.User
         {
             _repo = new ThucDonRepository();
             _banRepo = new BanAnRepository();
+
             LoadData();
 
             CallStaffCommand = new RelayCommand<object>(CallStaff);
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
+
+            // [MỚI] KHỞI ĐỘNG CHẾ ĐỘ TỰ CẬP NHẬT
+            SetupAutoUpdate();
         }
+
+        // --- [LOGIC TỰ ĐỘNG CẬP NHẬT] ---
+        private void SetupAutoUpdate()
+        {
+            _timerCheckUpdate = new DispatcherTimer();
+            // Cứ 5 giây hỏi Database 1 lần
+            _timerCheckUpdate.Interval = TimeSpan.FromSeconds(5);
+            _timerCheckUpdate.Tick += (s, e) => ReloadMenuRealTime();
+            _timerCheckUpdate.Start();
+        }
+
+        private void ReloadMenuRealTime()
+        {
+            // 1. Lấy dữ liệu mới nhất từ SQL (Hàm GetAvailableMenu phải dùng new Context)
+            var newData = _repo.GetAvailableMenu();
+
+            // 2. Kiểm tra sơ bộ xem số lượng có thay đổi không
+            // (Hoặc nếu muốn kỹ hơn thì so sánh nội dung, nhưng check count cho nhanh)
+            if (newData.Count != (_allMonAn?.Count ?? 0))
+            {
+                _allMonAn = newData;
+                // Cập nhật lại giao diện theo Tab đang chọn
+                FilterMenu(_currentCategoryTag);
+            }
+        }
+        // --------------------------------
 
         // --- [SECTION GIỎ HÀNG] ---
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
@@ -134,37 +170,28 @@ namespace OrMan.ViewModels.User
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
-        // --- [SECTION KHÁCH HÀNG - ĐÃ SỬA] ---
-
-        // 1. Kiểm tra thành viên: Chỉ tìm, KHÔNG tự thêm
+        // --- [SECTION KHÁCH HÀNG] ---
         public KhachHang CheckMember(string phoneNumber)
         {
             using (var db = new MenuContext())
             {
                 var khach = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phoneNumber);
-
-                // Nếu tìm thấy thì cập nhật vào ViewModel
-                if (khach != null)
-                {
-                    CurrentCustomer = khach;
-                }
-                return khach; // Trả về null nếu chưa có
+                if (khach != null) CurrentCustomer = khach;
+                return khach;
             }
         }
 
-        // 2. Đăng ký thành viên mới: Lưu tên thật vào DB
         public KhachHang RegisterCustomer(string phone, string name)
         {
             using (var db = new MenuContext())
             {
-                // Kiểm tra trùng lần cuối
                 var existing = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
                 if (existing != null) return existing;
 
                 var newKhach = new KhachHang
                 {
                     SoDienThoai = phone,
-                    HoTen = name, // Lưu tên người dùng nhập
+                    HoTen = name,
                     HangThanhVien = "Khách Hàng Mới",
                     DiemTichLuy = 0
                 };
@@ -195,6 +222,9 @@ namespace OrMan.ViewModels.User
 
         public void FilterMenu(string loai)
         {
+            // Lưu lại loại đang chọn để dùng cho Timer reload
+            _currentCategoryTag = loai;
+
             if (_allMonAn == null) return;
             if (loai == "Mì Cay") MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
             else MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));

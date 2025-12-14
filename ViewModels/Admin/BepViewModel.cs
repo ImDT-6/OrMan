@@ -81,6 +81,7 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
+        // Thay thế nội dung hàm XongMon bằng đoạn này:
         private void XongMon(BepOrderItem item)
         {
             if (item == null || item.ChiTiet == null) return;
@@ -92,17 +93,31 @@ namespace OrMan.ViewModels.Admin
                     var ct = context.ChiTietHoaDons.Find(item.ChiTiet.Id);
                     if (ct != null)
                     {
-                        // Cập nhật trạng thái thành 1 (Đã xong)
+                        // 1. Cập nhật trạng thái
                         ct.TrangThaiCheBien = 1;
+
+                        // 2. [MỚI] TRỪ KHO NGAY TẠI ĐÂY
+                        // Tìm công thức của món này
+                        var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
+                        foreach (var congThuc in congThucs)
+                        {
+                            var nguyenLieu = context.NguyenLieus.Find(congThuc.NguyenLieuId);
+                            if (nguyenLieu != null)
+                            {
+                                // Trừ tồn kho: Định lượng * Số lượng món
+                                double soLuongTru = congThuc.SoLuongCan * ct.SoLuong;
+                                nguyenLieu.SoLuongTon -= soLuongTru;
+                            }
+                        }
+
                         context.SaveChanges();
                     }
                 }
-                // Tải lại dữ liệu ngay lập tức để cập nhật giao diện
                 LoadData();
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Lỗi cập nhật món: " + ex.Message);
+                System.Windows.MessageBox.Show("Lỗi cập nhật: " + ex.Message);
             }
         }
 
