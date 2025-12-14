@@ -34,29 +34,50 @@ namespace OrMan.Views
 
         private void PreloadMascotImages()
         {
+            mascotFrames.Clear(); // Xóa danh sách cũ
+
+            // 1. Load ảnh mặc định
             try
             {
-                // 1. Load ảnh mặc định (dùng Frame 1)
-                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/debut.png"));
+                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/debut.JPG"));
+                // Gán luôn để tránh null lúc đầu
                 imgMascot.Source = defaultImage;
-                // 2. Load ảnh che mắt
+            }
+            catch { /* Nếu lỗi thì thôi */ }
+
+            // 2. Load ảnh che mắt & không che
+            try
+            {
                 blindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_password.png"));
                 noblindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/nocover.jpg"));
+            }
+            catch { /* Nếu lỗi thì thôi */ }
 
-                // 3. Load chuỗi ảnh animation (từ 1 đến 20)
-                // Giả sử bạn có 20 ảnh: textbox_user_1.jpg -> textbox_user_20.jpg
-                // Nếu bạn có nhiều hơn, hãy sửa số 20 thành số lượng thực tế
-                for (int i = 0; i <= 24; i++)
+            // 3. Load chuỗi ảnh animation (Load kỹ từng tấm)
+            // Cho vòng lặp chạy dư ra cũng được (ví dụ tới 50), code sẽ tự lọc cái nào có thật mới lấy
+            for (int i = 0; i <= 50; i++)
+            {
+                try
                 {
+                    // Đường dẫn ảnh (hãy chắc chắn đuôi file là .jpg hay .png nhé)
                     string path = $"pack://application:,,,/Images/textbox_user_{i}.jpg";
-                    var bitmap = new BitmapImage(new Uri(path));
+
+                    // Tải ảnh vào RAM ngay lập tức (OnLoad) để kiểm tra sống/chết
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(path);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad; // QUAN TRỌNG: Tải ngay lập tức
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // Tối ưu hiệu năng
+
+                    // Nếu chạy được tới đây nghĩa là ảnh TỒN TẠI -> Thêm vào list
                     mascotFrames.Add(bitmap);
                 }
-            }
-            catch (Exception ex)
-            {
-                // Nếu thiếu ảnh thì thôi, không crash app
-                Console.WriteLine("Lỗi load ảnh Gấu: " + ex.Message);
+                catch
+                {
+                    // Nếu ảnh số 'i' không tồn tại -> Nó nhảy vào đây -> Không làm gì cả -> Bỏ qua.
+                    // Như vậy list mascotFrames chỉ chứa toàn ảnh "sạch".
+                }
             }
         }
 
@@ -70,27 +91,44 @@ namespace OrMan.Views
         }
 
         // Hàm cập nhật mặt gấu dựa trên độ dài chữ
+        // Hàm cập nhật mặt gấu an toàn
         private void UpdateBearFace()
         {
-            if (mascotFrames.Count == 0) return;
+            // Nếu không có ảnh nào thì thoát luôn, tránh lỗi
+            if (mascotFrames == null || mascotFrames.Count == 0) return;
 
-            int textLength = txtUser.Text.Length;
+            try
+            {
+                int textLength = txtUser.Text.Length;
 
-            if (textLength <= 0)
-            {
-                imgMascot.Source = defaultImage;
-            }
-            else
-            {
-                // Mapping: 1 ký tự = 1 khung hình. 
-                // Nếu gõ dài hơn số ảnh có sẵn thì lấy ảnh cuối cùng.
-                // Trừ 1 vì List bắt đầu từ 0 (Frame 1 là index 0)
+                // Nếu chưa nhập gì -> Hiện ảnh mặc định
+                if (textLength <= 0)
+                {
+                    if (defaultImage != null) imgMascot.Source = defaultImage;
+                    return;
+                }
+
+                // Tính toán vị trí ảnh (Index)
+                // Ký tự 1 -> Ảnh 0
                 int frameIndex = textLength - 1;
 
+                // [KHÓA CHỐT AN TOÀN]
+                // Nếu gõ dài hơn số lượng ảnh đang có -> Luôn lấy ảnh cuối cùng
                 if (frameIndex >= mascotFrames.Count)
-                    frameIndex = mascotFrames.Count - 1; // Giữ ở ảnh cuối
+                {
+                    frameIndex = mascotFrames.Count - 1;
+                }
 
+                // Nếu index bị âm (do lỗi nào đó) -> lấy ảnh 0
+                if (frameIndex < 0) frameIndex = 0;
+
+                // Hiển thị
                 imgMascot.Source = mascotFrames[frameIndex];
+            }
+            catch (Exception ex)
+            {
+                // Bắt lỗi để không bao giờ làm đơ bàn phím
+                System.Diagnostics.Debug.WriteLine("Lỗi UpdateBearFace: " + ex.Message);
             }
         }
 

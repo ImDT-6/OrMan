@@ -1,0 +1,66 @@
+﻿<Window x:Class="OrMan.Views.Admin.ThemKhachHangWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Thông Tin Khách Hàng" 
+        Height="420" Width="500"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border CornerRadius="20" Background="{StaticResource MainBackgroundGradient}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+        </Border.Effect>
+
+        <Grid Margin="30">
+            <StackPanel VerticalAlignment="Top" Margin="0,10,0,0">
+
+                <TextBlock Text="CẬP NHẬT KHÁCH HÀNG" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,30" HorizontalAlignment="Center"/>
+
+                <TextBox x:Name="txtPhone" 
+                        Style="{StaticResource GlassTextBox}" 
+                        Tag="{StaticResource IconPhone}" 
+                        ToolTip="Số điện thoại"
+                        Height="60" Margin="0,0,0,20"
+                        BorderBrush="#8B5CF6"
+                        Opacity="1"/>
+
+                <TextBox x:Name="txtName" 
+                         Style="{StaticResource GlassTextBox}" 
+                         Tag="{StaticResource IconUser}"
+                         ToolTip="Họ tên khách hàng"
+                         Height="60" Margin="0,0,0,35"
+                         BorderBrush="#8B5CF6"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Content="Hủy Bỏ" Click="BtnCancel_Click" 
+                            Style="{StaticResource GlassDismissButtonStyle}" 
+                            Height="50" FontSize="15"/>
+
+                    <Button Content="Lưu Thay Đổi" Click="BtnSave_Click" Grid.Column="2" 
+                            IsDefault="True"
+                            Style="{StaticResource GlassButtonStyle}" 
+                            Background="{StaticResource AccentGradient}" 
+                            Height="50" FontSize="15" FontWeight="Bold">
+                        <Button.Effect>
+                            <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                        </Button.Effect>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

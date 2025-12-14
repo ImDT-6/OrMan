@@ -47,7 +47,20 @@ namespace OrMan.ViewModels
         private string _axisMidHigh = "1.5M";
         private string _axisMid = "1M";
         private string _axisMidLow = "500k";
+        private string _banHoatDongText;
+        public string BanHoatDongText
+        {
+            get => _banHoatDongText;
+            set { _banHoatDongText = value; OnPropertyChanged(); }
+        }
 
+        // [MỚI] Thuộc tính hiển thị công suất (VD: "Công suất: 25%")
+        private string _congSuatText;
+        public string CongSuatText
+        {
+            get => _congSuatText;
+            set { _congSuatText = value; OnPropertyChanged(); }
+        }
         public string AxisMax { get => _axisMax; set { _axisMax = value; OnPropertyChanged(); } }
         public string AxisMidHigh { get => _axisMidHigh; set { _axisMidHigh = value; OnPropertyChanged(); } }
         public string AxisMid { get => _axisMid; set { _axisMid = value; OnPropertyChanged(); } }
@@ -96,6 +109,9 @@ namespace OrMan.ViewModels
             LoadDashboardData();
 
             BanAnRepository.OnPaymentSuccess += () => LoadDashboardData();
+
+            // [MỚI] Cập nhật ngay khi Thêm hoặc Xóa bàn
+            BanAnRepository.OnTableChanged += () => LoadDashboardData();
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(30);
@@ -159,6 +175,25 @@ namespace OrMan.ViewModels
             LoadChartData();
 
             var allTables = _banRepo.GetAll();
+            int tongSoBan = allTables.Count;
+
+            // Bàn có khách là bàn có trạng thái KHÁC "Trống"
+            int banCoKhach = allTables.Count(b => b.TrangThai != "Trống");
+
+            // Cập nhật text "X / Y"
+            BanHoatDongText = $"{banCoKhach} / {tongSoBan}";
+
+            // Tính phần trăm công suất
+            if (tongSoBan > 0)
+            {
+                double phanTram = ((double)banCoKhach / tongSoBan) * 100;
+                CongSuatText = $"Công suất: {phanTram:0}%";
+            }
+            else
+            {
+                CongSuatText = "Công suất: 0%";
+            }
+
             var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
             // [CODE MỚI - LOGIC ÂM THANH]
             if (urgentTables.Count > _previousRequestCount)

@@ -10,6 +10,8 @@ namespace OrMan.Services
 {
     public class BanAnRepository
     {
+        public static event Action OnTableChanged;
+
         private readonly MenuContext _context;
 
         public BanAnRepository()
@@ -45,10 +47,12 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 int maxSoBan = context.BanAns.Any() ? context.BanAns.Max(b => b.SoBan) : 0;
-                // Constructor của BanAn nhận (SoBan, TrangThai)
                 var newBan = new BanAn(maxSoBan + 1, "Trống");
                 context.BanAns.Add(newBan);
                 context.SaveChanges();
+
+                // [MỚI] 2. Bắn tín hiệu cập nhật
+                OnTableChanged?.Invoke();
             }
         }
 
@@ -58,11 +62,13 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 var ban = context.BanAns.Find(soBan);
-                // Chỉ xóa được nếu bàn Trống và không nợ tiền
                 if (ban != null && ban.TrangThai == "Trống" && ban.YeuCauThanhToan == false)
                 {
                     context.BanAns.Remove(ban);
                     context.SaveChanges();
+
+                    // [MỚI] 3. Bắn tín hiệu cập nhật
+                    OnTableChanged?.Invoke();
                     return true;
                 }
                 return false;
