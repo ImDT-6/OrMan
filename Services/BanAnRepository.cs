@@ -128,10 +128,36 @@ namespace OrMan.Services
         {
             using (var context = new MenuContext())
             {
-                return context.ChiTietHoaDons
-                           .Include(ct => ct.MonAn) // Tạm bỏ include nếu model chưa update relation
+                // 1. Lấy toàn bộ dữ liệu thô từ SQL lên trước
+                var rawList = context.ChiTietHoaDons
+                           .Include(ct => ct.MonAn)
                            .Where(ct => ct.MaHoaDon == maHoaDon)
                            .ToList();
+
+                // 2. Dùng C# để GỘP các món giống hệt nhau
+                var groupedList = rawList
+                    .GroupBy(x => new { x.MaMon, x.CapDoCay, x.GhiChu, x.DonGia }) // Nhóm các món có cùng Mã, Cấp độ, Ghi chú, Giá
+                    .Select(g => new ChiTietHoaDon
+                    {
+                        MaHoaDon = maHoaDon,
+                        MaMon = g.Key.MaMon,
+
+                        // Lấy thông tin hiển thị từ dòng đầu tiên trong nhóm
+                        TenMonHienThi = g.First().TenMonHienThi,
+                        MonAn = g.First().MonAn,
+                        CapDoCay = g.Key.CapDoCay,
+                        GhiChu = g.Key.GhiChu,
+                        DonGia = g.Key.DonGia,
+
+                        // [QUAN TRỌNG] Cộng dồn số lượng
+                        SoLuong = g.Sum(x => x.SoLuong),
+
+                        // (Tùy chọn) Có thể lấy trạng thái chế biến
+                        TrangThaiCheBien = g.Min(x => x.TrangThaiCheBien)
+                    })
+                    .ToList();
+
+                return groupedList;
             }
         }
 
