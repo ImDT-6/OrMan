@@ -15,9 +15,35 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-
             <helpers:IndexConverter x:Key="IndexConverter"/>
             <helpers:RankToColorConverter x:Key="RankToColorConverter"/>
+            <Style x:Key="FilterRadioButtonStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Padding" Value="12,6"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="8" BorderThickness="1" BorderBrush="Transparent">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#203B82F6"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#3B82F6"/>
+                                    <Setter Property="Foreground" Value="#3B82F6"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -27,49 +53,87 @@
             <ColumnDefinition Width="1.5*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- CỘT TRÁI -->
-        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <!-- Cards Tổng Quan -->
-            <UniformGrid Columns="2" Rows="1" Margin="0,0,0,20">
-                <!-- Card Doanh Thu -->
-                <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25" Margin="0,0,10,0">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock Text="Doanh Thu Hôm Nay" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
-                            <TextBlock Text="{Binding DoanhThuNgay}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="40" Margin="0,5,0,0"/>
-                            <TextBlock Text="{Binding TangTruongText}" Foreground="{StaticResource SuccessGreen}" FontSize="12" Margin="0,5,0,0"/>
-                        </StackPanel>
-                        <Border Width="50" Height="50" CornerRadius="15" Background="#2010B981" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Width="24" Stretch="Uniform"/>
-                        </Border>
-                    </Grid>
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
+                    <StackPanel VerticalAlignment="Center">
+                        <Grid Margin="0,0,0,5">
+                            <TextBlock Text="DOANH THU" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
+                            <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="{Binding DoanhThuNgay}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22"/>
+                        <TextBlock Text="+12% so với hqua" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                    </StackPanel>
                 </Border>
 
-                <!-- Card Đơn Hàng -->
-                <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25" Margin="10,0,0,0">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock Text="Đơn Hàng Đã Phục Vụ" Foreground="{StaticResource TextSecondary}" FontSize="14"/>
-                            <TextBlock Text="{Binding SoDonHomNay}" Foreground="White" FontWeight="Bold" FontSize="40" Margin="0,5,0,0"/>
-                            <TextBlock Text="{Binding TrungBinhDon}" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,5,0,0"/>
-                        </StackPanel>
-                        <Border Width="50" Height="50" CornerRadius="15" Background="#203B82F6" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <Path Data="{StaticResource IconFoodGeo}" Fill="#3B82F6" Width="24" Stretch="Uniform"/>
-                        </Border>
-                    </Grid>
+                <Border Grid.Column="2" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
+                    <StackPanel VerticalAlignment="Center">
+                        <Grid Margin="0,0,0,5">
+                            <TextBlock Text="ĐƠN HÀNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
+                            <Path Data="{StaticResource IconFoodGeo}" Fill="#3B82F6" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="{Binding SoDonHomNay}" Foreground="White" FontWeight="Bold" FontSize="22"/>
+                        <TextBlock Text="Đang phục vụ" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                    </StackPanel>
                 </Border>
-            </UniformGrid>
 
-            <!-- [ĐÃ CẬP NHẬT] BIỂU ĐỒ VỚI TRỤC TUNG & CỘT ĐỘNG HOÀN TOÀN -->
-            <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="25" Padding="25" Height="350">
+                <Border Grid.Column="4" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
+                    <StackPanel VerticalAlignment="Center">
+                        <Grid Margin="0,0,0,5">
+                            <TextBlock Text="BÀN HOẠT ĐỘNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
+                            <TextBlock Text="🍽️" FontSize="12" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="8 / 15" Foreground="#F59E0B" FontWeight="Bold" FontSize="22"/>
+                        <TextBlock Text="Công suất: 53%" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="6" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
+                    <StackPanel VerticalAlignment="Center">
+                        <Grid Margin="0,0,0,5">
+                            <TextBlock Text="KHÁCH HÀNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
+                            <TextBlock Text="👥" FontSize="12" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="124" Foreground="#EC4899" FontWeight="Bold" FontSize="22"/>
+                        <TextBlock Text="3 khách mới" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="BIỂU ĐỒ DOANH THU THEO GIỜ" FontSize="16" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
+                    <Grid Grid.Row="0" Margin="0,0,0,25">
+                        <StackPanel>
+                            <TextBlock Text="PHÂN TÍCH DOANH THU" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="Theo dõi biến động doanh thu theo thời gian thực" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <RadioButton Content="Hôm nay" IsChecked="True" Style="{StaticResource FilterRadioButtonStyle}"/>
+                            <RadioButton Content="Tuần này" Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0"/>
+                            <RadioButton Content="Tháng này" Style="{StaticResource FilterRadioButtonStyle}"/>
+                        </StackPanel>
+                    </Grid>
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
@@ -77,32 +141,26 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- 1. Trục Tung (Dynamic Y-Axis Labels) -->
-                        <Grid Grid.Column="0" Margin="0,0,10,30">
+                        <Grid Grid.Column="0" Margin="0,0,15,30">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <!-- Binding vào các biến AxisMax, AxisMid... trong ViewModel -->
-                            <TextBlock Text="{Binding AxisMax}" Grid.Row="0" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="{Binding AxisMidHigh}" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="{Binding AxisMid}" Grid.Row="2" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="{Binding AxisMidLow}" Grid.Row="3" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
-                            <TextBlock Text="0" Grid.Row="3" VerticalAlignment="Bottom" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                            <TextBlock Text="{Binding AxisMax}" Grid.Row="0" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                            <TextBlock Text="{Binding AxisMidHigh}" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                            <TextBlock Text="{Binding AxisMid}" Grid.Row="2" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                            <TextBlock Text="{Binding AxisMidLow}" Grid.Row="3" VerticalAlignment="Top" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                            <TextBlock Text="0" Grid.Row="3" VerticalAlignment="Bottom" Foreground="{StaticResource TextSecondary}" FontSize="11"/>
                         </Grid>
 
-                        <!-- 2. Lưới ngang & Cột Biểu Đồ -->
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
-                                <!-- Vùng vẽ (220px) -->
                                 <RowDefinition Height="30"/>
-                                <!-- Vùng giờ -->
                             </Grid.RowDefinitions>
 
-                            <!-- Lưới ngang -->
                             <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -110,14 +168,13 @@
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <Border Grid.Row="0" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
-                                <Border Grid.Row="1" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
-                                <Border Grid.Row="2" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,0"/>
-                                <Border Grid.Row="3" BorderBrush="#20FFFFFF" BorderThickness="0,1,0,1"/>
+                                <Border Grid.Row="0" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="1" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="2" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="3" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,1"/>
                             </Grid>
 
-                            <!-- CỘT BIỂU ĐỒ (Binding Width/Height trực tiếp) -->
-                            <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Bottom">
+                            <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Stretch">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <UniformGrid Rows="1"/>
@@ -125,49 +182,31 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid>
-                                            <!-- [MỚI] Dùng StackPanel để xếp số tiền lên trên cột -->
-                                            <StackPanel VerticalAlignment="Bottom">
-                                                <!-- Số tiền trên đỉnh cột -->
-                                                <!-- Chỉ hiện nếu giá trị > 0 -->
-                                                <TextBlock Text="{Binding Value, StringFormat='{}{0:N0}'}" 
-                                                           FontSize="10" 
-                                                           Foreground="{StaticResource TextSecondary}" 
-                                                           HorizontalAlignment="Center" 
-                                                           Margin="0,0,0,3">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Value}" Value="0">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                        <Grid VerticalAlignment="Stretch">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="{Binding EmptyStar}"/>
+                                                <RowDefinition Height="{Binding BarStar}"/>
+                                            </Grid.RowDefinitions>
 
-                                                <!-- Cột biểu đồ -->
-                                                <Border Background="{StaticResource AccentGradient}" 
-                                                        CornerRadius="5,5,0,0"  
-                                                        Height="{Binding BarHeight}" 
-                                                        ToolTip="{Binding TooltipText}">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Opacity" Value="0.8"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
+                                            <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,-20,0,0" Panel.ZIndex="1">
+                                                <Border Background="#20303030" CornerRadius="5" Padding="5,2" HorizontalAlignment="Center" Visibility="{Binding Value, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="{Binding Value, StringFormat='{}{0:N0}'}" FontSize="10" Foreground="White"/>
                                                 </Border>
                                             </StackPanel>
+
+                                            <Border Grid.Row="1" CornerRadius="4,4,0,0" ToolTip="{Binding TooltipText}" MinHeight="2" VerticalAlignment="Stretch">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                        <GradientStop Color="#3B82F6" Offset="0"/>
+                                                        <GradientStop Color="#60A5FA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                            </Border>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!-- Trục Hoành (Giờ) -->
                             <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -176,7 +215,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding TimeLabel}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{Binding TimeLabel}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -184,9 +223,8 @@
                     </Grid>
                 </Grid>
             </Border>
-        </StackPanel>
+        </Grid>
 
-        <!-- CỘT PHẢI (Giữ nguyên) -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -271,37 +309,33 @@
                                         </StackPanel>
 
                                         <Button Grid.Column="2" 
-        Content="Xử lý"
-        Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-        CommandParameter="{Binding}"
-        VerticalAlignment="Center"
-        Height="32"
-        FontSize="13"
-        FontWeight="SemiBold"
-        Foreground="White"
-        Cursor="Hand"
-        BorderThickness="0">
+                                                Content="Xử lý"
+                                                Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center"
+                                                Height="32"
+                                                FontSize="13"
+                                                FontWeight="SemiBold"
+                                                Foreground="White"
+                                                Cursor="Hand"
+                                                BorderThickness="0">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border x:Name="BtnBorder" 
-                    CornerRadius="16" 
-                    Background="#EF4444" 
-                    RenderTransformOrigin="0.5,0.5">
+                                                            CornerRadius="16" 
+                                                            Background="#EF4444" 
+                                                            RenderTransformOrigin="0.5,0.5">
                                                         <Border.RenderTransform>
                                                             <ScaleTransform x:Name="ScaleTrans" ScaleX="1" ScaleY="1"/>
                                                         </Border.RenderTransform>
-
                                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="18,0"/>
                                                     </Border>
-
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter TargetName="BtnBorder" Property="Background" Value="#FF6B6B"/>
                                                         </Trigger>
-
                                                         <Trigger Property="IsPressed" Value="True">
                                                             <Setter TargetName="BtnBorder" Property="Background" Value="#C62828"/>
-
                                                             <Trigger.EnterActions>
                                                                 <BeginStoryboard>
                                                                     <Storyboard>
@@ -397,7 +431,6 @@
                                             Background="#15FFFFFF" 
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Center">
-
                                         <Image Source="{Binding MonAn.HinhAnhUrl}" 
                                                Stretch="UniformToFill"
                                                HorizontalAlignment="Center"
@@ -411,7 +444,6 @@
                                                    FontSize="14" 
                                                    TextTrimming="CharacterEllipsis" 
                                                    ToolTip="{Binding MonAn.TenMon}"/>
-
                                         <TextBlock Text="{Binding MonAn.MaMon}" 
                                                    Foreground="{StaticResource TextSecondary}" 
                                                    FontSize="12" 

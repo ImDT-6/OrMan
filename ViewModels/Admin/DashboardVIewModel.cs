@@ -10,22 +10,27 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using OrMan.Helpers;
 using System.Windows;
+using System.Globalization; // Thêm để format số chuẩn
 
 namespace OrMan.ViewModels
 {
-    // Class hỗ trợ hiển thị Top món
     public class TopFoodItem
     {
         public MonAn MonAn { get; set; }
         public int SoLuongBan { get; set; }
     }
 
-    // Class hỗ trợ vẽ biểu đồ
     public class ChartBarItem
     {
         public string TimeLabel { get; set; }
         public double Value { get; set; }
-        public double BarHeight { get; set; }
+        public double EmptyValue { get; set; } // Phần trống phía trên cột
+
+        // Binding cho Grid.RowDefinitions (Responsive tuyệt đối)
+        // Sử dụng InvariantCulture để đảm bảo dấu chấm thập phân đúng định dạng XAML
+        public string BarStar => $"{Value.ToString(CultureInfo.InvariantCulture)}*";
+        public string EmptyStar => $"{EmptyValue.ToString(CultureInfo.InvariantCulture)}*";
+
         public string TooltipText => $"{Value:N0} VNĐ";
     }
 
@@ -75,11 +80,7 @@ namespace OrMan.ViewModels
         public string TrungBinhDon { get => _trungBinhDon; set { _trungBinhDon = value; OnPropertyChanged(); } }
 
         public ICommand ResolveRequestCommand { get; private set; }
-
-        // Command này sẽ được Binding vào nút "Xử lý" trên Dashboard
         public ICommand ProcessRequestCommand { get; private set; }
-
-        // Event để View (Code-behind) lắng nghe và thực hiện điều hướng nếu cần
         public event Action<BanAn> RequestNavigationToTable;
 
         public DashboardViewModel()
@@ -105,7 +106,6 @@ namespace OrMan.ViewModels
         private void ResolveRequest(BanAn ban)
         {
             if (ban == null) return;
-            // Hàm này giữ lại để tương thích cũ nếu cần, nhưng logic chính đã chuyển sang ProcessRequest
             ProcessRequest(ban);
         }
 
@@ -113,12 +113,10 @@ namespace OrMan.ViewModels
         {
             if (ban == null) return;
 
-            // TRƯỜNG HỢP 1: YÊU CẦU THANH TOÁN -> CẦN ĐIỀU HƯỚNG
             if (ban.YeuCauThanhToan)
             {
                 RequestNavigationToTable?.Invoke(ban);
             }
-            // TRƯỜNG HỢP 2: YÊU CẦU HỖ TRỢ (Xin đồ...) -> XỬ LÝ NHANH TẠI CHỖ
             else if (!string.IsNullOrEmpty(ban.YeuCauHoTro))
             {
                 if (MessageBox.Show($"Đã mang \"{ban.YeuCauHoTro}\" cho {ban.TenBan} chưa?",
@@ -175,56 +173,70 @@ namespace OrMan.ViewModels
             var hourlyData = _doanhThuRepo.GetRevenueByHour();
             DoanhThuTheoGio.Clear();
 
-            double maxVal = 0;
-            if (hourlyData.Count > 0)
-            {
-                maxVal = (double)hourlyData.Values.Max();
-            }
+            double maxVal = hourlyData.Count > 0 ? (double)hourlyData.Values.Max() : 0;
 
-            // [FIX 1] Tăng khoảng đệm lên 20% (nhân 1.2) để số liệu trên đỉnh không bị sát viền
-            double targetTop = maxVal * 1.2;
+            // --- LOGIC TÍNH TRỤC TUNG THÔNG MINH ---
+            double axisTop = 1000000; // Mặc định 1M nếu không có data
 
-            double axisTop = 2000000;
-            if (targetTop > 2000000)
+            if (maxVal > 0)
             {
-                // Làm tròn lên hàng triệu
-                axisTop = Math.Ceiling(targetTop / 1000000) * 1000000;
+                // Thêm 10% đệm
+                double target = maxVal * 1.1;
+
+                // Tìm bậc của số (Ví dụ: 150k -> bậc 100k, 2.5M -> bậc 1M)
+                double exponent = Math.Floor(Math.Log10(target));
+                double powerOf10 = Math.Pow(10, exponent);
+                double fraction = target / powerOf10;
+
+                // Làm tròn lên các mốc đẹp: 1.0, 1.2, 1.5, 2.0, 2.5, 5.0, 10.0
+                double niceFraction;
+                if (fraction <= 1.0) niceFraction = 1.0;
+                else if (fraction <= 1.2) niceFraction = 1.2;
+                else if (fraction <= 1.5) niceFraction = 1.5;
+                else if (fraction <= 2.0) niceFraction = 2.0;
+                else if (fraction <= 2.5) niceFraction = 2.5;
+                else if (fraction <= 3.0) niceFraction = 3.0;
+                else if (fraction <= 4.0) niceFraction = 4.0;
+                else if (fraction <= 5.0) niceFraction = 5.0;
+                else if (fraction <= 6.0) niceFraction = 6.0;
+                else if (fraction <= 8.0) niceFraction = 8.0;
+                else niceFraction = 10.0;
+
+                axisTop = niceFraction * powerOf10;
             }
+            // ----------------------------------------
 
             AxisMax = FormatCurrencyShort((decimal)axisTop);
             AxisMidHigh = FormatCurrencyShort((decimal)(axisTop * 0.75));
             AxisMid = FormatCurrencyShort((decimal)(axisTop * 0.5));
             AxisMidLow = FormatCurrencyShort((decimal)(axisTop * 0.25));
 
-            double chartAreaHeight = 220;
-
-            // [FIX 2] Chạy từ 8h đến 24h
             for (int hour = 8; hour <= 24; hour++)
             {
                 decimal revenue = 0;
-                // Giờ 24 thực chất là 0h hôm sau, hoặc chỉ là mốc kết thúc, doanh thu = 0
                 if (hour < 24 && hourlyData.ContainsKey(hour))
                     revenue = hourlyData[hour];
 
                 double val = (double)revenue;
-                double pixelHeight = (val / axisTop) * chartAreaHeight;
 
-                if (val > 0 && pixelHeight < 2) pixelHeight = 2;
+                // Tính phần trống để Grid chia tỷ lệ
+                double empty = axisTop - val;
+                if (empty < 0) empty = 0; // Đề phòng lỗi làm tròn
 
-                // Logic hiển thị nhãn giờ: Chỉ hiện các giờ chẵn (8, 10, 12...)
                 string label = (hour % 2 == 0) ? $"{hour}h" : "";
 
                 DoanhThuTheoGio.Add(new ChartBarItem
                 {
                     TimeLabel = label,
                     Value = val,
-                    BarHeight = pixelHeight
+                    EmptyValue = empty
                 });
             }
         }
 
         private string FormatCurrencyShort(decimal amount)
         {
+            if (amount >= 1000000000) return (amount / 1000000000).ToString("0.##") + "B";
             if (amount >= 1000000) return (amount / 1000000).ToString("0.##") + "M";
             if (amount >= 1000) return (amount / 1000).ToString("0.#") + "k";
             return amount.ToString("N0");

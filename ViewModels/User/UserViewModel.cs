@@ -70,10 +70,7 @@ namespace OrMan.ViewModels.User
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
         }
 
-        // ... (Các hàm CheckMember, LoadData, FilterMenu giữ nguyên) ...
-
         // --- [SECTION GIỎ HÀNG] ---
-
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
             var itemDaCo = GioHang.FirstOrDefault(x => x.MonAn.MaMon == mon.MaMon
@@ -92,17 +89,15 @@ namespace OrMan.ViewModels.User
             UpdateCartInfo();
         }
 
-        // [MỚI] Tăng số lượng 1 món
         public void TangSoLuongMon(CartItem item)
         {
             if (item != null)
             {
-                item.SoLuong++; // Class CartItem cần NotifyPropertyChanged để UI cập nhật số
-                UpdateCartInfo(); // Tính lại tổng tiền
+                item.SoLuong++;
+                UpdateCartInfo();
             }
         }
 
-        // [MỚI] Giảm số lượng 1 món
         public void GiamSoLuongMon(CartItem item)
         {
             if (item != null)
@@ -114,7 +109,6 @@ namespace OrMan.ViewModels.User
                 }
                 else
                 {
-                    // Nếu đang là 1 mà bấm trừ -> Hỏi có muốn xóa luôn không
                     var result = MessageBox.Show($"Bạn có muốn xóa món '{item.TenHienThi}' khỏi giỏ hàng?",
                                                  "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes)
@@ -125,7 +119,6 @@ namespace OrMan.ViewModels.User
             }
         }
 
-        // Hàm xóa hẳn món khỏi giỏ
         public void XoaMonKhoiGio(CartItem item)
         {
             if (item != null && GioHang.Contains(item))
@@ -137,36 +130,60 @@ namespace OrMan.ViewModels.User
 
         private void UpdateCartInfo()
         {
-            // Cần đảm bảo Property ThanhTien trong CartItem trả về (DonGia * SoLuong)
             TongTienCart = GioHang.Sum(x => x.ThanhTien);
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
-        // ... (Các hàm SubmitOrder, CallStaff giữ nguyên) ...
+        // --- [SECTION KHÁCH HÀNG - ĐÃ SỬA] ---
 
-        // --- CÁC HÀM CŨ GIỮ NGUYÊN BÊN DƯỚI ĐỂ ĐẢM BẢO KHÔNG LỖI ---
+        // 1. Kiểm tra thành viên: Chỉ tìm, KHÔNG tự thêm
+        public KhachHang CheckMember(string phoneNumber)
+        {
+            using (var db = new MenuContext())
+            {
+                var khach = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phoneNumber);
+
+                // Nếu tìm thấy thì cập nhật vào ViewModel
+                if (khach != null)
+                {
+                    CurrentCustomer = khach;
+                }
+                return khach; // Trả về null nếu chưa có
+            }
+        }
+
+        // 2. Đăng ký thành viên mới: Lưu tên thật vào DB
+        public KhachHang RegisterCustomer(string phone, string name)
+        {
+            using (var db = new MenuContext())
+            {
+                // Kiểm tra trùng lần cuối
+                var existing = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
+                if (existing != null) return existing;
+
+                var newKhach = new KhachHang
+                {
+                    SoDienThoai = phone,
+                    HoTen = name, // Lưu tên người dùng nhập
+                    HangThanhVien = "Khách Hàng Mới",
+                    DiemTichLuy = 0
+                };
+
+                db.KhachHangs.Add(newKhach);
+                db.SaveChanges();
+
+                CurrentCustomer = newKhach;
+                return newKhach;
+            }
+        }
+
+        // --- [CÁC HÀM HỖ TRỢ KHÁC] ---
         private void OpenChonBanWindow(object obj)
         {
             var wd = new ChonBanWindow();
             if (wd.ShowDialog() == true)
             {
                 CurrentTable = wd.SelectedTableId;
-            }
-        }
-
-        public KhachHang CheckMember(string phoneNumber)
-        {
-            using (var db = new MenuContext())
-            {
-                var khach = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phoneNumber);
-                if (khach == null)
-                {
-                    khach = new KhachHang { SoDienThoai = phoneNumber, HoTen = "Khách Mới", HangThanhVien = "Mới", DiemTichLuy = 0 };
-                    db.KhachHangs.Add(khach);
-                    db.SaveChanges();
-                }
-                CurrentCustomer = khach;
-                return khach;
             }
         }
 
@@ -194,7 +211,6 @@ namespace OrMan.ViewModels.User
             var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
             bool hasActiveOrder = (activeOrder != null);
 
-            // Truyền trạng thái có đơn hay không vào cửa sổ
             var requestWindow = new SupportRequestWindow(hasActiveOrder);
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
@@ -205,7 +221,6 @@ namespace OrMan.ViewModels.User
                 {
                     if (activeOrder == null)
                     {
-                        // Trường hợp chưa có đơn mà đòi thanh toán
                         if (GioHang.Count > 0)
                             MessageBox.Show("Bạn chưa gửi đơn bếp. Vui lòng bấm 'Gửi Đơn' trước.", "Chưa có đơn", MessageBoxButton.OK, MessageBoxImage.Warning);
                         else
@@ -213,22 +228,17 @@ namespace OrMan.ViewModels.User
                     }
                     else
                     {
-                        // [ĐÃ SỬA] Trường hợp hợp lệ -> Lấy phương thức và gửi đi
                         string method = requestWindow.SelectedPaymentMethod;
-
-                        // Gọi Repository với tham số method mới thêm
                         _banRepo.RequestPayment(CurrentTable, method);
-
                         MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN ({method}) cho Bàn {CurrentTable}!",
                                         "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else if (requestWindow.SelectedRequest == RequestType.Support)
                 {
-                    // Trường hợp gọi hỗ trợ thường
                     string msg = requestWindow.SupportMessage;
                     _banRepo.SendSupportRequest(CurrentTable, msg);
-                    MessageBox.Show($"Đã gửi lời nhắn đến nhân viên:\n\"{msg}\"\n\nNhân viên sẽ đến bàn {CurrentTable} ngay!", "Đã gửi yêu cầu", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Đã gửi lời nhắn: \"{msg}\"\nNhân viên sẽ đến ngay!", "Đã gửi", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
 
@@ -248,42 +258,6 @@ namespace OrMan.ViewModels.User
             GioHang.Clear();
             UpdateCartInfo();
             return true;
-        }
-
-        // Thêm 2 hàm này vào UserViewModel
-
-        // 1. Chỉ tìm kiếm, không tự tạo mới
-        public KhachHang FindCustomer(string phone)
-        {
-            using (var db = new MenuContext())
-            {
-                return db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
-            }
-        }
-
-        // 2. Đăng ký khách hàng mới với tên cụ thể
-        public KhachHang RegisterCustomer(string phone, string name)
-        {
-            using (var db = new MenuContext())
-            {
-                // Kiểm tra lại lần nữa cho chắc
-                var existing = db.KhachHangs.FirstOrDefault(k => k.SoDienThoai == phone);
-                if (existing != null) return existing;
-
-                var newKhach = new KhachHang
-                {
-                    SoDienThoai = phone,
-                    HoTen = name, // Lưu tên đúng
-                    HangThanhVien = "Mới",
-                    DiemTichLuy = 0
-                };
-
-                db.KhachHangs.Add(newKhach);
-                db.SaveChanges();
-
-                CurrentCustomer = newKhach;
-                return newKhach;
-            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
