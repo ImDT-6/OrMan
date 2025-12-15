@@ -196,22 +196,58 @@ namespace OrMan.Views.User
 
         private void BtnThanhToan_Click(object sender, RoutedEventArgs e)
         {
+            // 1. Kiểm tra giỏ hàng
             if (_vm.GioHang.Count == 0)
             {
-                // [ĐÃ SỬA] Dùng GetRes
                 MessageBox.Show(GetRes("Str_Msg_CartEmpty"), GetRes("Str_Title_Notice"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // 2. Mở cửa sổ Giỏ hàng
             var cartWindow = new GioHangWindow(_vm);
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
-            if (cartWindow.ShowDialog() == true)
+            bool? isConfirmed = cartWindow.ShowDialog();
+
+            if (mainWindow != null) mainWindow.Opacity = 1;
+
+            // 3. Nếu khách chốt đơn
+            if (isConfirmed == true)
             {
+                // --- [LOGIC MỚI] KIỂM TRA KHÁCH HÀNG ---
+
+                // Điều kiện xác định là khách vãng lai (chưa đăng nhập):
+                // 1. Object null
+                // 2. ID = 0
+                // 3. Tên là "Khách Mới" (hoặc tên mặc định bạn đặt trong DB)
+                bool isGuest = _vm.CurrentCustomer == null ||
+                               _vm.CurrentCustomer.KhachHangID == 0 ||
+                               _vm.CurrentCustomer.HoTen == "Khách Mới" ||
+                               _vm.CurrentCustomer.HoTen == "Khách Hàng Mới";
+
+                // CHỈ HỎI NẾU LÀ KHÁCH VÃNG LAI
+                if (isGuest)
+                {
+                    string askMsg = GetRes("Str_Msg_AskLoyalty");
+                    string title = GetRes("Str_Title_Confirm");
+
+                    var result = MessageBox.Show(askMsg, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Mở cửa sổ Tích điểm
+                        var tichDiemWin = new TichDiemWindow(_vm);
+                        tichDiemWin.Owner = mainWindow;
+                        tichDiemWin.ShowDialog();
+
+                        // Sau khi cửa sổ này đóng, _vm.CurrentCustomer đã được cập nhật
+                    }
+                }
+
+                // --- GỬI ĐƠN HÀNG (Tự động dùng CurrentCustomer đang có) ---
                 if (_vm.SubmitOrder())
                 {
-                    // [ĐÃ SỬA] Dùng GetRes
                     MessageBox.Show(
                         GetRes("Str_Msg_OrderSuccess"),
                         GetRes("Str_Title_Success"),
@@ -219,10 +255,7 @@ namespace OrMan.Views.User
                         MessageBoxImage.Information);
                 }
             }
-
-            if (mainWindow != null) mainWindow.Opacity = 1;
         }
-
         private void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
             // [ĐÃ SỬA] Dùng GetRes

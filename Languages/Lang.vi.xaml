@@ -61,5 +61,6 @@
     <sys:String x:Key="Str_Points_Label_Short">Điểm:</sys:String>
     <sys:String x:Key="Str_Msg_NewPhoneRegister">Số điện thoại mới. Nhập tên để tạo tài khoản!</sys:String>
     <sys:String x:Key="Str_Btn_Register">ĐĂNG KÝ</sys:String>
+    <sys:String x:Key="Str_Msg_AskLoyalty">Bạn có muốn tích điểm cho đơn hàng này không?</sys:String>
 </ResourceDictionary>
     

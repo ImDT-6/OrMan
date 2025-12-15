@@ -65,4 +65,5 @@
     <sys:String x:Key="Str_Points_Label_Short">Points:</sys:String>
     <sys:String x:Key="Str_Msg_NewPhoneRegister">New phone number. Please enter name to register!</sys:String>
     <sys:String x:Key="Str_Btn_Register">REGISTER</sys:String>
+    <sys:String x:Key="Str_Msg_AskLoyalty">Do you want to earn points for this order?</sys:String>
 </ResourceDictionary>
