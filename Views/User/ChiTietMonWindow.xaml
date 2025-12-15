@@ -32,11 +32,11 @@
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="bdr" Property="Background" Value="{StaticResource AccentGradient}"/>
+                                    <Setter TargetName="bdr" Property="Background" Value="{DynamicResource AccentGradient}"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter TargetName="bdr" Property="Effect">
                                         <Setter.Value>
-                                            <DropShadowEffect Color="#8B5CF6" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+                                            <DropShadowEffect Color="{Binding Color, Source={StaticResource FocusBorderBrush}}" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -60,7 +60,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="#A78BFA"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource FocusBorderBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -70,7 +70,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border CornerRadius="25" Background="{StaticResource MainBackgroundGradient}" ClipToBounds="True">
+    <Border CornerRadius="25" Background="{DynamicResource MainBackgroundGradient}" ClipToBounds="True">
         <Border.Effect>
             <DropShadowEffect BlurRadius="30" ShadowDepth="10" Color="Black" Opacity="0.5"/>
         </Border.Effect>
@@ -193,7 +193,7 @@
 
             <Border Grid.Row="2" Padding="25,10,25,25" VerticalAlignment="Bottom">
                 <Button x:Name="btnConfirm" Click="BtnConfirm_Click" 
-                        Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" 
+                        Style="{StaticResource GlassButtonStyle}" Background="{DynamicResource AccentGradient}" 
                         Height="50" Cursor="Hand">
                     <Button.Effect>
                         <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>

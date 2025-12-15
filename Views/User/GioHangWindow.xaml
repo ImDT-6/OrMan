@@ -51,7 +51,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+    <Border Background="{DynamicResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

@@ -400,7 +400,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
+    <Grid Background="{DynamicResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
         <Grid Margin="25,5,25,0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -473,7 +473,7 @@
                     <Grid>
                         <Border x:Name="ActiveIndicator"
                     HorizontalAlignment="Left" Width="90" 
-                    Background="{StaticResource AccentGradient}" 
+                    Background="{DynamicResource AccentGradient}" 
                     CornerRadius="10">
                             <Border.Effect>
                                 <DropShadowEffect Color="#8B5CF6" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
@@ -521,7 +521,7 @@
 
                     <Button Content="Xem Thống kê" Click="BtnLocCustom_Click"
             Style="{StaticResource GlassButtonStyle}"
-            Background="{StaticResource AccentGradient}" 
+            Background="{DynamicResource AccentGradient}" 
             Foreground="White"
             Height="36" Width="110" FontSize="13" FontWeight="Bold"
             BorderThickness="0">
@@ -588,7 +588,7 @@
                         <DataGridTemplateColumn Header="Mã HĐ" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding MaHoaDon}" FontWeight="Bold" Foreground="{StaticResource AccentGradient}"/>
+                                    <TextBlock Text="{Binding MaHoaDon}" FontWeight="Bold" Foreground="{DynamicResource AccentGradient}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

@@ -83,7 +83,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource MainBackgroundGradient}">
+    <Grid Background="{DynamicResource MainBackgroundGradient}">
         <Grid Margin="25,5,25,0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -122,7 +122,7 @@
                         <DataGridTemplateColumn Header="SỐ ĐIỆN THOẠI" Width="180">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding SoDienThoai}" FontWeight="Bold" Foreground="{StaticResource AccentGradient}"/>
+                                    <TextBlock Text="{Binding SoDienThoai}" FontWeight="Bold" Foreground="{DynamicResource AccentGradient}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

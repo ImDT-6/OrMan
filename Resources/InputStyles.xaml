@@ -2,20 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:OrMan.Helpers">
 
-    <!-- ... (GIỮ NGUYÊN MÀU SẮC CŨ) ... -->
-    <LinearGradientBrush x:Key="MainBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#0F172A" Offset="0.0"/>
-        <GradientStop Color="#1E1B4B" Offset="0.5"/>
-        <GradientStop Color="#312E81" Offset="1.0"/>
-        <GradientStop Color="#4C1D95" Offset="0.8"/>
-        <GradientStop Color="#7C3AED" Offset="1.2"/>
-    </LinearGradientBrush>
-
-    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="#7C3AED" Offset="0.0"/>
-        <GradientStop Color="#312E81" Offset="1.0"/>
-    </LinearGradientBrush>
-
     <SolidColorBrush x:Key="GlassBackground" Color="#1E293B" Opacity="0.6"/>
     <SolidColorBrush x:Key="GlassBorder" Color="#FFFFFF" Opacity="0.15"/>
     <SolidColorBrush x:Key="TextPrimary" Color="White"/>
@@ -24,31 +10,22 @@
     <SolidColorBrush x:Key="WarningYellow" Color="#F59E0B"/>
     <SolidColorBrush x:Key="DangerRed" Color="#EF4444"/>
 
-    <!-- 2. ICONS -->
-    <!-- [MỚI] THÊM ICON DẤU X (CLOSE) VÀO ĐÂY -->
     <PathGeometry x:Key="IconClose">M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z</PathGeometry>
 
-    <!-- Các icon cũ giữ nguyên -->
-    <Path x:Key="IconUser" Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" Fill="{StaticResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
-    <Path x:Key="IconLock" Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" Fill="{StaticResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
-    <Path x:Key="IconLockVisible" Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" Fill="{StaticResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
+    <Path x:Key="IconUser" Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" Fill="{DynamicResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
+    <Path x:Key="IconLock" Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" Fill="{DynamicResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
+    <Path x:Key="IconLockVisible" Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" Fill="{DynamicResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
     <Path x:Key="IconGoogle" Data="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.333.533 12S5.867 24 12.48 24c3.44 0 6.027-1.133 8.093-3.293 2.107-2.107 2.733-5.067 2.733-7.467 0-.747-.067-1.48-.187-2.16l-10.64-.16z" Fill="White" Stretch="Uniform" Width="18" Height="18"/>
     <Path x:Key="IconApple" Data="M14.25.18l-.6.23L13 1.06l-.14.27-.18.45c0 .12-.03.26-.03.42-.03.27-.03.53 0 .78.03.26.1.5.18.75.09.24.18.48.3.72.12.23.24.45.42.63.15.2.36.36.57.51.23.15.48.27.75.36.26.09.54.12.81.12.24 0 .51-.03.75-.09.26-.06.51-.18.72-.33.23-.15.42-.33.6-.54.18-.21.3-.45.42-.69.12-.26.18-.53.24-.81.06-.27.06-.57.03-.84-.03-.3-.09-.57-.18-.81-.09-.26-.21-.48-.36-.69-.15-.2-.33-.36-.54-.51-.23-.15-.48-.24-.75-.33-.27-.06-.54-.09-.81-.09zM9.43 4.53c.18.23.39.42.63.57.24.15.51.24.81.27.3.03.6-.03.9-.12.3-.12.57-.3.81-.51.24-.23.42-.51.54-.81.12-.3.15-.63.12-.96-.03-.33-.12-.63-.27-.9-.15-.24-.36-.45-.6-.6-.24-.15-.51-.24-.81-.24-.3 0-.6.06-.9.21-.3.12-.57.3-.81.54-.23.23-.39.51-.51.81-.09.3-.12.63-.09.96.03.33.12.6.27.87zm8.36 1.05c.57.09 1.14.27 1.65.57.51.27.96.66 1.32 1.14.36.48.63 1.05.81 1.65.18.6.27 1.26.24 1.92-.03.66-.15 1.32-.36 1.95-.21.63-.51 1.2-.87 1.71-.36.51-.78.96-1.26 1.35-.48.39-1.02.69-1.59.93-.57.21-1.17.36-1.8.39-.63.03-1.26-.06-1.89-.21-.6-.18-1.2-.42-1.74-.78-.54-.33-1.02-.78-1.44-1.29-.42-.51-.75-1.08-.99-1.71-.24-.6-.39-1.26-.45-1.92-.06-.69 0-1.38.15-2.04.15-.66.39-1.29.72-1.86.33-.57.75-1.08 1.23-1.5.48-.42 1.05-.75 1.65-.99.63-.24 1.29-.39 1.98-.42z" Fill="White" Stretch="Uniform" Width="18" Height="18"/>
     <Path x:Key="IconSearch" Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" Fill="{StaticResource TextSecondary}" Stretch="Uniform" Width="18" Height="18"/>
-    <Path x:Key="IconPhone" 
-      Data="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21C10.61,21 3,13.39 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" 
-      Fill="{StaticResource AccentGradient}" 
-      Stretch="Uniform" 
-      Width="20" 
-      Height="20" 
-      Opacity="0.8"/>
+    <Path x:Key="IconPhone" Data="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21C10.61,21 3,13.39 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" Fill="{DynamicResource AccentGradient}" Stretch="Uniform" Width="20" Height="20" Opacity="0.8"/>
     <PathGeometry x:Key="IconDashboardGeo">M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z</PathGeometry>
     <PathGeometry x:Key="IconTableGeo">M4 18v3h3v-3h10v3h3v-6H4zm15-8h-2c0-2.76-2.24-5-5-5S7 7.24 7 10H5c0-3.87 3.13-7 7-7s7 3.13 7 7z</PathGeometry>
     <PathGeometry x:Key="IconFoodGeo">M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z</PathGeometry>
     <PathGeometry x:Key="IconMoneyGeo">M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z</PathGeometry>
     <PathGeometry x:Key="IconLogoutGeo">M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z</PathGeometry>
     <PathGeometry x:Key="IconMemberGeo">M20,2H4C2.89,2 2,2.89 2,4V15C2,16.11 2.89,17 4,17H8V22L12,20L16,22V17H20C21.11,17 22,16.11 22,15V4C22,2.89 21.11,2 20,2M20,15H4V13H20V15M20,10H4V4H20V10Z</PathGeometry>
-    <!-- ... (GIỮ NGUYÊN PHẦN STYLE CŨ) ... -->
+
     <ControlTemplate x:Key="EmptyErrorTemplate">
         <AdornedElementPlaceholder/>
     </ControlTemplate>
@@ -73,10 +50,10 @@
 
                             <TextBlock x:Name="FloatingLabel" Text="{TemplateBinding ToolTip}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="45,0,0,0" Padding="5,0" IsHitTestVisible="False" RenderTransformOrigin="0,0.5">
                                 <TextBlock.Foreground>
-                                    <SolidColorBrush Color="#94A3B8"/>
+                                    <SolidColorBrush Color="{Binding Color, Source={StaticResource FocusBorderBrush}}"/>
                                 </TextBlock.Foreground>
                                 <TextBlock.Background>
-                                    <SolidColorBrush Color="Transparent"/>
+                                    <SolidColorBrush Color="#1E293B"/>
                                 </TextBlock.Background>
                                 <TextBlock.RenderTransform>
                                     <TransformGroup>
@@ -95,17 +72,24 @@
                             <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource DangerRed}"/>
                             <Setter TargetName="ErrorText" Property="Visibility" Value="Visible"/>
                         </Trigger>
+
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                             <Setter TargetName="iconPresenter" Property="Opacity" Value="1"/>
                             <Setter TargetName="ErrorText" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="FloatingLabel" Property="Foreground" Value="{DynamicResource FocusBorderBrush}"/>
                         </Trigger>
+
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsKeyboardFocusWithin" Value="False"/>
                                 <Condition Property="Text" Value=""/>
                             </MultiTrigger.Conditions>
+
+                            <Setter TargetName="FloatingLabel" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="FloatingLabel" Property="Foreground" Value="#94A3B8"/>
+
                             <MultiTrigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -113,8 +97,6 @@
                                         <DoubleAnimation Storyboard.TargetName="LabelTranslate" Storyboard.TargetProperty="X" To="5" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" To="#94A3B8" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" To="Transparent" Duration="0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.EnterActions>
@@ -125,13 +107,11 @@
                                         <DoubleAnimation Storyboard.TargetName="LabelTranslate" Storyboard.TargetProperty="X" To="-7" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="0:0:0.2"/>
-                                        <!---->
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" To="#B875FF" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" To="#1E293B" Duration="0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.ExitActions>
                         </MultiTrigger>
+
                         <Trigger Property="Tag" Value="{x:Null}">
                             <Setter TargetName="PART_ContentHost" Property="Margin" Value="15,0,15,0"/>
                             <Setter TargetName="FloatingLabel" Property="Margin" Value="15,0,0,0"/>
@@ -163,10 +143,10 @@
 
                             <TextBlock x:Name="FloatingLabel" Text="{TemplateBinding ToolTip}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="45,0,0,0" Padding="5,0" IsHitTestVisible="False" RenderTransformOrigin="0,0.5">
                                 <TextBlock.Foreground>
-                                    <SolidColorBrush Color="#94A3B8"/>
+                                    <SolidColorBrush Color="{Binding Color, Source={StaticResource FocusBorderBrush}}"/>
                                 </TextBlock.Foreground>
                                 <TextBlock.Background>
-                                    <SolidColorBrush Color="Transparent"/>
+                                    <SolidColorBrush Color="#1E293B"/>
                                 </TextBlock.Background>
                                 <TextBlock.RenderTransform>
                                     <TransformGroup>
@@ -186,16 +166,21 @@
                             <Setter TargetName="ErrorText" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                             <Setter TargetName="iconPresenter" Property="Opacity" Value="1"/>
                             <Setter TargetName="ErrorText" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="FloatingLabel" Property="Foreground" Value="{DynamicResource FocusBorderBrush}"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsKeyboardFocusWithin" Value="False"/>
                                 <Condition Property="local:PasswordBoxHelper.HasText" Value="False"/>
                             </MultiTrigger.Conditions>
+
+                            <Setter TargetName="FloatingLabel" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="FloatingLabel" Property="Foreground" Value="#94A3B8"/>
+
                             <MultiTrigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -203,8 +188,6 @@
                                         <DoubleAnimation Storyboard.TargetName="LabelTranslate" Storyboard.TargetProperty="X" To="5" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" To="#94A3B8" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" To="Transparent" Duration="0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.EnterActions>
@@ -215,9 +198,6 @@
                                         <DoubleAnimation Storyboard.TargetName="LabelTranslate" Storyboard.TargetProperty="X" To="-7" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="0:0:0.2"/>
                                         <DoubleAnimation Storyboard.TargetName="LabelScale" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="0:0:0.2"/>
-                                        <!---->
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" To="#B875FF" Duration="0:0:0.2"/>
-                                        <ColorAnimation Storyboard.TargetName="FloatingLabel" Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" To="#1E293B" Duration="0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.ExitActions>
@@ -238,12 +218,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
-                        <Border CornerRadius="20" Background="{StaticResource AccentGradient}" Opacity="0.4" Margin="0,5,0,-5">
+                        <Border CornerRadius="20" Background="{DynamicResource AccentGradient}" Opacity="0.4" Margin="0,5,0,-5">
                             <Border.Effect>
                                 <BlurEffect Radius="20"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="border" CornerRadius="20" Background="{StaticResource AccentGradient}">
+                        <Border x:Name="border" CornerRadius="20" Background="{DynamicResource AccentGradient}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
@@ -324,7 +304,7 @@
 
                         <Border x:Name="HoverBorder" CornerRadius="12" Background="#1AFFFFFF" Opacity="0"/>
 
-                        <Border x:Name="CheckedBorder" CornerRadius="12" Opacity="0" Background="{StaticResource AccentGradient}">
+                        <Border x:Name="CheckedBorder" CornerRadius="12" Opacity="0" Background="{DynamicResource AccentGradient}">
                             <Border.Effect>
                                 <DropShadowEffect Color="#8B5CF6" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
                             </Border.Effect>
@@ -357,7 +337,7 @@
                                 <Condition Property="IsChecked" Value="False"/>
                             </MultiTrigger.Conditions>
 
-                            <Setter Property="Foreground" Value="#A78BFA"/>
+                            <Setter Property="Foreground" Value="{DynamicResource FocusBorderBrush}"/>
 
                             <MultiTrigger.EnterActions>
                                 <BeginStoryboard>
@@ -446,10 +426,10 @@
                             </Grid.ColumnDefinitions>
 
                             <ContentPresenter Grid.Column="0" 
-                                          Content="{TemplateBinding Tag}" 
-                                          HorizontalAlignment="Center" 
-                                          VerticalAlignment="Center" 
-                                          Margin="15,0,0,0"/>
+                                              Content="{TemplateBinding Tag}" 
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Margin="15,0,0,0"/>
 
                             <ScrollViewer Grid.Column="1" x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
 
@@ -467,7 +447,7 @@
                         </MultiDataTrigger>
 
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
 
@@ -504,7 +484,7 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter Property="Foreground" Value="White"/>
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentGradient}"/>
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -625,8 +605,8 @@
                             BorderBrush="{TemplateBinding BorderBrush}" 
                             BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" 
-                                          VerticalAlignment="Center" 
-                                          Margin="{TemplateBinding Padding}"/>
+                                              VerticalAlignment="Center" 
+                                              Margin="{TemplateBinding Padding}"/>
                         </Border>
                     </Grid>
 
@@ -684,16 +664,16 @@
                                 CornerRadius="25"/>
 
                             <ContentPresenter x:Name="iconPresenter" Content="{TemplateBinding Tag}" 
-                                          HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                          Margin="20,0,0,0"/>
+                                              HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                              Margin="20,0,0,0"/>
 
                             <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" 
                                       VerticalAlignment="Center"/>
                         </Grid>
 
                         <TextBlock x:Name="ErrorText" Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource TemplatedParent}}" 
-                               Foreground="{StaticResource DangerRed}" FontSize="12" FontStyle="Italic" 
-                               Margin="15,2,0,0" Visibility="Collapsed"/>
+                                   Foreground="{StaticResource DangerRed}" FontSize="12" FontStyle="Italic" 
+                                   Margin="15,2,0,0" Visibility="Collapsed"/>
                     </StackPanel>
 
                     <ControlTemplate.Triggers>
@@ -703,7 +683,7 @@
                         </Trigger>
 
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
 
@@ -715,10 +695,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
-
 
     <Style TargetType="{x:Type ScrollViewer}" BasedOn="{StaticResource GlassScrollViewer}"/>
 
-    
 </ResourceDictionary>

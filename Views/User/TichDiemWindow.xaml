@@ -13,7 +13,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{StaticResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+    <Border Background="{DynamicResource MainBackgroundGradient}" CornerRadius="20" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="30" ShadowDepth="10" Color="Black" Opacity="0.5"/>
         </Border.Effect>
@@ -95,7 +95,7 @@
             <Button Grid.Row="2" x:Name="btnAction" Click="BtnAction_Click" 
                     Content="{DynamicResource Str_Btn_CheckRegister}" 
                     Style="{StaticResource GlassButtonStyle}" 
-                    Background="{StaticResource AccentGradient}" 
+                    Background="{DynamicResource AccentGradient}" 
                     FontSize="16" FontWeight="Bold" Height="50">
                 <Button.Effect>
                     <DropShadowEffect Color="#8B5CF6" BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>

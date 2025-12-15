@@ -6,7 +6,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Theme.Blue.xaml"/>
+
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+
                 <ResourceDictionary Source="/Languages/Lang.vi.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -45,7 +45,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border CornerRadius="20" Background="{StaticResource MainBackgroundGradient}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+    <Border CornerRadius="20" Background="{DynamicResource MainBackgroundGradient}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Grid Margin="25">
             <StackPanel>
                 <TextBlock x:Name="lblTitle" Text="THÊM NGUYÊN LIỆU" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
@@ -82,7 +82,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Content="Hủy" Click="BtnCancel_Click" Style="{StaticResource GlassDismissButtonStyle}" Height="45"/>
-                    <Button Content="Lưu Lại" Click="BtnSave_Click" Grid.Column="2" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource AccentGradient}" Height="45"/>
+                    <Button Content="Lưu Lại" Click="BtnSave_Click" Grid.Column="2" Style="{StaticResource GlassButtonStyle}" Background="{DynamicResource AccentGradient}" Height="45"/>
                 </Grid>
             </StackPanel>
         </Grid>

@@ -86,7 +86,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource MainBackgroundGradient}">
+    <Grid Background="{DynamicResource MainBackgroundGradient}">
         <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -116,7 +116,7 @@
                         Command="{Binding AddCommand}" 
                         Content="+ Nhập Nguyên Liệu" 
                         Style="{StaticResource GlassDismissButtonStyle}" 
-                        Background="{StaticResource AccentGradient}"
+                        Background="{DynamicResource AccentGradient}"
                         Height="45" Width="160" Padding="25,0">
                     <Button.Effect>
                         <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>

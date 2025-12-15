@@ -34,7 +34,7 @@
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="#25FFFFFF"/>
-                                    <Setter Property="BorderBrush" Value="{StaticResource AccentGradient}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
                                     <Setter Property="Effect">
                                         <Setter.Value>
                                             <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
@@ -194,7 +194,7 @@
                                             Height="4" 
                                             VerticalAlignment="Bottom" 
                                             HorizontalAlignment="Left"
-                                            Background="{StaticResource AccentGradient}" 
+                                            Background="{DynamicResource AccentGradient}" 
                                             CornerRadius="2"
                                             Width="0">
                                         <Border.RenderTransform>
@@ -250,7 +250,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
+    <Grid Background="{DynamicResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
         <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

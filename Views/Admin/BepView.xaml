@@ -43,7 +43,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource MainBackgroundGradient}">
+    <Grid Background="{DynamicResource MainBackgroundGradient}">
         <Grid Margin="25,5,25,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -110,7 +110,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <Border Grid.Column="0" Background="{StaticResource AccentGradient}" CornerRadius="8" Padding="10,4">
+                                            <Border Grid.Column="0" Background="{DynamicResource AccentGradient}" CornerRadius="8" Padding="10,4">
                                                 <TextBlock Text="{Binding SoBan, StringFormat='Bàn {0}'}" FontWeight="Bold" Foreground="White" FontSize="13"/>
                                             </Border>
 

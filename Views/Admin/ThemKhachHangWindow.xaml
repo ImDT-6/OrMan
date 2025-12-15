@@ -14,7 +14,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border CornerRadius="20" Background="{StaticResource MainBackgroundGradient}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
+    <Border CornerRadius="20" Background="{DynamicResource MainBackgroundGradient}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
         </Border.Effect>
@@ -53,7 +53,7 @@
                     <Button Content="Lưu Thay Đổi" Click="BtnSave_Click" Grid.Column="2" 
                             IsDefault="True"
                             Style="{StaticResource GlassButtonStyle}" 
-                            Background="{StaticResource AccentGradient}" 
+                            Background="{DynamicResource AccentGradient}" 
                             Height="50" FontSize="15" FontWeight="Bold">
                         <Button.Effect>
                             <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
