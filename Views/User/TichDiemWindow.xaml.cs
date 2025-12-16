@@ -16,41 +16,50 @@ namespace OrMan.Views.User
             _vm = vm;
             txtPhone.Focus();
         }
-        private void txtName_KeyDown(object sender, KeyEventArgs e)
-        {
-            // Nếu bấm Enter khi đang nhập tên -> Gọi hành động Đăng ký luôn
-            if (e.Key == Key.Enter)
-            {
-                HandleAction();
-            }
-        }
-        private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
 
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            // Bấm X -> Đóng cửa sổ, DialogResult mặc định là false -> Không gửi đơn
+            this.Close();
+        }
+
+        // --- XỬ LÝ PHÍM ENTER ---
         private void txtPhone_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) HandleAction();
         }
 
+        private void txtName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) HandleAction();
+        }
+
+        // --- SỰ KIỆN NÚT BẤM ---
         private void BtnAction_Click(object sender, RoutedEventArgs e)
         {
             HandleAction();
         }
 
-        // [LOGIC CHÍNH ĐÃ ĐƯỢC SỬA LẠI]
+        // --- LOGIC CHÍNH ---
         private void HandleAction()
         {
             if (lblError != null) lblError.Visibility = Visibility.Collapsed;
 
             string phone = txtPhone.Text.Trim();
 
-            // 1. Validate Số điện thoại
-            if (string.IsNullOrEmpty(phone) || phone.Length < 9)
+            // 1. Validate Số điện thoại (Bắt buộc 10 số, bắt đầu bằng 0)
+            long n;
+            bool isNumeric = long.TryParse(phone, out n);
+
+            if (string.IsNullOrEmpty(phone) || phone.Length != 10 || !phone.StartsWith("0") || !isNumeric)
             {
-                ShowError("Số điện thoại không hợp lệ (cần ít nhất 9 số).");
+                ShowError("Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (VD: 09xx...)!");
+                txtPhone.SelectAll();
+                txtPhone.Focus();
                 return;
             }
 
-            // 2. Chế độ Đăng ký (Người dùng bấm nút Lần 2 sau khi nhập tên)
+            // 2. Chế độ Đăng ký (Khi đang hiện ô nhập tên)
             if (_isRegisterMode)
             {
                 string name = txtName.Text.Trim();
@@ -61,23 +70,24 @@ namespace OrMan.Views.User
                     return;
                 }
 
-                // Gọi ViewModel để lưu vào Database
+                // Đăng ký và hiển thị thông tin
                 var newKhach = _vm.RegisterCustomer(phone, name);
                 ShowCustomerInfo(newKhach);
                 return;
             }
 
-            // 3. Chế độ Tra cứu (Người dùng bấm nút Lần 1)
+            // 3. Chế độ Tra cứu (Mặc định)
             var khach = _vm.CheckMember(phone);
 
-            if (khach == null)
+            // Kiểm tra nếu là khách mới chưa có trong DB
+            bool isNew = (khach == null || khach.KhachHangID == 0 || khach.HoTen == "Khách Mới" || khach.HoTen == "Khách Hàng Mới");
+
+            if (isNew)
             {
-                // Chưa có trong DB -> Chuyển sang chế độ nhập tên
                 SwitchToRegisterMode();
             }
             else
             {
-                // Đã có -> Hiển thị thông tin
                 ShowCustomerInfo(khach);
             }
         }
@@ -87,66 +97,92 @@ namespace OrMan.Views.User
             _isRegisterMode = true;
             pnlNameInput.Visibility = Visibility.Visible;
 
-            // Đổi nút thành "Đăng Ký"
-            btnAction.Content = "Đăng Ký Thành Viên";
+            // Đổi nút thành "ĐĂNG KÝ"
+            btnAction.Content = GetRes("Str_Btn_Register");
             btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#F59E0B"); // Màu cam
 
-            string msg = "Số điện thoại chưa tồn tại. Vui lòng nhập tên để đăng ký mới.";
-            ShowError(msg);
-            if (lblError != null) lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#F59E0B"); // Màu cam cho thông báo
+            // Thông báo
+            ShowError(GetRes("Str_Msg_NewPhoneRegister"));
+            if (lblError != null) lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#F59E0B");
 
             txtName.Focus();
         }
 
         private void ShowCustomerInfo(OrMan.Models.KhachHang khach)
         {
+            // Ẩn ô nhập, hiện kết quả
             txtPhone.IsEnabled = false;
             pnlNameInput.Visibility = Visibility.Collapsed;
             if (lblError != null) lblError.Visibility = Visibility.Collapsed;
-
             pnlResult.Visibility = Visibility.Visible;
 
-            // Hiển thị tên
-            lblTenKhach.Text = $"Xin chào, {khach.HoTen}";
+            // Hiển thị thông tin
+            string helloPrefix = GetRes("Str_Hello_Prefix");
+            lblTenKhach.Text = $"{helloPrefix.Trim()} {khach.HoTen}";
 
-            // Hiển thị hạng & điểm
-            lblHang.Text = $"Hạng: {khach.HangThanhVien}";
-            lblDiem.Text = $"{khach.DiemTichLuy:N0}";
+            string rankLabel = GetRes("Str_Rank_Label");
+            string rankName = GetTranslatedRank(khach.HangThanhVien);
+            lblHang.Text = $"{rankLabel.Trim()} {rankName}";
 
+            string pointLabel = GetRes("Str_Points_Label");
+            lblDiem.Text = $"{pointLabel.Trim()} {khach.DiemTichLuy:N0}";
+
+            // Cập nhật ViewModel
             _vm.CurrentCustomer = khach;
 
             // --- CẤU HÌNH NÚT HOÀN TẤT ---
             btnAction.Content = GetRes("Str_Btn_Done");
             btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#22C55E"); // Xanh lá
 
-            // Xóa sự kiện cũ
+            // Gán lại sự kiện: Bấm Hoàn Tất -> Trả về TRUE
             btnAction.Click -= BtnAction_Click;
-
-            // [QUAN TRỌNG] Chỉ khi bấm nút này mới được tính là Thành công (True)
             btnAction.Click += (s, ev) =>
             {
-                this.DialogResult = true; // Đóng cửa sổ và báo về UserView là OK
+                this.DialogResult = true; // Chỉ ở đây mới trả về True
             };
 
-            // Focus vào nút để bấm Enter là xong luôn
+            // Focus vào nút để người dùng có thể bấm Enter ngay
             btnAction.Focus();
         }
-        private string GetRes(string key)
-        {
-            return Application.Current.TryFindResource(key) as string ?? key;
-        }
+
+        // --- HÀM HỖ TRỢ ---
         private void ShowError(string msg)
         {
             if (lblError != null)
             {
                 lblError.Text = msg;
                 lblError.Visibility = Visibility.Visible;
-                lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#EF4444"); // Màu đỏ lỗi
+                lblError.Foreground = (Brush)new BrushConverter().ConvertFrom("#EF4444");
             }
             else
             {
                 MessageBox.Show(msg);
             }
+        }
+
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
+        private string GetTranslatedRank(string dbRank)
+        {
+            string resourceKey = "";
+            switch (dbRank)
+            {
+                case "Mới":
+                case "Khách Hàng Mới":
+                    resourceKey = "Str_Rank_New"; break;
+                case "Bạc":
+                    resourceKey = "Str_Rank_Silver"; break;
+                case "Vàng":
+                    resourceKey = "Str_Rank_Gold"; break;
+                case "Kim Cương":
+                    resourceKey = "Str_Rank_Diamond"; break;
+                default:
+                    return dbRank;
+            }
+            return GetRes(resourceKey);
         }
     }
 }

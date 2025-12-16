@@ -52,7 +52,7 @@
                         <TextBox x:Name="txtPhone" Grid.Column="1"
                                  FontSize="24" FontWeight="Bold" Foreground="White" Background="Transparent" BorderThickness="0" 
                                  VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10,0,5,0"
-                                 MaxLength="12" KeyDown="txtPhone_KeyDown" CaretBrush="White"/>
+                                 MaxLength="10" KeyDown="txtPhone_KeyDown" CaretBrush="White"/>
                     </Grid>
                 </Border>
 
