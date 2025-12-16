@@ -15,7 +15,7 @@ using System.Globalization;
 namespace OrMan.ViewModels
 {
     // Enum để định nghĩa các loại lọc
-    public enum ChartFilterType { Day, Week, Month }
+    public enum ChartFilterType { Day, Week, Month, Year }
 
     public class TopFoodItem
     {
@@ -137,6 +137,7 @@ namespace OrMan.ViewModels
                 case "Day": _currentFilter = ChartFilterType.Day; break;
                 case "Week": _currentFilter = ChartFilterType.Week; break;
                 case "Month": _currentFilter = ChartFilterType.Month; break;
+                case "Year": _currentFilter = ChartFilterType.Year; break;
             }
             LoadChartData(); // Vẽ lại biểu đồ
         }
@@ -259,6 +260,11 @@ namespace OrMan.ViewModels
                     start = 1;
                     end = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
                     break;
+                case ChartFilterType.Year:
+                    data = _doanhThuRepo.GetRevenueByYear(); // Gọi hàm vừa tạo ở Bước 2
+                    start = 1;
+                    end = 12; // 12 tháng
+                    break;
             }
 
             // Tính Max Value để chia trục
@@ -314,10 +320,15 @@ namespace OrMan.ViewModels
                 {
                     label = i == 8 ? "CN" : $"T{i}";
                 }
-                else // Month
+                else if (_currentFilter == ChartFilterType.Month)
                 {
-                    // Chỉ hiện ngày lẻ hoặc cách nhật để đỡ rối nếu cần
+                    // Tháng này: Hiện ngày lẻ 1, 3, 5... hoặc ngày cuối
                     label = (i % 2 != 0 || i == end) ? $"{i}" : "";
+                }
+                else if (_currentFilter == ChartFilterType.Year) // [MỚI] Label cho Năm
+                {
+                    // Hiển thị T1, T2... T12
+                    label = $"T{i}";
                 }
 
                 DoanhThuTheoGio.Add(new ChartBarItem

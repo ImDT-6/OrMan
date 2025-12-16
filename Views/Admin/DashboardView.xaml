@@ -144,6 +144,10 @@
                  Style="{StaticResource FilterRadioButtonStyle}"
                  Command="{Binding ChangeFilterCommand}" 
                  CommandParameter="Month"/>
+                            <RadioButton Content="Năm này" 
+                 Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0,0,0"
+                 Command="{Binding ChangeFilterCommand}" 
+                 CommandParameter="Year"/>
 
                         </StackPanel>
                     </Grid>

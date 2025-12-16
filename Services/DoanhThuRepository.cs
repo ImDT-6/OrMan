@@ -57,7 +57,26 @@ namespace OrMan.Services
                 return context.HoaDons.Count(h => h.NgayTao >= today && h.DaThanhToan == true);
             }
         }
+        public Dictionary<int, decimal> GetRevenueByYear()
+        {
+            using (var context = new MenuContext())
+            {
+                int currentYear = DateTime.Now.Year;
 
+                // Lấy tất cả hóa đơn đã thanh toán trong năm nay
+                var query = context.HoaDons
+                    .Where(h => h.DaThanhToan && h.NgayTao.Year == currentYear)
+                    .Select(h => new { h.NgayTao.Month, h.TongTien })
+                    .ToList();
+
+                // Gom nhóm theo Tháng
+                var result = query
+                    .GroupBy(x => x.Month)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.TongTien));
+
+                return result;
+            }
+        }
         public Dictionary<int, decimal> GetRevenueByHour()
         {
             using (var context = new MenuContext())
