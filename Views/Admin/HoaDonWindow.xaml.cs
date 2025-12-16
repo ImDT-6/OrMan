@@ -51,7 +51,7 @@ namespace OrMan.Views.Admin
                 string content = Uri.EscapeDataString($"{tenBan} TT");
 
                 // Tạo link API VietQR
-                string qrUrl = $"https://img.vietqr.io/image/{BANK_ID}-{ACCOUNT_NO}-{TEMPLATE}.png?amount={hoaDon.TongTien}&addInfo={content}&accountName={Uri.EscapeDataString(ACCOUNT_NAME)}";
+                string qrUrl = $"https://img.vietqr.io/image/{BANK_ID}-{ACCOUNT_NO}-{TEMPLATE}.png?amount={(long)hoaDon.TongTien}&addInfo={content}&accountName={Uri.EscapeDataString(ACCOUNT_NAME)}";
                 try
                 {
                     // Tải ảnh từ URL
