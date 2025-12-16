@@ -212,50 +212,52 @@ namespace OrMan.Views.User
 
             if (mainWindow != null) mainWindow.Opacity = 1;
 
-            // 3. Nếu khách chốt đơn
             if (isConfirmed == true)
             {
-                // --- [LOGIC MỚI] KIỂM TRA KHÁCH HÀNG ---
-
-                // Điều kiện xác định là khách vãng lai (chưa đăng nhập):
-                // 1. Object null
-                // 2. ID = 0
-                // 3. Tên là "Khách Mới" (hoặc tên mặc định bạn đặt trong DB)
+                // Kiểm tra xem có phải khách vãng lai không
                 bool isGuest = _vm.CurrentCustomer == null ||
                                _vm.CurrentCustomer.KhachHangID == 0 ||
                                _vm.CurrentCustomer.HoTen == "Khách Mới" ||
                                _vm.CurrentCustomer.HoTen == "Khách Hàng Mới";
 
-                // CHỈ HỎI NẾU LÀ KHÁCH VÃNG LAI
                 if (isGuest)
                 {
-                    string askMsg = GetRes("Str_Msg_AskLoyalty");
-                    string title = GetRes("Str_Title_Confirm");
-
-                    var result = MessageBox.Show(askMsg, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    var result = MessageBox.Show(GetRes("Str_Msg_AskLoyalty"), GetRes("Str_Title_Confirm"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        // Mở cửa sổ Tích điểm
+                        // Mở cửa sổ tích điểm
                         var tichDiemWin = new TichDiemWindow(_vm);
-                        tichDiemWin.Owner = mainWindow;
-                        tichDiemWin.ShowDialog();
+                        tichDiemWin.Owner = Application.Current.MainWindow;
 
-                        // Sau khi cửa sổ này đóng, _vm.CurrentCustomer đã được cập nhật
+                        // Lấy kết quả trả về
+                        bool? dialogResult = tichDiemWin.ShowDialog();
+
+                        // [LOGIC QUAN TRỌNG ĐỂ "LÀM LẠI TỪ ĐẦU"]
+                        if (dialogResult != true)
+                        {
+                            // Trường hợp này là: Đã mở cửa sổ lên (thậm chí đã đăng ký xong) 
+                            // nhưng lại bấm nút X thoát ra mà chưa bấm "HOÀN TẤT".
+
+                            // -> Hủy bỏ khách hàng vừa đăng ký (nếu có), reset về khách lẻ
+                            _vm.ResetSession();
+
+                            // -> Dừng lại, KHÔNG gửi đơn
+                            return;
+                        }
+
+                        // Nếu chạy xuống đây nghĩa là dialogResult == true (Đã bấm HOÀN TẤT đàng hoàng)
                     }
                 }
 
-                // --- GỬI ĐƠN HÀNG (Tự động dùng CurrentCustomer đang có) ---
+                // 4. Gửi đơn hàng
                 if (_vm.SubmitOrder())
                 {
-                    MessageBox.Show(
-                        GetRes("Str_Msg_OrderSuccess"),
-                        GetRes("Str_Title_Success"),
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show(GetRes("Str_Msg_OrderSuccess"), GetRes("Str_Title_Success"), MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
+
         private void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
             // [ĐÃ SỬA] Dùng GetRes

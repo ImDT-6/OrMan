@@ -16,7 +16,14 @@ namespace OrMan.Views.User
             _vm = vm;
             txtPhone.Focus();
         }
-
+        private void txtName_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Nếu bấm Enter khi đang nhập tên -> Gọi hành động Đăng ký luôn
+            if (e.Key == Key.Enter)
+            {
+                HandleAction();
+            }
+        }
         private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
 
         private void txtPhone_KeyDown(object sender, KeyEventArgs e)
@@ -108,15 +115,26 @@ namespace OrMan.Views.User
 
             _vm.CurrentCustomer = khach;
 
-            // Đổi nút thành "Hoàn Tất"
-            btnAction.Content = "Hoàn Tất";
+            // --- CẤU HÌNH NÚT HOÀN TẤT ---
+            btnAction.Content = GetRes("Str_Btn_Done");
             btnAction.Background = (Brush)new BrushConverter().ConvertFrom("#22C55E"); // Xanh lá
 
-            // Gỡ sự kiện cũ, gán sự kiện đóng window
+            // Xóa sự kiện cũ
             btnAction.Click -= BtnAction_Click;
-            btnAction.Click += (s, e) => this.Close();
-        }
 
+            // [QUAN TRỌNG] Chỉ khi bấm nút này mới được tính là Thành công (True)
+            btnAction.Click += (s, ev) =>
+            {
+                this.DialogResult = true; // Đóng cửa sổ và báo về UserView là OK
+            };
+
+            // Focus vào nút để bấm Enter là xong luôn
+            btnAction.Focus();
+        }
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
         private void ShowError(string msg)
         {
             if (lblError != null)

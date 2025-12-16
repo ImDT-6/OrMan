@@ -58,10 +58,10 @@
 
                 <StackPanel x:Name="pnlNameInput" Visibility="Collapsed">
                     <TextBlock Text="{DynamicResource Str_Name_Input_Label}" Foreground="#F59E0B" FontWeight="Bold" Margin="5,0,0,15"/>
-                    <TextBox x:Name="txtName" Style="{StaticResource GlassTextBox}" Tag="{StaticResource IconUser}" ToolTip="{DynamicResource Str_Name_Placeholder}" Margin="0,0,0,25"/>
+                    <TextBox x:Name="txtName" Style="{StaticResource GlassTextBox}" Tag="{StaticResource IconUser}" ToolTip="{DynamicResource Str_Name_Placeholder}" Margin="0,0,0,25" KeyDown="txtName_KeyDown"/>
                 </StackPanel>
 
-                <Border x:Name="pnlResult" Visibility="Collapsed" Background="#2010B981" CornerRadius="12" Padding="20" Margin="0,0,0,15" BorderBrush="#10B981" BorderThickness="1">
+                <Border x:Name="pnlResult"  Visibility="Collapsed" Background="#2010B981" CornerRadius="12" Padding="20" Margin="0,0,0,15" BorderBrush="#10B981" BorderThickness="1" >
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

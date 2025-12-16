@@ -289,7 +289,28 @@ namespace OrMan.ViewModels.User
             UpdateCartInfo();
             return true;
         }
+        public void ResetSession()
+        {
+            // 1. Reset Khách hàng về mặc định (Khách lẻ/vãng lai)
+            CurrentCustomer = new KhachHang
+            {
+                KhachHangID = 0,
+                HoTen = "Khách Mới",
+                SoDienThoai = "",
+                HangThanhVien = "Mới",
+                DiemTichLuy = 0
+            };
 
+            // 2. Nếu bạn muốn xóa sạch giỏ hàng khi reset thì dùng dòng này:
+            // GioHang.Clear(); 
+
+            // Tuy nhiên, theo logic "Hủy đăng ký tích điểm nhưng vẫn muốn thanh toán cho khách lẻ" 
+            // thì KHÔNG NÊN xóa giỏ hàng ở đây. 
+            // Ta chỉ reset thông tin khách hàng thôi.
+
+            // 3. Cập nhật lại các thông số tiền nong (nếu cần)
+            UpdateCartInfo();
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
