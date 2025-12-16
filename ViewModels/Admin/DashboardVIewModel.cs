@@ -11,7 +11,7 @@ using System.Windows.Input;
 using OrMan.Helpers;
 using System.Windows;
 using System.Globalization;
-
+using System.Windows.Media; 
 namespace OrMan.ViewModels
 {
     // Enum để định nghĩa các loại lọc
@@ -46,7 +46,12 @@ namespace OrMan.ViewModels
         // --- 1. Biến lưu trạng thái lọc ---
         private ChartFilterType _currentFilter = ChartFilterType.Day;
         public ICommand ChangeFilterCommand { get; private set; }
-
+        private Brush _tangTruongColor;
+        public Brush TangTruongColor
+        {
+            get => _tangTruongColor;
+            set { _tangTruongColor = value; OnPropertyChanged(); }
+        }
         public ObservableCollection<ChartBarItem> DoanhThuTheoGio { get; set; }
 
         // Các biến trục tung biểu đồ
@@ -177,15 +182,36 @@ namespace OrMan.ViewModels
             decimal totalYesterday = _doanhThuRepo.GetYesterdayRevenue();
 
             DoanhThuNgay = FormatCurrencyShort(totalToday);
-
+            decimal diff = totalToday - totalYesterday;
+            string sign = diff >= 0 ? "+" : "-";
+            string diffString = FormatCurrencyShort(Math.Abs(diff));
             if (totalYesterday == 0)
-                TangTruongText = totalToday > 0 ? "+100% (Mới)" : "---";
+            {
+                // Trường hợp hôm qua doanh thu = 0
+                if (totalToday > 0)
+                    TangTruongText = $"+{diffString} (Mới)";
+                else
+                    TangTruongText = "---";
+            }
             else
             {
-                double percent = (double)((totalToday - totalYesterday) / totalYesterday) * 100;
-                TangTruongText = (percent >= 0 ? "+" : "") + percent.ToString("0") + "% so với hôm qua";
-            }
+                // 4. Tính phần trăm (VD: 5%)
+                double percent = (double)(Math.Abs(diff) / totalYesterday) * 100;
 
+                // 5. Ghép chuỗi: +500k (5%) so với hôm qua
+                TangTruongText = $"{sign}{diffString} ({percent:0}%) so với hôm qua";
+            }
+            var converter = new BrushConverter();
+            if (diff >= 0)
+            {
+                // Màu Xanh (SuccessGreen)
+                TangTruongColor = (Brush)converter.ConvertFrom("#22C55E");
+            }
+            else
+            {
+                // Màu Đỏ (DangerRed)
+                TangTruongColor = (Brush)converter.ConvertFrom("#EF4444");
+            }
             SoDonHomNay = _doanhThuRepo.GetTodayOrderCount();
             if (SoDonHomNay > 0)
             {

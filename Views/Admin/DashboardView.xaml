@@ -76,8 +76,11 @@
                             <TextBlock Text="DOANH THU" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
                             <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
                         </Grid>
+
                         <TextBlock Text="{Binding DoanhThuNgay}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22"/>
-                        <TextBlock Text="+12% so với hqua" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+
+                        <TextBlock Text="{Binding TangTruongText}" Foreground="{Binding TangTruongColor}" FontSize="10" Margin="0,2,0,0"/>
+
                     </StackPanel>
                 </Border>
 
