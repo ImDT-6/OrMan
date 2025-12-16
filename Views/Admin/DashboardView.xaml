@@ -129,9 +129,22 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <RadioButton Content="Hôm nay" IsChecked="True" Style="{StaticResource FilterRadioButtonStyle}"/>
-                            <RadioButton Content="Tuần này" Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0"/>
-                            <RadioButton Content="Tháng này" Style="{StaticResource FilterRadioButtonStyle}"/>
+
+                            <RadioButton Content="Hôm nay" IsChecked="True" 
+                 Style="{StaticResource FilterRadioButtonStyle}"
+                 Command="{Binding ChangeFilterCommand}" 
+                 CommandParameter="Day"/>
+
+                            <RadioButton Content="Tuần này" 
+                 Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0"
+                 Command="{Binding ChangeFilterCommand}" 
+                 CommandParameter="Week"/>
+
+                            <RadioButton Content="Tháng này" 
+                 Style="{StaticResource FilterRadioButtonStyle}"
+                 Command="{Binding ChangeFilterCommand}" 
+                 CommandParameter="Month"/>
+
                         </StackPanel>
                     </Grid>
 

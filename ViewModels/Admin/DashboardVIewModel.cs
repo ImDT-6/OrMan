@@ -10,10 +10,13 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using OrMan.Helpers;
 using System.Windows;
-using System.Globalization; // Thêm để format số chuẩn
+using System.Globalization;
 
 namespace OrMan.ViewModels
 {
+    // Enum để định nghĩa các loại lọc
+    public enum ChartFilterType { Day, Week, Month }
+
     public class TopFoodItem
     {
         public MonAn MonAn { get; set; }
@@ -27,7 +30,6 @@ namespace OrMan.ViewModels
         public double EmptyValue { get; set; } // Phần trống phía trên cột
 
         // Binding cho Grid.RowDefinitions (Responsive tuyệt đối)
-        // Sử dụng InvariantCulture để đảm bảo dấu chấm thập phân đúng định dạng XAML
         public string BarStar => $"{Value.ToString(CultureInfo.InvariantCulture)}*";
         public string EmptyStar => $"{EmptyValue.ToString(CultureInfo.InvariantCulture)}*";
 
@@ -41,12 +43,24 @@ namespace OrMan.ViewModels
         private readonly BanAnRepository _banRepo;
         private DispatcherTimer _timer;
 
+        // --- 1. Biến lưu trạng thái lọc ---
+        private ChartFilterType _currentFilter = ChartFilterType.Day;
+        public ICommand ChangeFilterCommand { get; private set; }
+
         public ObservableCollection<ChartBarItem> DoanhThuTheoGio { get; set; }
 
+        // Các biến trục tung biểu đồ
         private string _axisMax = "2M";
         private string _axisMidHigh = "1.5M";
         private string _axisMid = "1M";
         private string _axisMidLow = "500k";
+
+        public string AxisMax { get => _axisMax; set { _axisMax = value; OnPropertyChanged(); } }
+        public string AxisMidHigh { get => _axisMidHigh; set { _axisMidHigh = value; OnPropertyChanged(); } }
+        public string AxisMid { get => _axisMid; set { _axisMid = value; OnPropertyChanged(); } }
+        public string AxisMidLow { get => _axisMidLow; set { _axisMidLow = value; OnPropertyChanged(); } }
+
+        // Các biến hiển thị Dashboard
         private string _banHoatDongText;
         public string BanHoatDongText
         {
@@ -54,17 +68,12 @@ namespace OrMan.ViewModels
             set { _banHoatDongText = value; OnPropertyChanged(); }
         }
 
-        // [MỚI] Thuộc tính hiển thị công suất (VD: "Công suất: 25%")
         private string _congSuatText;
         public string CongSuatText
         {
             get => _congSuatText;
             set { _congSuatText = value; OnPropertyChanged(); }
         }
-        public string AxisMax { get => _axisMax; set { _axisMax = value; OnPropertyChanged(); } }
-        public string AxisMidHigh { get => _axisMidHigh; set { _axisMidHigh = value; OnPropertyChanged(); } }
-        public string AxisMid { get => _axisMid; set { _axisMid = value; OnPropertyChanged(); } }
-        public string AxisMidLow { get => _axisMidLow; set { _axisMidLow = value; OnPropertyChanged(); } }
 
         private ObservableCollection<TopFoodItem> _topMonAn;
         public ObservableCollection<TopFoodItem> TopMonAn
@@ -106,17 +115,30 @@ namespace OrMan.ViewModels
             ResolveRequestCommand = new RelayCommand<BanAn>(ResolveRequest);
             ProcessRequestCommand = new RelayCommand<BanAn>(ProcessRequest);
 
+            // --- 2. Khởi tạo Command lọc ---
+            ChangeFilterCommand = new RelayCommand<string>(ChangeFilter);
+
             LoadDashboardData();
 
             BanAnRepository.OnPaymentSuccess += () => LoadDashboardData();
-
-            // [MỚI] Cập nhật ngay khi Thêm hoặc Xóa bàn
             BanAnRepository.OnTableChanged += () => LoadDashboardData();
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(30);
             _timer.Tick += (s, e) => LoadDashboardData();
             _timer.Start();
+        }
+
+        // --- 3. Xử lý khi bấm nút RadioButton ---
+        private void ChangeFilter(string type)
+        {
+            switch (type)
+            {
+                case "Day": _currentFilter = ChartFilterType.Day; break;
+                case "Week": _currentFilter = ChartFilterType.Week; break;
+                case "Month": _currentFilter = ChartFilterType.Month; break;
+            }
+            LoadChartData(); // Vẽ lại biểu đồ
         }
 
         private void ResolveRequest(BanAn ban)
@@ -145,7 +167,9 @@ namespace OrMan.ViewModels
                 }
             }
         }
+
         private int _previousRequestCount = 0;
+
         private void LoadDashboardData()
         {
             decimal totalToday = _doanhThuRepo.GetTodayRevenue();
@@ -176,14 +200,10 @@ namespace OrMan.ViewModels
 
             var allTables = _banRepo.GetAll();
             int tongSoBan = allTables.Count;
-
-            // Bàn có khách là bàn có trạng thái KHÁC "Trống"
             int banCoKhach = allTables.Count(b => b.TrangThai != "Trống");
 
-            // Cập nhật text "X / Y"
             BanHoatDongText = $"{banCoKhach} / {tongSoBan}";
 
-            // Tính phần trăm công suất
             if (tongSoBan > 0)
             {
                 double phanTram = ((double)banCoKhach / tongSoBan) * 100;
@@ -195,16 +215,13 @@ namespace OrMan.ViewModels
             }
 
             var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
-            // [CODE MỚI - LOGIC ÂM THANH]
+
             if (urgentTables.Count > _previousRequestCount)
             {
-                // Có yêu cầu mới -> Phát âm thanh hệ thống
                 System.Media.SystemSounds.Exclamation.Play();
-                // Hoặc nếu muốn tiếng Beep rõ hơn: 
-                // Console.Beep(800, 500); 
             }
             _previousRequestCount = urgentTables.Count;
-            // [HẾT CODE MỚI]
+
             if (BanCanXuLy == null || BanCanXuLy.Count != urgentTables.Count)
                 BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
 
@@ -213,27 +230,48 @@ namespace OrMan.ViewModels
             TopMonAn = new ObservableCollection<TopFoodItem>(topList);
         }
 
+        // --- 4. Logic LoadChartData Động ---
         private void LoadChartData()
         {
-            var hourlyData = _doanhThuRepo.GetRevenueByHour();
             DoanhThuTheoGio.Clear();
 
-            double maxVal = hourlyData.Count > 0 ? (double)hourlyData.Values.Max() : 0;
+            // Khởi tạo các biến để xử lý động
+            Dictionary<int, decimal> data = new Dictionary<int, decimal>();
+            int start = 0, end = 0;
 
-            // --- LOGIC TÍNH TRỤC TUNG THÔNG MINH ---
-            double axisTop = 1000000; // Mặc định 1M nếu không có data
+            // Lấy dữ liệu từ Repo dựa trên Filter
+            switch (_currentFilter)
+            {
+                case ChartFilterType.Day:
+                    data = _doanhThuRepo.GetRevenueByHour();
+                    start = 8;
+                    end = 24;
+                    break;
+
+                case ChartFilterType.Week:
+                    data = _doanhThuRepo.GetRevenueByWeek(); // Đảm bảo Repo đã có hàm này
+                    start = 2;
+                    end = 8; // Thứ 2 -> Chủ Nhật (quy ước là 8)
+                    break;
+
+                case ChartFilterType.Month:
+                    data = _doanhThuRepo.GetRevenueByMonth(); // Đảm bảo Repo đã có hàm này
+                    start = 1;
+                    end = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+                    break;
+            }
+
+            // Tính Max Value để chia trục
+            double maxVal = data.Count > 0 ? (double)data.Values.Max() : 0;
+            double axisTop = 1000000; // Mặc định 1M
 
             if (maxVal > 0)
             {
-                // Thêm 10% đệm
-                double target = maxVal * 1.1;
-
-                // Tìm bậc của số (Ví dụ: 150k -> bậc 100k, 2.5M -> bậc 1M)
+                double target = maxVal * 1.1; // Đệm 10%
                 double exponent = Math.Floor(Math.Log10(target));
                 double powerOf10 = Math.Pow(10, exponent);
                 double fraction = target / powerOf10;
 
-                // Làm tròn lên các mốc đẹp: 1.0, 1.2, 1.5, 2.0, 2.5, 5.0, 10.0
                 double niceFraction;
                 if (fraction <= 1.0) niceFraction = 1.0;
                 else if (fraction <= 1.2) niceFraction = 1.2;
@@ -249,26 +287,38 @@ namespace OrMan.ViewModels
 
                 axisTop = niceFraction * powerOf10;
             }
-            // ----------------------------------------
 
             AxisMax = FormatCurrencyShort((decimal)axisTop);
             AxisMidHigh = FormatCurrencyShort((decimal)(axisTop * 0.75));
             AxisMid = FormatCurrencyShort((decimal)(axisTop * 0.5));
             AxisMidLow = FormatCurrencyShort((decimal)(axisTop * 0.25));
 
-            for (int hour = 8; hour <= 24; hour++)
+            // Vòng lặp tạo cột biểu đồ
+            for (int i = start; i <= end; i++)
             {
                 decimal revenue = 0;
-                if (hour < 24 && hourlyData.ContainsKey(hour))
-                    revenue = hourlyData[hour];
+                if (data.ContainsKey(i))
+                    revenue = data[i];
 
                 double val = (double)revenue;
-
-                // Tính phần trống để Grid chia tỷ lệ
                 double empty = axisTop - val;
-                if (empty < 0) empty = 0; // Đề phòng lỗi làm tròn
+                if (empty < 0) empty = 0;
 
-                string label = (hour % 2 == 0) ? $"{hour}h" : "";
+                // Xử lý Label trục hoành (X-Axis)
+                string label = "";
+                if (_currentFilter == ChartFilterType.Day)
+                {
+                    label = (i % 2 == 0) ? $"{i}h" : "";
+                }
+                else if (_currentFilter == ChartFilterType.Week)
+                {
+                    label = i == 8 ? "CN" : $"T{i}";
+                }
+                else // Month
+                {
+                    // Chỉ hiện ngày lẻ hoặc cách nhật để đỡ rối nếu cần
+                    label = (i % 2 != 0 || i == end) ? $"{i}" : "";
+                }
 
                 DoanhThuTheoGio.Add(new ChartBarItem
                 {
