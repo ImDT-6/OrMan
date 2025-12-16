@@ -264,6 +264,8 @@
                              Background="Transparent" 
                              BorderThickness="0" 
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             MaxHeight="240"
                              Padding="0">
 
                         <ListBox.ItemContainerStyle>
