@@ -285,8 +285,45 @@ namespace OrMan.ViewModels.User
                 if (CurrentTable <= 0) return false;
             }
             _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
+            if (CurrentCustomer != null && CurrentCustomer.KhachHangID > 0)
+            {
+                // Công thức: Tổng tiền / 1000 (Lấy phần nguyên)
+                int diemCong = (int)(TongTienCart / 1000);
+
+                if (diemCong > 0)
+                {
+                    using (var db = new MenuContext()) // Mở kết nối riêng để update điểm
+                    {
+                        var khachDB = db.KhachHangs.FirstOrDefault(k => k.KhachHangID == CurrentCustomer.KhachHangID);
+                        if (khachDB != null)
+                        {
+                            khachDB.DiemTichLuy += diemCong;
+
+                            // (Tùy chọn) Logic thăng hạng:
+                            // if (khachDB.DiemTichLuy >= 1000) khachDB.HangThanhVien = "Vàng";
+                            // else if (khachDB.DiemTichLuy >= 500) khachDB.HangThanhVien = "Bạc";
+
+                            db.SaveChanges();
+
+                            // Cập nhật lại giao diện (để nếu khách còn ngồi đó thì thấy điểm tăng)
+                            CurrentCustomer.DiemTichLuy = khachDB.DiemTichLuy;
+                            OnPropertyChanged(nameof(CurrentCustomer));
+
+                            // Thông báo nhẹ (tùy chọn, có thể bỏ nếu thấy phiền)
+                            // MessageBox.Show($"Đã cộng {diemCong} điểm cho quý khách!", "Tích điểm");
+                        }
+                    }
+                }
+            }
+
+            // 4. Dọn dẹp giỏ hàng
             GioHang.Clear();
             UpdateCartInfo();
+
+            // Reset lại phiên làm việc (nếu muốn sau khi gửi đơn là coi như xong khách đó)
+            // Hoặc giữ lại nếu khách còn ngồi ăn tiếp. 
+            // Thường thì gửi đơn xong khách vẫn ngồi ăn -> KHÔNG NÊN ResetSession() ở đây.
+
             return true;
         }
         public void ResetSession()
