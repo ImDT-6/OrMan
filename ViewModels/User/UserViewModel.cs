@@ -9,8 +9,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using OrMan.Data;
-using System.Windows.Threading; // [QUAN TRỌNG] Để dùng Timer
-using System; // Để dùng TimeSpan
+using System.Windows.Threading;
+using System;
+using System.Threading.Tasks; // [QUAN TRỌNG] Thêm dòng này để dùng Task.Delay
 
 namespace OrMan.ViewModels.User
 {
@@ -19,7 +20,23 @@ namespace OrMan.ViewModels.User
         private readonly ThucDonRepository _repo;
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
-        private DispatcherTimer _timerCheckUpdate; // [MỚI] Timer để tự động cập nhật
+        private DispatcherTimer _timerCheckUpdate;
+
+        // --- [MỚI] BIẾN ĐỂ KHÓA NÚT GỌI ---
+        private bool _isNutGoiHoTroEnabled = true;
+        public bool IsNutGoiHoTroEnabled
+        {
+            get => _isNutGoiHoTroEnabled;
+            set
+            {
+                _isNutGoiHoTroEnabled = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TextNutHoTro)); // Cập nhật luôn chữ trên nút
+            }
+        }
+
+        // Tự động đổi chữ trên nút: "Gọi Nhân Viên" <-> "Đợi xíu..."
+        public string TextNutHoTro => IsNutGoiHoTroEnabled ? "Gọi Nhân Viên" : "Đợi xíu nha!";
 
         private KhachHang _currentCustomer;
         public KhachHang CurrentCustomer
@@ -60,7 +77,6 @@ namespace OrMan.ViewModels.User
             set { _tongSoLuong = value; OnPropertyChanged(); }
         }
 
-        // Biến lưu loại món đang xem (Mì Cay/Đồ Chiên...) để khi reload không bị nhảy về tab đầu
         private string _currentCategoryTag = "Mì Cay";
 
         public ICommand CallStaffCommand { get; private set; }
@@ -76,15 +92,12 @@ namespace OrMan.ViewModels.User
             CallStaffCommand = new RelayCommand<object>(CallStaff);
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
 
-            // [MỚI] KHỞI ĐỘNG CHẾ ĐỘ TỰ CẬP NHẬT
             SetupAutoUpdate();
         }
 
-        // --- [LOGIC TỰ ĐỘNG CẬP NHẬT] ---
         private void SetupAutoUpdate()
         {
             _timerCheckUpdate = new DispatcherTimer();
-            // Cứ 5 giây hỏi Database 1 lần
             _timerCheckUpdate.Interval = TimeSpan.FromSeconds(5);
             _timerCheckUpdate.Tick += (s, e) => ReloadMenuRealTime();
             _timerCheckUpdate.Start();
@@ -92,21 +105,14 @@ namespace OrMan.ViewModels.User
 
         private void ReloadMenuRealTime()
         {
-            // 1. Lấy dữ liệu mới nhất từ SQL (Hàm GetAvailableMenu phải dùng new Context)
             var newData = _repo.GetAvailableMenu();
-
-            // 2. Kiểm tra sơ bộ xem số lượng có thay đổi không
-            // (Hoặc nếu muốn kỹ hơn thì so sánh nội dung, nhưng check count cho nhanh)
             if (newData.Count != (_allMonAn?.Count ?? 0))
             {
                 _allMonAn = newData;
-                // Cập nhật lại giao diện theo Tab đang chọn
                 FilterMenu(_currentCategoryTag);
             }
         }
-        // --------------------------------
 
-        // --- [SECTION GIỎ HÀNG] ---
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
             var itemDaCo = GioHang.FirstOrDefault(x => x.MonAn.MaMon == mon.MaMon
@@ -170,7 +176,6 @@ namespace OrMan.ViewModels.User
             TongSoLuong = GioHang.Sum(x => x.SoLuong);
         }
 
-        // --- [SECTION KHÁCH HÀNG] ---
         public KhachHang CheckMember(string phoneNumber)
         {
             using (var db = new MenuContext())
@@ -204,7 +209,6 @@ namespace OrMan.ViewModels.User
             }
         }
 
-        // --- [CÁC HÀM HỖ TRỢ KHÁC] ---
         private void OpenChonBanWindow(object obj)
         {
             var wd = new ChonBanWindow();
@@ -222,16 +226,18 @@ namespace OrMan.ViewModels.User
 
         public void FilterMenu(string loai)
         {
-            // Lưu lại loại đang chọn để dùng cho Timer reload
             _currentCategoryTag = loai;
-
             if (_allMonAn == null) return;
             if (loai == "Mì Cay") MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
             else MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
         }
 
-        private void CallStaff(object obj)
+        // [MỚI] Sửa hàm này thành async void để dùng await
+        private async void CallStaff(object obj)
         {
+            // 1. Nếu đang bị khóa thì chặn luôn
+            if (!IsNutGoiHoTroEnabled) return;
+
             if (CurrentTable <= 0)
             {
                 OpenChonBanWindow(null);
@@ -245,8 +251,16 @@ namespace OrMan.ViewModels.User
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
-            if (requestWindow.ShowDialog() == true)
+            // Hiện dialog
+            bool? dialogResult = requestWindow.ShowDialog();
+
+            // Trả lại độ sáng màn hình
+            if (mainWindow != null) mainWindow.Opacity = 1;
+
+            if (dialogResult == true)
             {
+                bool daGuiThanhCong = false;
+
                 if (requestWindow.SelectedRequest == RequestType.Checkout)
                 {
                     if (activeOrder == null)
@@ -262,6 +276,7 @@ namespace OrMan.ViewModels.User
                         _banRepo.RequestPayment(CurrentTable, method);
                         MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN ({method}) cho Bàn {CurrentTable}!",
                                         "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        daGuiThanhCong = true;
                     }
                 }
                 else if (requestWindow.SelectedRequest == RequestType.Support)
@@ -269,10 +284,22 @@ namespace OrMan.ViewModels.User
                     string msg = requestWindow.SupportMessage;
                     _banRepo.SendSupportRequest(CurrentTable, msg);
                     MessageBox.Show($"Đã gửi lời nhắn: \"{msg}\"\nNhân viên sẽ đến ngay!", "Đã gửi", MessageBoxButton.OK, MessageBoxImage.Information);
+                    daGuiThanhCong = true;
+                }
+
+                // [QUAN TRỌNG] Logic Chống Spam
+                if (daGuiThanhCong)
+                {
+                    // Khóa nút
+                    IsNutGoiHoTroEnabled = false;
+
+                    // Đợi 30 giây (không làm đơ ứng dụng)
+                    await Task.Delay(10000);
+
+                    // Mở lại nút
+                    IsNutGoiHoTroEnabled = true;
                 }
             }
-
-            if (mainWindow != null) mainWindow.Opacity = 1;
         }
 
         public bool SubmitOrder()
@@ -288,7 +315,6 @@ namespace OrMan.ViewModels.User
 
             if (CurrentCustomer != null && CurrentCustomer.KhachHangID > 0)
             {
-                // Công thức: 1.000đ = 1 điểm
                 int diemCong = (int)(TongTienCart / 1000);
 
                 if (diemCong > 0)
@@ -298,22 +324,14 @@ namespace OrMan.ViewModels.User
                         var khachDB = db.KhachHangs.FirstOrDefault(k => k.KhachHangID == CurrentCustomer.KhachHangID);
                         if (khachDB != null)
                         {
-                            // 1. Cộng điểm
                             khachDB.DiemTichLuy += diemCong;
-
-                            // 2. [MỚI] Tự động xét hạng
                             khachDB.CapNhatHang();
-
                             db.SaveChanges();
 
-                            // 3. Cập nhật lại giao diện ngay lập tức
-                            // (Để khách nhìn thấy mình vừa lên hạng Vàng/Kim Cương)
                             CurrentCustomer.DiemTichLuy = khachDB.DiemTichLuy;
-                            CurrentCustomer.HangThanhVien = khachDB.HangThanhVien; // <--- Quan trọng
-
+                            CurrentCustomer.HangThanhVien = khachDB.HangThanhVien;
                             OnPropertyChanged(nameof(CurrentCustomer));
 
-                            // (Tùy chọn) Hiện thông báo chúc mừng
                             if (khachDB.HangThanhVien == "Kim Cương" && CurrentCustomer.HangThanhVien != "Kim Cương")
                             {
                                 MessageBox.Show("Chúc mừng! Quý khách đã thăng hạng KIM CƯƠNG!", "Thông báo");
@@ -323,19 +341,13 @@ namespace OrMan.ViewModels.User
                 }
             }
 
-            // 4. Dọn dẹp giỏ hàng
             GioHang.Clear();
             UpdateCartInfo();
-
-            // Reset lại phiên làm việc (nếu muốn sau khi gửi đơn là coi như xong khách đó)
-            // Hoặc giữ lại nếu khách còn ngồi ăn tiếp. 
-            // Thường thì gửi đơn xong khách vẫn ngồi ăn -> KHÔNG NÊN ResetSession() ở đây.
-
             return true;
         }
+
         public void ResetSession()
         {
-            // 1. Reset Khách hàng về mặc định (Khách lẻ/vãng lai)
             CurrentCustomer = new KhachHang
             {
                 KhachHangID = 0,
@@ -344,17 +356,9 @@ namespace OrMan.ViewModels.User
                 HangThanhVien = "Mới",
                 DiemTichLuy = 0
             };
-
-            // 2. Nếu bạn muốn xóa sạch giỏ hàng khi reset thì dùng dòng này:
-            // GioHang.Clear(); 
-
-            // Tuy nhiên, theo logic "Hủy đăng ký tích điểm nhưng vẫn muốn thanh toán cho khách lẻ" 
-            // thì KHÔNG NÊN xóa giỏ hàng ở đây. 
-            // Ta chỉ reset thông tin khách hàng thôi.
-
-            // 3. Cập nhật lại các thông số tiền nong (nếu cần)
             UpdateCartInfo();
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

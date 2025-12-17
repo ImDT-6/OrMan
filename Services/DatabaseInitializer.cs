@@ -25,13 +25,13 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 3. Cột YeuCauHoTro
+                // 3. Cột YeuCauHoTro (Tạo mới nếu chưa có)
                 try
                 {
                     string sqlHoTro = @"
                         IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'YeuCauHoTro' AND Object_ID = Object_ID(N'BanAn'))
                         BEGIN
-                            ALTER TABLE BanAn ADD YeuCauHoTro NVARCHAR(255) NULL;
+                            ALTER TABLE BanAn ADD YeuCauHoTro NVARCHAR(MAX) NULL;
                         END";
                     context.Database.ExecuteSqlRaw(sqlHoTro);
                 }
@@ -84,24 +84,24 @@ namespace OrMan.Services
                 }
                 catch (Exception ex)
                 {
-                    // Nếu lỗi thì ghi ra console để biết đường sửa
                     Console.WriteLine("Lỗi tạo bảng KhachHang: " + ex.Message);
                 }
+
                 // 6. [MỚI] Tạo bảng Nguyên Liệu
                 try
                 {
                     string sqlNguyenLieu = @"
-        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[NguyenLieu]') AND type in (N'U'))
-        BEGIN
-            CREATE TABLE [dbo].[NguyenLieu](
-                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [TenNguyenLieu] [nvarchar](100) NOT NULL,
-                [DonViTinh] [nvarchar](20) NULL,
-                [SoLuongTon] [float] NOT NULL DEFAULT 0,
-                [GiaVon] [decimal](18, 0) NOT NULL DEFAULT 0,
-                [DinhMucToiThieu] [float] NOT NULL DEFAULT 0
-            );
-        END";
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[NguyenLieu]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[NguyenLieu](
+                                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                                [TenNguyenLieu] [nvarchar](100) NOT NULL,
+                                [DonViTinh] [nvarchar](20) NULL,
+                                [SoLuongTon] [float] NOT NULL DEFAULT 0,
+                                [GiaVon] [decimal](18, 0) NOT NULL DEFAULT 0,
+                                [DinhMucToiThieu] [float] NOT NULL DEFAULT 0
+                            );
+                        END";
                     context.Database.ExecuteSqlRaw(sqlNguyenLieu);
                 }
                 catch { }
@@ -110,61 +110,70 @@ namespace OrMan.Services
                 try
                 {
                     string sqlCongThuc = @"
-        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CongThuc]') AND type in (N'U'))
-        BEGIN
-            CREATE TABLE [dbo].[CongThuc](
-                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [MaMon] [nvarchar](450) NOT NULL, -- Chú ý kiểu dữ liệu phải khớp MaMon cũ
-                [NguyenLieuId] [int] NOT NULL,
-                [SoLuongCan] [float] NOT NULL DEFAULT 0
-            );
-            -- Tạo Foreign Key (Tùy chọn, để đảm bảo dữ liệu chuẩn)
-        END";
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CongThuc]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[CongThuc](
+                                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                                [MaMon] [nvarchar](450) NOT NULL, 
+                                [NguyenLieuId] [int] NOT NULL,
+                                [SoLuongCan] [float] NOT NULL DEFAULT 0
+                            );
+                        END";
                     context.Database.ExecuteSqlRaw(sqlCongThuc);
                 }
                 catch { }
 
-                // 8. [MỚI - SỬA LỖI] Thêm cột TrangThaiCheBien cho bảng ChiTietHoaDons
+                // 8. [MỚI - SỬA LỖI] Thêm cột TrangThaiCheBien
+                // Tách riêng Try-Catch này ra, không lồng cái khác vào trong Catch
                 try
                 {
-                    // Lưu ý: Tên bảng trong SQL thường là 'ChiTietHoaDons' (có s) do EF tự đặt
                     string sqlBep = @"
-        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDons'))
-        BEGIN
-            ALTER TABLE ChiTietHoaDons ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
-        END";
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDons'))
+                        BEGIN
+                            ALTER TABLE ChiTietHoaDons ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+                        END";
                     context.Database.ExecuteSqlRaw(sqlBep);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    // Nếu lỗi tên bảng, thử tên không có 's'
+                    // Nếu lỗi (thường do tên bảng không có 's'), thử phương án dự phòng
                     try
                     {
                         string sqlBepBackup = @"
-            IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
-            BEGIN
-                ALTER TABLE ChiTietHoaDon ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
-            END";
+                            IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
+                            BEGIN
+                                ALTER TABLE ChiTietHoaDon ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+                            END";
                         context.Database.ExecuteSqlRaw(sqlBepBackup);
                     }
                     catch { }
-
-                    // ... (Các đoạn code cũ tạo bảng KhachHang, NguyenLieu...)
-
-                    // 9. [MỚI] Thêm cột TenGoi cho bảng BanAn
-                    try
-                    {
-                        string sqlTenGoi = @"
-        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TenGoi' AND Object_ID = Object_ID(N'BanAn'))
-        BEGIN
-            ALTER TABLE BanAn ADD TenGoi NVARCHAR(50) NULL;
-        END";
-                        context.Database.ExecuteSqlRaw(sqlTenGoi);
-                    }
-                    catch { }
                 }
-            }
 
+                // 9. [MỚI] Thêm cột TenGoi cho bảng BanAn
+                // (Đã đưa ra ngoài Try-Catch của mục 8)
+                try
+                {
+                    string sqlTenGoi = @"
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TenGoi' AND Object_ID = Object_ID(N'BanAn'))
+                        BEGIN
+                            ALTER TABLE BanAn ADD TenGoi NVARCHAR(50) NULL;
+                        END";
+                    context.Database.ExecuteSqlRaw(sqlTenGoi);
+                }
+                catch { }
+
+                // 10. [QUAN TRỌNG] Mở rộng cột YeuCauHoTro lên tối đa
+                // (Đã đưa ra ngoài Try-Catch của mục 8)
+                try
+                {
+                    // Câu lệnh này ép kiểu dữ liệu từ cũ (ví dụ 255) lên NVARCHAR(MAX)
+                    // Nếu cột chưa có thì lệnh ALTER sẽ lỗi nhẹ nhưng không sao vì lệnh CREATE ở mục 3 đã tạo rồi.
+                    // Mục đích chính là để UPDATE những DB cũ đang bị giới hạn 255 ký tự.
+                    string sqlExpand = "ALTER TABLE BanAn ALTER COLUMN YeuCauHoTro NVARCHAR(MAX) NULL";
+                    context.Database.ExecuteSqlRaw(sqlExpand);
+                }
+                catch { }
+            }
         }
     }
 }

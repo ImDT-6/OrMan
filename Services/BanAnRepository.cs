@@ -112,7 +112,29 @@ namespace OrMan.Services
                 var item = context.BanAns.Find(soBan);
                 if (item != null)
                 {
-                    item.YeuCauHoTro = message;
+                    string yeuCauHienTai = item.YeuCauHoTro ?? ""; // Lấy chuỗi hiện tại, nếu null thì là rỗng
+                    string yeuCauMoi = ", " + message;
+
+                    // [LỚP BẢO VỆ]: Kiểm tra độ dài
+                    // Nếu độ dài hiện tại + độ dài mới > 250 (giới hạn an toàn của cột NVARCHAR 255)
+                    if (yeuCauHienTai.Length + yeuCauMoi.Length > 250)
+                    {
+                        // QUÁ DÀI -> Reset lại, chỉ lưu yêu cầu mới nhất để tránh lỗi DB
+                        item.YeuCauHoTro = message;
+                    }
+                    else
+                    {
+                        // CÒN CHỖ -> Nối thêm vào
+                        if (string.IsNullOrEmpty(yeuCauHienTai))
+                        {
+                            item.YeuCauHoTro = message;
+                        }
+                        else
+                        {
+                            item.YeuCauHoTro = yeuCauHienTai + yeuCauMoi;
+                        }
+                    }
+
                     context.SaveChanges();
                 }
             }

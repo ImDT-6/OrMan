@@ -537,9 +537,15 @@
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBox Style="{StaticResource SearchTextBoxStyle}" ToolTip="{DynamicResource Str_Search_Placeholder}" Width="220" Height="45" VerticalAlignment="Center" Margin="0,0,20,0"/>
-                        <Button Command="{Binding CallStaffCommand}" Style="{StaticResource GlassButtonStyle}" Width="150" Height="45" Margin="0,0,10,0" Background="#20F59E0B" ToolTip="Gọi phục vụ">
+                        <Button Command="{Binding CallStaffCommand}" 
+        IsEnabled="{Binding IsNutGoiHoTroEnabled}" 
+        Style="{StaticResource GlassButtonStyle}" 
+        Width="150" Height="45" Margin="0,0,10,0" 
+        Background="#20F59E0B" ToolTip="Gọi phục vụ">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{DynamicResource Str_Call_Staff}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="{Binding TextNutHoTro}" 
+                   FontSize="14" VerticalAlignment="Center" 
+                   FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding ChonBanCommand}" Style="{StaticResource SocialButtonStyle}" Height="45" Width="90" Margin="0,0,10,0" Padding="15,0" Background="#20FFFFFF" ToolTip="{DynamicResource Str_Table}">
