@@ -214,7 +214,15 @@ namespace OrMan.ViewModels.User
             var wd = new ChonBanWindow();
             if (wd.ShowDialog() == true)
             {
-                CurrentTable = wd.SelectedTableId;
+                // [FIX] Kiểm tra nếu bàn mới khác bàn cũ thì mới Reset thông tin khách
+                if (CurrentTable != wd.SelectedTableId)
+                {
+                    CurrentTable = wd.SelectedTableId;
+
+                    // Xóa thông tin khách hàng của bàn cũ, đưa về "Khách Mới"
+                    // Để sang bàn mới nó sẽ hỏi lại từ đầu
+                    ResetSession();
+                }
             }
         }
 
