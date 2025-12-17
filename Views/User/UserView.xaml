@@ -153,7 +153,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource SidebarButtonStyle}"  ToolTip="{DynamicResource Str_Review}">
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnDanhGia_Click" ToolTip="{DynamicResource Str_Review}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{DynamicResource Str_Review}" FontWeight="SemiBold"/>
                         </StackPanel>

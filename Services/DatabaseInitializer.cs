@@ -187,6 +187,21 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw("UPDATE ChiTietHoaDon SET ThoiGianGoiMon = (SELECT NgayTao FROM HoaDon WHERE HoaDon.MaHoaDon = ChiTietHoaDon.MaHoaDon) WHERE ThoiGianGoiMon IS NULL");
                 }
                 catch { }
+                // Tạo bảng DanhGia
+                try
+                {
+                    string sql = @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DanhGia]'))
+                   CREATE TABLE [dbo].[DanhGia](
+                       [Id] int IDENTITY(1,1) PRIMARY KEY,
+                       [SoSao] int NOT NULL,
+                       [CacTag] nvarchar(500),
+                       [NoiDung] nvarchar(MAX),
+                       [SoDienThoai] nvarchar(20),
+                       [NgayTao] datetime DEFAULT GETDATE()
+                   );";
+                    context.Database.ExecuteSqlRaw(sql);
+                }
+                catch { }
             }
         }
     }

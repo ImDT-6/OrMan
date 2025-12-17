@@ -322,7 +322,16 @@ namespace OrMan.Views.User
             txtLangName.Text = "English";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
         }
+        private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
+        {
+            // Tạo màn hình đen mờ che phía sau (tùy chọn cho đẹp)
+            // Hoặc đơn giản chỉ cần 2 dòng này:
 
+            var reviewWindow = new DanhGiaWindow();
+
+            // ShowDialog giúp chặn thao tác ở màn hình chính cho đến khi đóng đánh giá
+            reviewWindow.ShowDialog();
+        }
     }
 
 }

@@ -1,0 +1,154 @@
+﻿<Window x:Class="OrMan.Views.User.DanhGiaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Đánh Giá" Height="650" Width="480"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True" WindowStyle="None" Background="Transparent"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <Style x:Key="GlassTagStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="bd" CornerRadius="12" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{StaticResource GlassBorder}"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="bd" Property="Background" Value="#20FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GlassTextAreaStyle" TargetType="TextBox" BasedOn="{StaticResource SimpleGlassTextBox}">
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="MinHeight" Value="100"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        
+        <Style x:Key="StarBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Path x:Name="starPath" Data="{StaticResource StarIcon}" 
+                              Fill="{StaticResource TextSecondary}" 
+                              Height="40" Width="40" Stretch="Uniform">
+                            <Path.Effect>
+                                <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                            </Path.Effect>
+                        </Path>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="starPath" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{StaticResource GlassBackground}" 
+            BorderBrush="{StaticResource GlassBorder}" 
+            BorderThickness="1" 
+            CornerRadius="20">
+
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="30" ShadowDepth="10" Opacity="0.5"/>
+        </Border.Effect>
+
+        <Grid Margin="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Đánh Giá &amp; Góp Ý" 
+                               FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Trải nghiệm hôm nay của bạn thế nào?" 
+                               FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Click="BtnClose_Click" 
+                        Style="{StaticResource GlassDismissButtonStyle}"
+                        Width="40" Height="40" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Path Data="{StaticResource IconClose}" Fill="White" Stretch="Uniform" Width="12" Height="12"/>
+                </Button>
+            </Grid>
+
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,25">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="Star1" Click="Star_Click" Tag="1" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star2" Click="Star_Click" Tag="2" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star3" Click="Star_Click" Tag="3" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star4" Click="Star_Click" Tag="4" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star5" Click="Star_Click" Tag="5" Style="{StaticResource StarBtnStyle}"/>
+                </StackPanel>
+                <TextBlock x:Name="txtRatingStatus" Text="Vui lòng chọn số sao" 
+                           HorizontalAlignment="Center" Margin="0,10,0,0" 
+                           Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,0,0,25">
+
+                <TextBlock x:Name="txtQuestion" 
+                           Text="Bạn hài lòng nhất về điều gì?" 
+                           Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                <WrapPanel x:Name="wrapPanelTags">
+                </WrapPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3">
+                <TextBox x:Name="txtGopY" 
+                         Style="{StaticResource GlassTextAreaStyle}"
+                         Tag="Chia sẻ thêm với chúng tôi..."/>
+
+              
+            </StackPanel>
+
+            <Button Grid.Row="4" Click="BtnGui_Click" 
+                    Content="Gửi Đánh Giá"
+                    Style="{StaticResource GlassButtonStyle}"
+                    Margin="0,20,0,0"/>
+        </Grid>
+    </Border>
+</Window>

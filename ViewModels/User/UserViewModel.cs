@@ -366,7 +366,21 @@ namespace OrMan.ViewModels.User
             };
             UpdateCartInfo();
         }
-
+        public void GuiDanhGia(int soSao, string tags, string noiDung)
+        {
+            using (var context = new MenuContext())
+            {
+                var danhGia = new DanhGia
+                {
+                    SoSao = soSao,
+                    CacTag = tags,
+                    NoiDung = noiDung,
+                    NgayTao = DateTime.Now
+                };
+                context.DanhGias.Add(danhGia);
+                context.SaveChanges();
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
