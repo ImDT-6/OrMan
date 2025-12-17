@@ -446,7 +446,7 @@
     <Folder Include="Converters\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="AppIcon.ico" />
+    <Resource Include="AppIcon2.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\QR.png" />
@@ -492,6 +492,7 @@
     <Resource Include="Images2\MyKimchiThapCam.png" />
     <Resource Include="Images2\MyTokbokkiPhoMai.png" />
     <Resource Include="Images2\MyUdonBulgogi.png" />
+    <Resource Include="AppIcon.ico" />
     <Content Include="Images2\textbox_user_Clicked.JPG" />
   </ItemGroup>
   <ItemGroup>
