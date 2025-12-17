@@ -20,5 +20,22 @@ namespace OrMan.Models
 
         [StringLength(20)]
         public string HangThanhVien { get; set; } = "Khách Hàng Mới"; // Bạc, Vàng, Kim Cương
+
+        // --- [ĐOẠN CODE MỚI] ---
+        public void CapNhatHang()
+        {
+            if (DiemTichLuy >= 5000)
+            {
+                HangThanhVien = "Kim Cương";
+            }
+            else if (DiemTichLuy >= 1000)
+            {
+                HangThanhVien = "Vàng";
+            }
+            else
+            {
+                HangThanhVien = "Khách Hàng Mới";
+            }
+        }
     }
 }

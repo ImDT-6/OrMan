@@ -285,32 +285,39 @@ namespace OrMan.ViewModels.User
                 if (CurrentTable <= 0) return false;
             }
             _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
+
             if (CurrentCustomer != null && CurrentCustomer.KhachHangID > 0)
             {
-                // Công thức: Tổng tiền / 1000 (Lấy phần nguyên)
+                // Công thức: 1.000đ = 1 điểm
                 int diemCong = (int)(TongTienCart / 1000);
 
                 if (diemCong > 0)
                 {
-                    using (var db = new MenuContext()) // Mở kết nối riêng để update điểm
+                    using (var db = new MenuContext())
                     {
                         var khachDB = db.KhachHangs.FirstOrDefault(k => k.KhachHangID == CurrentCustomer.KhachHangID);
                         if (khachDB != null)
                         {
+                            // 1. Cộng điểm
                             khachDB.DiemTichLuy += diemCong;
 
-                            // (Tùy chọn) Logic thăng hạng:
-                            // if (khachDB.DiemTichLuy >= 1000) khachDB.HangThanhVien = "Vàng";
-                            // else if (khachDB.DiemTichLuy >= 500) khachDB.HangThanhVien = "Bạc";
+                            // 2. [MỚI] Tự động xét hạng
+                            khachDB.CapNhatHang();
 
                             db.SaveChanges();
 
-                            // Cập nhật lại giao diện (để nếu khách còn ngồi đó thì thấy điểm tăng)
+                            // 3. Cập nhật lại giao diện ngay lập tức
+                            // (Để khách nhìn thấy mình vừa lên hạng Vàng/Kim Cương)
                             CurrentCustomer.DiemTichLuy = khachDB.DiemTichLuy;
+                            CurrentCustomer.HangThanhVien = khachDB.HangThanhVien; // <--- Quan trọng
+
                             OnPropertyChanged(nameof(CurrentCustomer));
 
-                            // Thông báo nhẹ (tùy chọn, có thể bỏ nếu thấy phiền)
-                            // MessageBox.Show($"Đã cộng {diemCong} điểm cho quý khách!", "Tích điểm");
+                            // (Tùy chọn) Hiện thông báo chúc mừng
+                            if (khachDB.HangThanhVien == "Kim Cương" && CurrentCustomer.HangThanhVien != "Kim Cương")
+                            {
+                                MessageBox.Show("Chúc mừng! Quý khách đã thăng hạng KIM CƯƠNG!", "Thông báo");
+                            }
                         }
                     }
                 }
