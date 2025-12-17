@@ -79,7 +79,7 @@
 
                         <TextBlock Text="{Binding DoanhThuNgay}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22"/>
 
-                        <TextBlock Text="{Binding TangTruongText}" Foreground="{Binding TangTruongColor}" FontSize="10" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding TangTruongText}" Foreground="{Binding TangTruongColor}" FontSize="10" Margin="0,2,0,0" FontWeight="SemiBold"/>
 
                     </StackPanel>
                 </Border>
@@ -91,7 +91,7 @@
                             <Path Data="{StaticResource IconFoodGeo}" Fill="#3B82F6" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
                         </Grid>
                         <TextBlock Text="{Binding SoDonHomNay}" Foreground="White" FontWeight="Bold" FontSize="22"/>
-                        <TextBlock Text="Đang phục vụ" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding TangTruongDonHangText}" Foreground="{Binding TangTruongDonHangColor}" FontSize="10" Margin="0,2,0,0" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Border>
 

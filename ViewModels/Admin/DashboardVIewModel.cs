@@ -79,7 +79,19 @@ namespace OrMan.ViewModels
             get => _congSuatText;
             set { _congSuatText = value; OnPropertyChanged(); }
         }
+        private string _tangTruongDonHangText;
+        public string TangTruongDonHangText
+        {
+            get => _tangTruongDonHangText;
+            set { _tangTruongDonHangText = value; OnPropertyChanged(); }
+        }
 
+        private Brush _tangTruongDonHangColor;
+        public Brush TangTruongDonHangColor
+        {
+            get => _tangTruongDonHangColor;
+            set { _tangTruongDonHangColor = value; OnPropertyChanged(); }
+        }
         private ObservableCollection<TopFoodItem> _topMonAn;
         public ObservableCollection<TopFoodItem> TopMonAn
         {
@@ -255,6 +267,30 @@ namespace OrMan.ViewModels
             var topDict = _thucDonRepo.GetTopSellingFoods(5);
             var topList = topDict.Select(x => new TopFoodItem { MonAn = x.Key, SoLuongBan = x.Value }).ToList();
             TopMonAn = new ObservableCollection<TopFoodItem>(topList);
+            int ordersToday = _doanhThuRepo.GetTodayOrderCount();
+            int ordersYesterday = _doanhThuRepo.GetYesterdayOrderCount();
+
+            SoDonHomNay = ordersToday;
+            int diffOrder = ordersToday - ordersYesterday;
+            string signOrder = diffOrder >= 0 ? "+" : "-";
+
+            // 2. Xử lý Text hiển thị
+            if (ordersYesterday == 0)
+            {
+                if (ordersToday > 0) TangTruongDonHangText = $"+{ordersToday} (Mới)";
+                else TangTruongDonHangText = "---";
+            }
+            else
+            {
+                double percentOrder = (double)Math.Abs(diffOrder) / ordersYesterday * 100;
+                TangTruongDonHangText = $"{signOrder}{Math.Abs(diffOrder)} ({percentOrder:0}%) so với hôm qua";
+            }
+
+            // 3. Xử lý Màu sắc (Xanh / Đỏ)
+            if (diffOrder >= 0)
+                TangTruongDonHangColor = (Brush)converter.ConvertFrom("#22C55E"); // Xanh
+            else
+                TangTruongDonHangColor = (Brush)converter.ConvertFrom("#EF4444"); // Đỏ
         }
 
         // --- 4. Logic LoadChartData Động ---

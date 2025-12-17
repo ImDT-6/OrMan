@@ -149,5 +149,17 @@ namespace OrMan.Services
                               .ToDictionary(g => g.Key, g => g.Sum(h => h.TongTien));
             }
         }
+        public int GetYesterdayOrderCount()
+        {
+            using (var context = new MenuContext())
+            {
+                var today = DateTime.Today;
+                var yesterday = today.AddDays(-1);
+
+                // Đếm số đơn đã thanh toán ngày hôm qua
+                return context.HoaDons
+                    .Count(h => h.DaThanhToan && h.NgayTao >= yesterday && h.NgayTao < today);
+            }
+        }
     }
 }
