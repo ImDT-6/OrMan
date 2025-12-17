@@ -173,6 +173,20 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sqlExpand);
                 }
                 catch { }
+
+                try
+                {
+                    string sqlTime = @"
+        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'ThoiGianGoiMon' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
+        BEGIN
+            ALTER TABLE ChiTietHoaDon ADD ThoiGianGoiMon DATETIME NULL;
+        END";
+                    context.Database.ExecuteSqlRaw(sqlTime);
+
+                    // Cập nhật dữ liệu cũ để không bị null (lấy theo giờ hóa đơn)
+                    context.Database.ExecuteSqlRaw("UPDATE ChiTietHoaDon SET ThoiGianGoiMon = (SELECT NgayTao FROM HoaDon WHERE HoaDon.MaHoaDon = ChiTietHoaDon.MaHoaDon) WHERE ThoiGianGoiMon IS NULL");
+                }
+                catch { }
             }
         }
     }

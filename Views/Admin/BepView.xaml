@@ -86,7 +86,7 @@
 
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Width="280" Margin="0,0,15,15" CornerRadius="15" 
+                                <Border Width="260" Margin="0,0,15,15" CornerRadius="15" 
                                         BorderThickness="1" BorderBrush="{StaticResource GlassBorder}"
                                         ClipToBounds="True">
 

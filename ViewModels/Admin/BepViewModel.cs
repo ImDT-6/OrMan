@@ -63,10 +63,12 @@ namespace OrMan.ViewModels.Admin
                                 join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
                                 where !hd.DaThanhToan && ct.TrangThaiCheBien == 0
                                 orderby hd.NgayTao
+                                // [BepViewModel.cs]
                                 select new BepOrderItem
                                 {
                                     SoBan = hd.SoBan,
-                                    ThoiGianOrder = hd.NgayTao.ToString("HH:mm"),
+                                    // Ưu tiên lấy giờ gọi món, nếu null thì mới lấy giờ tạo hóa đơn
+                                    ThoiGianOrder = (ct.ThoiGianGoiMon ?? hd.NgayTao).ToString("HH:mm"),
                                     ChiTiet = ct
                                 };
 
