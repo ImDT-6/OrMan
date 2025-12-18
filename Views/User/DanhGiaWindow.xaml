@@ -7,73 +7,134 @@
         FontFamily="Segoe UI">
 
     <Window.Resources>
-        <Style x:Key="GlassTagStyle" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="0,0,10,10"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <Border x:Name="bd" CornerRadius="12" 
+        <!-- Import tài nguyên InputStyles -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Style Tag chọn nhanh -->
+            <Style x:Key="GlassTagStyle" TargetType="CheckBox">
+                <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="15,8"/>
+                <Setter Property="Margin" Value="0,0,10,10"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="bd" CornerRadius="12" 
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{StaticResource GlassBorder}"
                                 BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="bd" Property="Background" Value="#20FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
-                                <Setter TargetName="bd" Property="BorderBrush" Value="Transparent"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter TargetName="bd" Property="Background" Value="#20FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
+                                    <Setter TargetName="bd" Property="BorderBrush" Value="Transparent"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-        <Style x:Key="GlassTextAreaStyle" TargetType="TextBox" BasedOn="{StaticResource SimpleGlassTextBox}">
-            <Setter Property="Height" Value="Auto"/>
-            <Setter Property="MinHeight" Value="100"/>
-            <Setter Property="VerticalContentAlignment" Value="Top"/>
-            <Setter Property="Padding" Value="15"/>
-            <Setter Property="AcceptsReturn" Value="True"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-        </Style>
+            <!-- [ĐÃ SỬA] Style cho TextArea (Nhập nhiều dòng) -->
+            <Style x:Key="GlassTextAreaStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="Background" Value="{StaticResource GlassBackground}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="15"/>
+                <Setter Property="MinHeight" Value="120"/>
+                <Setter Property="MaxHeight" Value="200"/>
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+                <Setter Property="AcceptsReturn" Value="True"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
 
-        
-        <Style x:Key="StarBtnStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Path x:Name="starPath" Data="{StaticResource StarIcon}" 
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+
+                <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+                <Setter Property="ScrollViewer.PanningMode" Value="VerticalOnly"/>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="15"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"/>
+
+                                <TextBlock x:Name="Placeholder" 
+                               Text="{TemplateBinding Tag}" 
+                               Foreground="{StaticResource TextSecondary}" 
+                               Margin="{TemplateBinding Padding}"
+                               VerticalAlignment="Top" 
+                               HorizontalAlignment="Left"
+                               IsHitTestVisible="False"
+                               Opacity="0.7"
+                               Visibility="Collapsed"/>
+
+                                <ScrollViewer x:Name="PART_ContentHost" 
+                                  Margin="{TemplateBinding Padding}" 
+                                  VerticalAlignment="Stretch"
+                                  PanningMode="{TemplateBinding ScrollViewer.PanningMode}"
+                                  CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}"
+                                  HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                  VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"/>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
+                                    <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Style Nút Sao -->
+            <Style x:Key="StarBtnStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Path x:Name="starPath" Data="{StaticResource StarIcon}" 
                               Fill="{StaticResource TextSecondary}" 
                               Height="40" Width="40" Stretch="Uniform">
-                            <Path.Effect>
-                                <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
-                            </Path.Effect>
-                        </Path>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="starPath" Property="Opacity" Value="0.8"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                                <Path.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                                </Path.Effect>
+                            </Path>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="starPath" Property="Opacity" Value="0.8"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Border Background="{StaticResource GlassBackground}" 
@@ -94,6 +155,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Header -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -114,37 +176,38 @@
                 </Button>
             </Grid>
 
+            <!-- Rating Stars -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,25">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="Star1" Click="Star_Click" Tag="1" Style="{StaticResource StarBtnStyle}"/>
-                    <Button x:Name="Star2" Click="Star_Click" Tag="2" Style="{StaticResource StarBtnStyle}"/>
-                    <Button x:Name="Star3" Click="Star_Click" Tag="3" Style="{StaticResource StarBtnStyle}"/>
-                    <Button x:Name="Star4" Click="Star_Click" Tag="4" Style="{StaticResource StarBtnStyle}"/>
-                    <Button x:Name="Star5" Click="Star_Click" Tag="5" Style="{StaticResource StarBtnStyle}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MouseLeave="StackPanel_MouseLeave">
+                    <Button x:Name="Star1" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="1" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star2" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="2" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star3" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="3" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star4" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="4" Style="{StaticResource StarBtnStyle}"/>
+                    <Button x:Name="Star5" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="5" Style="{StaticResource StarBtnStyle}"/>
                 </StackPanel>
                 <TextBlock x:Name="txtRatingStatus" Text="Vui lòng chọn số sao" 
                            HorizontalAlignment="Center" Margin="0,10,0,0" 
                            Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="2" Margin="0,0,0,25">
-
+            <!-- Tags -->
+            <StackPanel x:Name="pnlDetails" Grid.Row="2" Margin="0,0,0,25" Opacity="0" Visibility="Collapsed">
                 <TextBlock x:Name="txtQuestion" 
                            Text="Bạn hài lòng nhất về điều gì?" 
                            Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
-                <WrapPanel x:Name="wrapPanelTags">
-                </WrapPanel>
+                <WrapPanel x:Name="wrapPanelTags"/>
             </StackPanel>
 
+            <!-- Text Area (Đã bật Scroll & Panning) -->
             <StackPanel Grid.Row="3">
                 <TextBox x:Name="txtGopY" 
                          Style="{StaticResource GlassTextAreaStyle}"
-                         Tag="Chia sẻ thêm với chúng tôi..."/>
-
-              
+                         Tag="Chia sẻ thêm với chúng tôi... (Tùy chọn)"
+                         PreviewMouseWheel="TxtGopY_PreviewMouseWheel"/>
             </StackPanel>
 
+            <!-- Submit Button -->
             <Button Grid.Row="4" Click="BtnGui_Click" 
                     Content="Gửi Đánh Giá"
                     Style="{StaticResource GlassButtonStyle}"

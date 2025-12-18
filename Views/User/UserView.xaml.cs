@@ -252,8 +252,17 @@ namespace OrMan.Views.User
 
         private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
         {
-            var reviewWindow = new DanhGiaWindow();
+            var reviewWindow = new DanhGiaWindow(_vm);
+
+            // Làm mờ màn hình chính cho đẹp
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null) mainWindow.Opacity = 0.4;
+
+            reviewWindow.Owner = mainWindow;
             reviewWindow.ShowDialog();
+
+            // Khôi phục độ sáng
+            if (mainWindow != null) mainWindow.Opacity = 1;
         }
 
         // --- Xử lý đổi ngôn ngữ ---

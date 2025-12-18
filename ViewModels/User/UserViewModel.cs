@@ -90,8 +90,6 @@ namespace OrMan.ViewModels.User
             _repo = new ThucDonRepository();
             _banRepo = new BanAnRepository();
 
-            // Load data nên chạy ở background nếu menu quá lớn
-            // Ở đây tạm thời để sync vì menu thường ít, nhưng tốt nhất nên async nếu có hình ảnh nặng
             LoadData();
 
             CallStaffCommand = new RelayCommand<object>(CallStaff);
@@ -248,7 +246,6 @@ namespace OrMan.ViewModels.User
                 if (CurrentTable <= 0) return;
             }
 
-            // Có thể dùng Async ở đây nếu GetActiveOrder chậm
             var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
             bool hasActiveOrder = (activeOrder != null);
 
@@ -356,6 +353,7 @@ namespace OrMan.ViewModels.User
             UpdateCartInfo();
         }
 
+        // [QUAN TRỌNG] Hàm gửi đánh giá đã được cập nhật
         public void GuiDanhGia(int soSao, string tags, string noiDung)
         {
             using (var context = new MenuContext())
@@ -365,6 +363,10 @@ namespace OrMan.ViewModels.User
                     SoSao = soSao,
                     CacTag = tags,
                     NoiDung = noiDung,
+                    // [TỰ ĐỘNG] Lấy số điện thoại từ khách hàng hiện tại (nếu có)
+                    SoDienThoai = CurrentCustomer != null && !string.IsNullOrEmpty(CurrentCustomer.SoDienThoai)
+                                  ? CurrentCustomer.SoDienThoai
+                                  : "Ẩn danh",
                     NgayTao = DateTime.Now
                 };
                 context.DanhGias.Add(danhGia);
@@ -381,11 +383,9 @@ namespace OrMan.ViewModels.User
             }
         }
 
-        // [QUAN TRỌNG] Thêm Cleanup cho UserViewModel
-        // Dù file UserView.xaml.cs chưa gọi tới, nhưng nên có để đồng bộ sau này nếu cần Timer trong tương lai
         public void Cleanup()
         {
-            // Hiện tại UserViewModel chưa dùng Timer, hàm này để giữ chuẩn interface
+            // Hàm Cleanup để đồng bộ interface
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
