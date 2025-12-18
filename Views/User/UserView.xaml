@@ -158,8 +158,18 @@
                             <TextBlock Text="{DynamicResource Str_Review}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Button>
-                </StackPanel>
 
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnLuckyWheel_Click" ToolTip="Quay thưởng may mắn">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource IconWheelGeo}" 
+                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  Stretch="Uniform" Width="18" Height="18" Margin="0,0,10,0"/>
+
+                            <TextBlock Text="Vòng quay" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
                 <!-- 4. Ngôn ngữ (Góc dưới bên trái) -->
                 <Button Grid.Row="4" Style="{StaticResource SidebarButtonStyle}" Click="BtnLanguage_Click">
                     <StackPanel Orientation="Horizontal">

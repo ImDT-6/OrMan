@@ -292,7 +292,21 @@ namespace OrMan.Views.User
             if (txtLangName != null) txtLangName.Text = "English";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
         }
+        private void BtnLuckyWheel_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = (UserViewModel)this.DataContext;
+            if (vm.CurrentCustomer == null || vm.CurrentCustomer.KhachHangID == 0)
+            {
+                MessageBox.Show("Vui lòng nhập SĐT thành viên để tham gia!", "Chưa đăng nhập");
+                return;
+            }
 
+            var wheelWindow = new LuckyWheelWindow(vm.CurrentCustomer);
+            wheelWindow.ShowDialog();
+
+            // Sau khi đóng vòng quay, cập nhật lại điểm ra ngoài màn hình chính
+            vm.OnPropertyChanged(nameof(vm.CurrentCustomer));
+        }
         private string GetRes(string key)
         {
             return Application.Current.TryFindResource(key) as string ?? key;

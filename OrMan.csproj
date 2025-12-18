@@ -219,6 +219,7 @@
     <Compile Include="Models\BanAn.cs" />
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\ChiTietHoaDon.cs" />
+    <Compile Include="Models\PhanThuong.cs" />
     <Compile Include="Models\DanhGia.cs" />
     <Compile Include="Models\CongThuc.cs" />
     <Compile Include="Models\HoaDon.cs" />
@@ -294,6 +295,9 @@
     </Compile>
     <Compile Include="Views\User\DanhGiaWindow.xaml.cs">
       <DependentUpon>DanhGiaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\User\LuckyWheelWindow.xaml.cs">
+      <DependentUpon>LuckyWheelWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\User\SupportRequestWindow.xaml.cs">
       <DependentUpon>SupportRequestWindow.xaml</DependentUpon>
@@ -402,6 +406,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\User\DanhGiaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\User\LuckyWheelWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
