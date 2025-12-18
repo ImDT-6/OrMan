@@ -1,17 +1,18 @@
-﻿using OrMan.Helpers;
-using OrMan.Models;
-using OrMan.Services;
-using OrMan.Views.User;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using OrMan.Data;
 using System.Windows.Threading;
-using System;
-using System.Threading.Tasks; // [QUAN TRỌNG] Thêm dòng này để dùng Task.Delay
+using OrMan.Data;
+using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
+using OrMan.Views.User;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrMan.ViewModels.User
 {
@@ -20,9 +21,7 @@ namespace OrMan.ViewModels.User
         private readonly ThucDonRepository _repo;
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
-        private DispatcherTimer _timerCheckUpdate;
 
-        // --- [MỚI] BIẾN ĐỂ KHÓA NÚT GỌI ---
         private bool _isNutGoiHoTroEnabled = true;
         public bool IsNutGoiHoTroEnabled
         {
@@ -31,11 +30,10 @@ namespace OrMan.ViewModels.User
             {
                 _isNutGoiHoTroEnabled = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(TextNutHoTro)); // Cập nhật luôn chữ trên nút
+                OnPropertyChanged(nameof(TextNutHoTro));
             }
         }
 
-        // Tự động đổi chữ trên nút: "Gọi Nhân Viên" <-> "Đợi xíu..."
         public string TextNutHoTro => IsNutGoiHoTroEnabled ? "Gọi Nhân Viên" : "Đợi xíu nha!";
 
         private KhachHang _currentCustomer;
@@ -78,6 +76,11 @@ namespace OrMan.ViewModels.User
         }
 
         private string _currentCategoryTag = "Mì Cay";
+        public string CurrentCategoryTag
+        {
+            get => _currentCategoryTag;
+            set { _currentCategoryTag = value; OnPropertyChanged(); }
+        }
 
         public ICommand CallStaffCommand { get; private set; }
         public ICommand ChonBanCommand { get; private set; }
@@ -87,20 +90,12 @@ namespace OrMan.ViewModels.User
             _repo = new ThucDonRepository();
             _banRepo = new BanAnRepository();
 
+            // Load data nên chạy ở background nếu menu quá lớn
+            // Ở đây tạm thời để sync vì menu thường ít, nhưng tốt nhất nên async nếu có hình ảnh nặng
             LoadData();
 
             CallStaffCommand = new RelayCommand<object>(CallStaff);
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
-
-            SetupAutoUpdate();
-        }
-
-        private void SetupAutoUpdate()
-        {
-            _timerCheckUpdate = new DispatcherTimer();
-            _timerCheckUpdate.Interval = TimeSpan.FromSeconds(5);
-            _timerCheckUpdate.Tick += (s, e) => ReloadMenuRealTime();
-            _timerCheckUpdate.Start();
         }
 
         private void ReloadMenuRealTime()
@@ -214,13 +209,9 @@ namespace OrMan.ViewModels.User
             var wd = new ChonBanWindow();
             if (wd.ShowDialog() == true)
             {
-                // [FIX] Kiểm tra nếu bàn mới khác bàn cũ thì mới Reset thông tin khách
                 if (CurrentTable != wd.SelectedTableId)
                 {
                     CurrentTable = wd.SelectedTableId;
-
-                    // Xóa thông tin khách hàng của bàn cũ, đưa về "Khách Mới"
-                    // Để sang bàn mới nó sẽ hỏi lại từ đầu
                     ResetSession();
                 }
             }
@@ -234,16 +225,21 @@ namespace OrMan.ViewModels.User
 
         public void FilterMenu(string loai)
         {
-            _currentCategoryTag = loai;
+            CurrentCategoryTag = loai;
             if (_allMonAn == null) return;
-            if (loai == "Mì Cay") MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
-            else MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
+
+            if (loai == "Mì Cay")
+            {
+                MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.Where(x => x is MonMiCay));
+            }
+            else
+            {
+                MenuHienThi = new ObservableCollection<MonAn>(_allMonAn.OfType<MonPhu>().Where(x => x.TheLoai == loai));
+            }
         }
 
-        // [MỚI] Sửa hàm này thành async void để dùng await
         private async void CallStaff(object obj)
         {
-            // 1. Nếu đang bị khóa thì chặn luôn
             if (!IsNutGoiHoTroEnabled) return;
 
             if (CurrentTable <= 0)
@@ -252,6 +248,7 @@ namespace OrMan.ViewModels.User
                 if (CurrentTable <= 0) return;
             }
 
+            // Có thể dùng Async ở đây nếu GetActiveOrder chậm
             var activeOrder = _banRepo.GetActiveOrder(CurrentTable);
             bool hasActiveOrder = (activeOrder != null);
 
@@ -259,10 +256,8 @@ namespace OrMan.ViewModels.User
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
 
-            // Hiện dialog
             bool? dialogResult = requestWindow.ShowDialog();
 
-            // Trả lại độ sáng màn hình
             if (mainWindow != null) mainWindow.Opacity = 1;
 
             if (dialogResult == true)
@@ -295,16 +290,10 @@ namespace OrMan.ViewModels.User
                     daGuiThanhCong = true;
                 }
 
-                // [QUAN TRỌNG] Logic Chống Spam
                 if (daGuiThanhCong)
                 {
-                    // Khóa nút
                     IsNutGoiHoTroEnabled = false;
-
-                    // Đợi 30 giây (không làm đơ ứng dụng)
-                    await Task.Delay(10000);
-
-                    // Mở lại nút
+                    await Task.Delay(10000); // Đợi 10s async không block UI
                     IsNutGoiHoTroEnabled = true;
                 }
             }
@@ -366,6 +355,7 @@ namespace OrMan.ViewModels.User
             };
             UpdateCartInfo();
         }
+
         public void GuiDanhGia(int soSao, string tags, string noiDung)
         {
             using (var context = new MenuContext())
@@ -381,6 +371,23 @@ namespace OrMan.ViewModels.User
                 context.SaveChanges();
             }
         }
+
+        public bool KiemTraConMon(string maMon)
+        {
+            using (var db = new MenuContext())
+            {
+                var mon = db.MonAns.AsNoTracking().FirstOrDefault(x => x.MaMon == maMon);
+                return mon != null && !mon.IsSoldOut;
+            }
+        }
+
+        // [QUAN TRỌNG] Thêm Cleanup cho UserViewModel
+        // Dù file UserView.xaml.cs chưa gọi tới, nhưng nên có để đồng bộ sau này nếu cần Timer trong tương lai
+        public void Cleanup()
+        {
+            // Hiện tại UserViewModel chưa dùng Timer, hàm này để giữ chuẩn interface
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

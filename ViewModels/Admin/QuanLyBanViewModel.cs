@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks; // Cần cho Task.Run
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -19,7 +20,6 @@ namespace OrMan.ViewModels.Admin
         private readonly BanAnRepository _repository;
         private DispatcherTimer _timer;
 
-        // --- Các biến Binding ---
         private ObservableCollection<BanAn> _danhSachBan;
         public ObservableCollection<BanAn> DanhSachBan
         {
@@ -36,7 +36,6 @@ namespace OrMan.ViewModels.Admin
                 _selectedBan = value;
                 OnPropertyChanged();
 
-                // Khi chọn bàn, nếu không phải chế độ sửa thì load chi tiết đơn
                 if (_selectedBan != null && !IsEditMode)
                 {
                     LoadTableDetails();
@@ -76,7 +75,6 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
-        // --- Commands ---
         public ICommand SelectTableCommand { get; private set; }
         public ICommand CheckoutCommand { get; private set; }
         public ICommand AssignTableCommand { get; private set; }
@@ -84,8 +82,8 @@ namespace OrMan.ViewModels.Admin
         public ICommand AddTableCommand { get; private set; }
         public ICommand DeleteTableCommand { get; private set; }
         public ICommand PrintBillCommand { get; private set; }
-        // [MỚI] Command lưu cài đặt bàn (Đổi tên)
         public ICommand SaveTableSettingsCommand { get; private set; }
+
         public QuanLyBanViewModel()
         {
             _repository = new BanAnRepository();
@@ -93,15 +91,10 @@ namespace OrMan.ViewModels.Admin
 
             LoadTables();
 
-            SelectTableCommand = new RelayCommand<BanAn>(ban =>
-            {
-                SelectedBan = ban;
-            });
-
+            SelectTableCommand = new RelayCommand<BanAn>(ban => SelectedBan = ban);
             AssignTableCommand = new RelayCommand<object>(AssignTable);
             ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
 
-            // --- Logic Thêm Bàn ---
             AddTableCommand = new RelayCommand<object>(p =>
             {
                 _repository.AddTable();
@@ -114,7 +107,6 @@ namespace OrMan.ViewModels.Admin
                 }
             });
 
-            // --- Logic Xóa Bàn ---
             DeleteTableCommand = new RelayCommand<BanAn>(ban =>
             {
                 if (ban == null) return;
@@ -135,84 +127,69 @@ namespace OrMan.ViewModels.Admin
                 }
             });
 
-            // --- Timer cập nhật trạng thái bàn real-time ---
+            // [TỐI ƯU] Tăng thời gian Timer lên 5s để giảm tải DB
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(2);
-            _timer.Tick += (s, e) => RefreshTableStatus();
+            _timer.Interval = TimeSpan.FromSeconds(5);
+            _timer.Tick += async (s, e) => await RefreshTableStatusAsync();
             _timer.Start();
 
-            // ==========================================================
-            // [QUAN TRỌNG] Logic Nút IN TẠM TÍNH (Sửa lỗi In/Hủy)
-            // ==========================================================
             PrintBillCommand = new RelayCommand<object>(p =>
             {
                 if (SelectedBan == null || _currentHoaDon == null) return;
-
-                var printWindow = new HoaDonWindow(
-                    SelectedBan.TenBan,
-                    _currentHoaDon,
-                    ChiTietDonHang,
-                    SelectedBan.HinhThucThanhToan ?? "Tiền mặt"
-                );
-
-                // ShowDialog trả về true nết bấm In, false/null nếu bấm Hủy
-                bool? ketQua = printWindow.ShowDialog();
-
-                if (ketQua == true)
+                var printWindow = new HoaDonWindow(SelectedBan.TenBan, _currentHoaDon, ChiTietDonHang, SelectedBan.HinhThucThanhToan ?? "Tiền mặt");
+                if (printWindow.ShowDialog() == true)
                 {
-                    // Chỉ khi bấm IN thật thì mới set trạng thái này
-                    // Lúc này giao diện (nếu Binding đúng) sẽ tự đổi sang chữ "In Lại"
                     SelectedBan.DaInTamTinh = true;
-                    MessageBox.Show("Đã nhận lệnh In thành công! Trạng thái bàn đã đổi.", "Test");
                 }
             });
 
-            // [MỚI] Logic lưu cài đặt bàn
             SaveTableSettingsCommand = new RelayCommand<object>(p =>
             {
                 if (SelectedBan == null) return;
-
-                // Gọi xuống Repository để lưu vào SQL
                 _repository.UpdateTableInfo(SelectedBan.SoBan, SelectedBan.TenGoi);
-
-                MessageBox.Show($"Đã lưu thông tin {SelectedBan.TenBan} thành công!",
-                                "Đã Lưu", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Đã lưu thông tin {SelectedBan.TenBan} thành công!", "Đã Lưu", MessageBoxButton.OK, MessageBoxImage.Information);
             });
 
-            // ==========================================================
-            // Logic THANH TOÁN & TRẢ BÀN
-            // ==========================================================
             CheckoutCommand = new RelayCommand<object>(Checkout);
         }
 
         private void LoadTables()
         {
+            // Có thể chạy Async nếu muốn, nhưng ở đây load lần đầu nên chấp nhận Sync cũng được
             DanhSachBan = _repository.GetAll();
         }
 
-        private void RefreshTableStatus()
+        // [QUAN TRỌNG] Hàm cập nhật trạng thái bàn Real-time chạy Async
+        private async Task RefreshTableStatusAsync()
         {
-            // 1. Cập nhật trạng thái các bàn (Code cũ giữ nguyên)
-            var newData = _repository.GetAll();
-            foreach (var banMoi in newData)
+            try
             {
-                var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
-                if (banCu != null)
-                {
-                    if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
-                    if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
+                // 1. Lấy dữ liệu mới từ DB ở Background Thread
+                var newData = await Task.Run(() => _repository.GetAll());
 
-                    // Cập nhật các thông tin khác nếu cần
-                    if (banCu.HinhThucThanhToan != banMoi.HinhThucThanhToan) banCu.HinhThucThanhToan = banMoi.HinhThucThanhToan;
+                // 2. Cập nhật UI
+                // Lưu ý: Không gán trực tiếp DanhSachBan = newData vì sẽ làm mất Selection/Focus
+                // Chỉ cập nhật các thuộc tính thay đổi
+                foreach (var banMoi in newData)
+                {
+                    var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
+                    if (banCu != null)
+                    {
+                        if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
+                        if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
+                        if (banCu.HinhThucThanhToan != banMoi.HinhThucThanhToan) banCu.HinhThucThanhToan = banMoi.HinhThucThanhToan;
+                        if (banCu.YeuCauHoTro != banMoi.YeuCauHoTro) banCu.YeuCauHoTro = banMoi.YeuCauHoTro;
+                    }
+                }
+
+                if (SelectedBan != null && SelectedBan.TrangThai == "Có Khách")
+                {
+                    LoadTableDetails(); // Cân nhắc chuyển hàm này thành Async nếu chi tiết đơn quá nhiều
                 }
             }
-
-            // [MỚI - QUAN TRỌNG] 
-            // Nếu đang chọn một bàn và bàn đó đang có khách -> Tải lại chi tiết đơn hàng
-            if (SelectedBan != null && SelectedBan.TrangThai == "Có Khách")
+            catch (Exception ex)
             {
-                // Gọi lại hàm này để nó lấy danh sách món mới nhất từ DB lên
-                LoadTableDetails();
+                System.Diagnostics.Debug.WriteLine("Refresh Error: " + ex.Message);
             }
         }
 
@@ -256,36 +233,27 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
-        // Trong file QuanLyBanViewModel.cs
         private void Checkout(object obj)
         {
             if (SelectedBan == null || _currentHoaDon == null) return;
 
-            // 1. Tạo nội dung thông báo xác nhận
             string thongBao = $"Bạn có chắc chắn muốn kết thúc đơn hàng bàn {SelectedBan.TenBan}?\n" +
                               $"Tổng tiền thu: {TongTienCanThu:N0} VNĐ";
 
-            // 2. Hiện MessageBox hỏi Yes/No
-            var ketQua = MessageBox.Show(thongBao, "Xác nhận thanh toán",
-                                         MessageBoxButton.YesNo,
-                                         MessageBoxImage.Question);
+            var ketQua = MessageBox.Show(thongBao, "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            // 3. Nếu chọn Yes thì mới xử lý
             if (ketQua == MessageBoxResult.Yes)
             {
                 try
                 {
-                    // Gọi xuống DB để chốt đơn
                     _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
 
-                    // Reset trạng thái bàn về Trống
                     SelectedBan.TrangThai = "Trống";
                     SelectedBan.YeuCauThanhToan = false;
                     SelectedBan.HinhThucThanhToan = null;
-                    SelectedBan.DaInTamTinh = false; // Reset trạng thái in
+                    SelectedBan.DaInTamTinh = false;
                     SelectedBan.YeuCauHoTro = null;
 
-                    // Load lại giao diện
                     LoadTableDetails();
 
                     MessageBox.Show("Thanh toán thành công! Đã trả bàn.", "Hoàn tất", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -294,6 +262,16 @@ namespace OrMan.ViewModels.Admin
                 {
                     MessageBox.Show("Lỗi thanh toán: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+
+        // [QUAN TRỌNG] Hủy Timer
+        public void Cleanup()
+        {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer = null;
             }
         }
 

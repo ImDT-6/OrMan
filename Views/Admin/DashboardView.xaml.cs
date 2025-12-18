@@ -15,18 +15,30 @@ namespace OrMan.Views.Admin
             var vm = new DashboardViewModel();
             this.DataContext = vm;
 
-            // Lắng nghe sự kiện từ ViewModel: Khi nào cần chuyển trang thì mới chuyển
+            // Lắng nghe yêu cầu chuyển trang từ ViewModel (khi bấm vào thông báo bàn cần thanh toán)
             vm.RequestNavigationToTable += (ban) =>
             {
                 var adminView = FindParent<AdminView>(this);
                 if (adminView != null)
                 {
+                    // Giả sử AdminView có hàm public để chuyển tab
+                    // Nếu tên hàm khác, bạn hãy sửa lại cho khớp với AdminView.xaml.cs của bạn
                     adminView.ChuyenDenBanCanXuLy(ban);
                 }
             };
+
+            this.Unloaded += DashboardView_Unloaded;
         }
 
-        // Helper tìm cha (Giữ nguyên)
+        private void DashboardView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (this.DataContext is DashboardViewModel vm)
+            {
+                vm.Cleanup(); // Dừng Timer cập nhật doanh thu
+            }
+        }
+
+        // Helper để tìm AdminView chứa UserControl này
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);

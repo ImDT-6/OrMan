@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using OrMan.Helpers;
 using OrMan.Models;
 using OrMan.ViewModels.User;
-using OrMan.Helpers;
+
 namespace OrMan.Views.User
 {
-
     public partial class UserView : UserControl
     {
         private UserViewModel _vm;
@@ -21,18 +22,16 @@ namespace OrMan.Views.User
             _vm = new UserViewModel();
             this.DataContext = _vm;
 
-            // Đăng ký sự kiện Unloaded để dọn dẹp Timer
             this.Unloaded += UserControl_Unloaded;
+            this.Loaded += UserControl_Loaded;
 
-            FilterByTag("Mì Cay");
-
+            // Khởi tạo Timer cho đồng hồ hiển thị lời chào
             SetupTimer();
         }
 
         private void SetupTimer()
         {
             _clockTimer = new DispatcherTimer();
-            // Cập nhật mỗi 30 giây
             _clockTimer.Interval = TimeSpan.FromSeconds(30);
             _clockTimer.Tick += (s, e) => UpdateGreeting();
         }
@@ -41,32 +40,26 @@ namespace OrMan.Views.User
         {
             _clockTimer?.Start();
             UpdateGreeting();
+
+            // Gọi filter mặc định để hiển thị món ăn ngay khi load xong
+            FilterByTag("Mì Cay");
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
+            // 1. Dừng đồng hồ UI
             _clockTimer?.Stop();
+
+            // 2. Dọn dẹp ViewModel (nếu có Timer ngầm)
+            _vm.Cleanup();
         }
 
-        private void TestTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            // Khi kéo slider, gọi hàm update với giá trị của slider
-            // Ép kiểu double sang int
-            if (_vm != null) // check null cho chắc
-            {
-                UpdateGreeting((int)e.NewValue);
-
-                // Mẹo: Tạm dừng cái ClockTimer lại để nó không tự reset về giờ thật sau 30s
-                if (_clockTimer != null && _clockTimer.IsEnabled)
-                    _clockTimer.Stop();
-            }
-        }
+        // Logic cập nhật lời chào theo giờ
         private void UpdateGreeting(int? fakeHour = null)
         {
             var now = DateTime.Now;
             int hour = fakeHour ?? now.Hour;
 
-            // Reset ẩn hết các background
             if (GridMorning != null) GridMorning.Visibility = Visibility.Collapsed;
             if (GridNoon != null) GridNoon.Visibility = Visibility.Collapsed;
             if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Collapsed;
@@ -74,56 +67,37 @@ namespace OrMan.Views.User
 
             string greetingText = "Xin chào";
 
-            // --- LOGIC CHIA GIỜ VÀ SET TEXT ---
-            if (hour >= 5 && hour < 11) // Sáng (5h - 11h)
+            if (hour >= 5 && hour < 11)
             {
                 if (GridMorning != null) GridMorning.Visibility = Visibility.Visible;
-
-                // Cố gắng lấy từ Resource, nếu không có thì gán cứng
-                string res = Application.Current.TryFindResource("Str_GoodMorning") as string;
-                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi sáng";
+                greetingText = "Chào buổi sáng";
             }
-            else if (hour >= 11 && hour < 14) // Trưa (11h - 14h)
+            else if (hour >= 11 && hour < 14)
             {
                 if (GridNoon != null) GridNoon.Visibility = Visibility.Visible;
-
-                // Có thể bạn chưa có key "Str_GoodNoon", nên dùng fallback
-                string res = Application.Current.TryFindResource("Str_GoodNoon") as string;
-                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi trưa";
+                greetingText = "Chào buổi trưa";
             }
-            else if (hour >= 14 && hour < 18) // Chiều (14h - 18h)
+            else if (hour >= 14 && hour < 18)
             {
                 if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Visible;
-
-                string res = Application.Current.TryFindResource("Str_GoodAfternoon") as string;
-                greetingText = !string.IsNullOrEmpty(res) ? res : "Chào buổi chiều";
+                greetingText = "Chào buổi chiều";
             }
-            else // Tối (18h - 5h sáng hôm sau)
+            else
             {
                 if (GridNight != null) GridNight.Visibility = Visibility.Visible;
-
-                // Tối muộn thì Chúc ngủ ngon, còn mới tối thì Chào buổi tối
-                string key = (hour >= 22 || hour < 4) ? "Str_GoodNight" : "Str_GoodEvening";
-
-                string res = Application.Current.TryFindResource(key) as string;
-                // Fallback text Việt hóa luôn cho chắc
-                if (string.IsNullOrEmpty(res))
-                {
-                    greetingText = (key == "Str_GoodNight") ? "Chúc ngủ ngon" : "Chào buổi tối";
-                }
-                else
-                {
-                    greetingText = res;
-                }
+                greetingText = (hour >= 22 || hour < 4) ? "Chúc ngủ ngon" : "Chào buổi tối";
             }
 
-            // Cập nhật lên giao diện
-            if (txtGreeting != null)
-            {
-                txtGreeting.Text = greetingText;
-            }
+            if (txtGreeting != null) txtGreeting.Text = greetingText;
         }
 
+        private void TestTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateGreeting((int)e.NewValue);
+            if (_clockTimer != null && _clockTimer.IsEnabled) _clockTimer.Stop();
+        }
+
+        // Xử lý Animation khi chọn Menu Category
         private void Filter_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as RadioButton;
@@ -134,22 +108,27 @@ namespace OrMan.Views.User
                 FilterByTag(tag);
             }
 
-            int index = MenuPanel.Children.IndexOf(button);
-            double targetY = index * 60;
-
-            DoubleAnimation animation = new DoubleAnimation
+            // Animation di chuyển thanh indicator
+            if (MenuPanel != null && MenuIndicatorTransform != null)
             {
-                To = targetY,
-                Duration = TimeSpan.FromSeconds(0.25),
-                EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
-            };
+                int index = MenuPanel.Children.IndexOf(button);
+                double targetY = index * 60; // Giả sử chiều cao mỗi item là 60
 
-            MenuIndicatorTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+                DoubleAnimation animation = new DoubleAnimation
+                {
+                    To = targetY,
+                    Duration = TimeSpan.FromSeconds(0.25),
+                    EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
+                };
+
+                MenuIndicatorTransform.BeginAnimation(TranslateTransform.YProperty, animation);
+            }
         }
 
         private void FilterByTag(string tag)
         {
             _vm.FilterMenu(tag);
+            // Cập nhật ItemsSource nếu Binding không tự động (hoặc để ép refresh)
             var itemsControl = this.FindName("ItemsControlMenu") as ItemsControl;
             if (itemsControl != null)
             {
@@ -157,32 +136,39 @@ namespace OrMan.Views.User
             }
         }
 
+        // Xử lý khi bấm vào Món ăn
         private void Product_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is MonAn monAn)
             {
+                // Kiểm tra nhanh xem món còn không (gọi thẳng ViewModel)
+                bool isConMon = _vm.KiemTraConMon(monAn.MaMon);
+
+                if (!isConMon)
+                {
+                    MessageBox.Show($"Món '{monAn.TenMon}' vừa mới HẾT HÀNG!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    _vm.FilterMenu(_vm.CurrentCategoryTag);
+                    return;
+                }
                 if (monAn.IsSoldOut)
                 {
-                    string msg = string.Format(GetRes("Str_Msg_ProductSoldOut"), monAn.TenMon);
-                    MessageBox.Show(msg, GetRes("Str_Title_Notice"), 
-                        MessageBoxButton.OK, 
-                        MessageBoxImage.Information);
-                   
+                    MessageBox.Show($"Món {monAn.TenMon} đã hết hàng!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
+                // Yêu cầu chọn bàn nếu chưa có
                 if (_vm.CurrentTable <= 0)
                 {
                     if (_vm.ChonBanCommand.CanExecute(null))
-                    {
                         _vm.ChonBanCommand.Execute(null);
-                    }
                     if (_vm.CurrentTable <= 0) return;
                 }
 
+                // Mở popup chi tiết món
                 var popup = new ChiTietMonWindow(monAn);
                 popup.Owner = Application.Current.MainWindow;
                 var mainWindow = Application.Current.MainWindow;
+
                 if (mainWindow != null) mainWindow.Opacity = 0.4;
 
                 if (popup.ShowDialog() == true)
@@ -194,16 +180,15 @@ namespace OrMan.Views.User
             }
         }
 
+        // Xử lý nút Thanh toán / Giỏ hàng
         private void BtnThanhToan_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Kiểm tra giỏ hàng
             if (_vm.GioHang.Count == 0)
             {
-                MessageBox.Show(GetRes("Str_Msg_CartEmpty"), GetRes("Str_Title_Notice"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Giỏ hàng đang trống!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // 2. Mở cửa sổ Giỏ hàng
             var cartWindow = new GioHangWindow(_vm);
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
@@ -214,87 +199,65 @@ namespace OrMan.Views.User
 
             if (isConfirmed == true)
             {
-                // Kiểm tra xem có phải khách vãng lai không
-                bool isGuest = _vm.CurrentCustomer == null ||
-                               _vm.CurrentCustomer.KhachHangID == 0 ||
-                               _vm.CurrentCustomer.HoTen == "Khách Mới" ||
-                               _vm.CurrentCustomer.HoTen == "Khách Hàng Mới";
+                // Logic hỏi Tích điểm
+                bool isGuest = _vm.CurrentCustomer == null || _vm.CurrentCustomer.HoTen.Contains("Khách Mới");
 
                 if (isGuest)
                 {
-                    var result = MessageBox.Show(GetRes("Str_Msg_AskLoyalty"), GetRes("Str_Title_Confirm"), MessageBoxButton.YesNo, MessageBoxImage.Question);
-
+                    var result = MessageBox.Show("Quý khách có muốn tích điểm không?", "Khách hàng thân thiết", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes)
                     {
-                        // Mở cửa sổ tích điểm
                         var tichDiemWin = new TichDiemWindow(_vm);
                         tichDiemWin.Owner = Application.Current.MainWindow;
-
-                        // Lấy kết quả trả về
                         bool? dialogResult = tichDiemWin.ShowDialog();
 
-                        // [LOGIC QUAN TRỌNG ĐỂ "LÀM LẠI TỪ ĐẦU"]
                         if (dialogResult != true)
                         {
-                            // Trường hợp này là: Đã mở cửa sổ lên (thậm chí đã đăng ký xong) 
-                            // nhưng lại bấm nút X thoát ra mà chưa bấm "HOÀN TẤT".
-
-                            // -> Hủy bỏ khách hàng vừa đăng ký (nếu có), reset về khách lẻ
                             _vm.ResetSession();
-
-                            // -> Dừng lại, KHÔNG gửi đơn
-                            return;
+                            return; // Hủy gửi đơn nếu thoát tích điểm giữa chừng
                         }
-
-                        // Nếu chạy xuống đây nghĩa là dialogResult == true (Đã bấm HOÀN TẤT đàng hoàng)
                     }
                 }
 
-                // 4. Gửi đơn hàng
                 if (_vm.SubmitOrder())
                 {
-                    MessageBox.Show(GetRes("Str_Msg_OrderSuccess"), GetRes("Str_Title_Success"), MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Đặt món thành công! Vui lòng đợi trong giây lát.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
 
-        private void BtnDangXuat_Click(object sender, RoutedEventArgs e)
+        // Xử lý Đăng xuất
+        private async void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
-            // [ĐÃ SỬA] Dùng GetRes
-            var result = MessageBox.Show(GetRes("Str_Msg_ConfirmLogout"), GetRes("Str_Title_Confirm"), MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
+                await Task.Delay(200);
                 var mainWindow = Application.Current.MainWindow as MainWindow;
+                // Gọi hàm chuyển view trong MainWindow
                 mainWindow?.ChuyenSangDangNhap();
             }
         }
 
         private void BtnTichDiem_Click(object sender, RoutedEventArgs e)
         {
-            // [CŨ] MessageBox.Show("Tính năng Tích điểm đang được phát triển!", "Thông báo");
-
-            // [MỚI]
             var popup = new TichDiemWindow(_vm);
             var mainWindow = Application.Current.MainWindow;
-
-            // Làm mờ màn hình chính cho đẹp
             if (mainWindow != null) mainWindow.Opacity = 0.4;
-
             popup.Owner = mainWindow;
             popup.ShowDialog();
-
-            // Khôi phục độ sáng
             if (mainWindow != null) mainWindow.Opacity = 1;
-
-            // Nếu đã đăng nhập thành công, cập nhật giao diện chính (nếu muốn)
-            if (_vm.CurrentCustomer != null)
-            {
-                // Ví dụ: đổi icon tích điểm thành màu vàng để báo hiệu đã đăng nhập
-            }
         }
 
-        // Đã xóa hàm BtnNgonNgu_Click vì không còn dùng nữa
+        private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
+        {
+            var reviewWindow = new DanhGiaWindow();
+            reviewWindow.ShowDialog();
+        }
+
+        // --- Xử lý đổi ngôn ngữ ---
+
         private void BtnLanguage_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
@@ -304,34 +267,26 @@ namespace OrMan.Views.User
                 btn.ContextMenu.IsOpen = true;
             }
         }
+
         private void MenuItem_VN_Click(object sender, RoutedEventArgs e)
         {
             LanguageHelper.SetLanguage("vi");
-            txtLangFlag.Text = "🇻🇳";
-            txtLangName.Text = "Tiếng Việt";
+            if (txtLangFlag != null) txtLangFlag.Text = "🇻🇳";
+            if (txtLangName != null) txtLangName.Text = "Tiếng Việt";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
         }
+
+        private void MenuItem_EN_Click(object sender, RoutedEventArgs e)
+        {
+            LanguageHelper.SetLanguage("en");
+            if (txtLangFlag != null) txtLangFlag.Text = "🇺🇸";
+            if (txtLangName != null) txtLangName.Text = "English";
+            UpdateGreeting(); // Cập nhật lại câu chào ngay
+        }
+
         private string GetRes(string key)
         {
             return Application.Current.TryFindResource(key) as string ?? key;
         }
-        private void MenuItem_EN_Click(object sender, RoutedEventArgs e)
-        {
-            LanguageHelper.SetLanguage("en");
-            txtLangFlag.Text = "🇺🇸";
-            txtLangName.Text = "English";
-            UpdateGreeting(); // Cập nhật lại câu chào ngay
-        }
-        private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
-        {
-            // Tạo màn hình đen mờ che phía sau (tùy chọn cho đẹp)
-            // Hoặc đơn giản chỉ cần 2 dòng này:
-
-            var reviewWindow = new DanhGiaWindow();
-
-            // ShowDialog giúp chặn thao tác ở màn hình chính cho đến khi đóng đánh giá
-            reviewWindow.ShowDialog();
-        }
     }
-
 }

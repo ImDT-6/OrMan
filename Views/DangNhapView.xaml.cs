@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging; // Thư viện xử lý ảnh WPF
+using System.Windows.Media.Imaging;
 using OrMan.Models;
 using OrMan.ViewModels;
 using System.Threading.Tasks;
@@ -15,11 +15,11 @@ namespace OrMan.Views
     {
         private DangNhapViewModel vm;
 
-        // List chứa sẵn các ảnh đã load lên RAM để animation mượt mà không bị nháy
+        // List chứa ảnh (khởi tạo rỗng để tránh null)
         private List<ImageSource> mascotFrames = new List<ImageSource>();
-        private ImageSource blindfoldImage; // Ảnh che mắt
-        private ImageSource defaultImage;   // Ảnh mặc định
-        private ImageSource noblindfoldImage; // Ảnh không che mắt
+        private ImageSource blindfoldImage;
+        private ImageSource defaultImage;
+        private ImageSource noblindfoldImage;
 
         public DangNhapView()
         {
@@ -27,127 +27,143 @@ namespace OrMan.Views
             vm = new DangNhapViewModel();
             DataContext = vm;
 
-            // Load trước hình ảnh vào bộ nhớ khi mở form
-            PreloadMascotImages();
+            // [TỐI ƯU] Không load ảnh ở đây nữa để tránh đơ lúc khởi tạo
+            // Chuyển sang sự kiện Loaded
+            this.Loaded += DangNhapView_Loaded;
+        }
+
+        private async void DangNhapView_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Gọi hàm load ảnh bất đồng bộ
+            await PreloadMascotImagesAsync();
             UpdateBearFace();
         }
 
-        private void PreloadMascotImages()
+        // [QUAN TRỌNG] Hàm load ảnh chạy ngầm (Async)
+        private async Task PreloadMascotImagesAsync()
         {
-            mascotFrames.Clear(); // Xóa danh sách cũ
-
-            // 1. Load ảnh mặc định
-            try
+            // Chạy việc nặng ở luồng phụ
+            var loadedData = await Task.Run(() =>
             {
-                defaultImage = new BitmapImage(new Uri("pack://application:,,,/Images/debut.JPG"));
-                // Gán luôn để tránh null lúc đầu
-                imgMascot.Source = defaultImage;
-            }
-            catch { /* Nếu lỗi thì thôi */ }
+                var frames = new List<ImageSource>();
+                ImageSource def = null, blind = null, noblind = null;
 
-            // 2. Load ảnh che mắt & không che
-            try
-            {
-                blindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/textbox_password.png"));
-                noblindfoldImage = new BitmapImage(new Uri("pack://application:,,,/Images/nocover.jpg"));
-            }
-            catch { /* Nếu lỗi thì thôi */ }
-
-            // 3. Load chuỗi ảnh animation (Load kỹ từng tấm)
-            // Cho vòng lặp chạy dư ra cũng được (ví dụ tới 50), code sẽ tự lọc cái nào có thật mới lấy
-            for (int i = 0; i <= 50; i++)
-            {
                 try
                 {
-                    // Đường dẫn ảnh (hãy chắc chắn đuôi file là .jpg hay .png nhé)
-                    string path = $"pack://application:,,,/Images/textbox_user_{i}.jpg";
+                    // 1. Load các ảnh tĩnh
+                    // Lưu ý: BitmapCacheOption.OnLoad + Freeze() là bắt buộc để truyền ảnh giữa các Thread
+                    def = LoadImageFrozen("pack://application:,,,/Images/debut.JPG");
+                    blind = LoadImageFrozen("pack://application:,,,/Images/textbox_password.png");
+                    noblind = LoadImageFrozen("pack://application:,,,/Images/nocover.jpg");
 
-                    // Tải ảnh vào RAM ngay lập tức (OnLoad) để kiểm tra sống/chết
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(path);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad; // QUAN TRỌNG: Tải ngay lập tức
-                    bitmap.EndInit();
-                    bitmap.Freeze(); // Tối ưu hiệu năng
+                    // 2. Load chuỗi ảnh animation
+                    // Giả sử ảnh được đặt tên liên tiếp: textbox_user_0, textbox_user_1...
+                    for (int i = 0; i <= 50; i++)
+                    {
+                        string path = $"pack://application:,,,/Images/textbox_user_{i}.jpg";
+                        var img = LoadImageFrozen(path);
 
-                    // Nếu chạy được tới đây nghĩa là ảnh TỒN TẠI -> Thêm vào list
-                    mascotFrames.Add(bitmap);
+                        if (img != null)
+                        {
+                            frames.Add(img);
+                        }
+                        else
+                        {
+                            // [TỐI ƯU CỰC MẠNH] 
+                            // Nếu không tìm thấy ảnh thứ 'i', ta DỪNG LUÔN vòng lặp.
+                            // Giả định là bạn đặt tên file liên tiếp (0, 1, 2...). 
+                            // Nếu file 5 không có thì khả năng cao file 6-50 cũng không có -> Không cần try-catch tốn time.
+                            break;
+                        }
+                    }
                 }
-                catch
-                {
-                    // Nếu ảnh số 'i' không tồn tại -> Nó nhảy vào đây -> Không làm gì cả -> Bỏ qua.
-                    // Như vậy list mascotFrames chỉ chứa toàn ảnh "sạch".
-                }
+                catch { /* Bỏ qua lỗi chung */ }
+
+                // Trả về kết quả gói gọn
+                return new { Frames = frames, Default = def, Blind = blind, NoBlind = noblind };
+            });
+
+            // Cập nhật lại biến ở luồng chính (UI Thread)
+            if (loadedData != null)
+            {
+                this.mascotFrames = loadedData.Frames;
+                this.defaultImage = loadedData.Default;
+                this.blindfoldImage = loadedData.Blind;
+                this.noblindfoldImage = loadedData.NoBlind;
+
+                // Gán ảnh mặc định ngay khi load xong
+                if (this.defaultImage != null) imgMascot.Source = this.defaultImage;
             }
         }
 
-        // --- SỰ KIỆN 1: KHI GÕ TÀI KHOẢN (Gấu nhìn theo) ---
+        // Hàm hỗ trợ load và đóng băng ảnh (để dùng được đa luồng)
+        private BitmapImage LoadImageFrozen(string path)
+        {
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(path);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Load ngay lập tức
+                bitmap.EndInit();
+                bitmap.Freeze(); // Đóng băng để share sang UI Thread
+                return bitmap;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // --- CÁC SỰ KIỆN KHÁC GIỮ NGUYÊN ---
+
         private void txtUser_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Nếu đang nhập mật khẩu thì không đổi hình (vì đang che mắt)
             if (pwdBox.IsKeyboardFocusWithin || txtVisiblePass.IsKeyboardFocusWithin) return;
-
             UpdateBearFace();
         }
 
-        // Hàm cập nhật mặt gấu dựa trên độ dài chữ
-        // Hàm cập nhật mặt gấu an toàn
         private void UpdateBearFace()
         {
-            // Nếu không có ảnh nào thì thoát luôn, tránh lỗi
-            if (mascotFrames == null || mascotFrames.Count == 0) return;
+            // Thêm check null an toàn
+            if (mascotFrames == null || mascotFrames.Count == 0)
+            {
+                if (defaultImage != null && imgMascot.Source != defaultImage)
+                    imgMascot.Source = defaultImage;
+                return;
+            }
 
             try
             {
                 int textLength = txtUser.Text.Length;
-
-                // Nếu chưa nhập gì -> Hiện ảnh mặc định
                 if (textLength <= 0)
                 {
                     if (defaultImage != null) imgMascot.Source = defaultImage;
                     return;
                 }
 
-                // Tính toán vị trí ảnh (Index)
-                // Ký tự 1 -> Ảnh 0
                 int frameIndex = textLength - 1;
-
-                // [KHÓA CHỐT AN TOÀN]
-                // Nếu gõ dài hơn số lượng ảnh đang có -> Luôn lấy ảnh cuối cùng
-                if (frameIndex >= mascotFrames.Count)
-                {
-                    frameIndex = mascotFrames.Count - 1;
-                }
-
-                // Nếu index bị âm (do lỗi nào đó) -> lấy ảnh 0
+                if (frameIndex >= mascotFrames.Count) frameIndex = mascotFrames.Count - 1;
                 if (frameIndex < 0) frameIndex = 0;
 
-                // Hiển thị
                 imgMascot.Source = mascotFrames[frameIndex];
             }
             catch (Exception ex)
             {
-                // Bắt lỗi để không bao giờ làm đơ bàn phím
                 System.Diagnostics.Debug.WriteLine("Lỗi UpdateBearFace: " + ex.Message);
             }
         }
 
-        // --- SỰ KIỆN 2: KHI VÀO Ô MẬT KHẨU (Che mắt) ---
         private void pwdBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            if (blindfoldImage != null)
-                imgMascot.Source = blindfoldImage;
+            if (blindfoldImage != null) imgMascot.Source = blindfoldImage;
         }
 
-        // --- SỰ KIỆN 3: KHI RỜI Ô MẬT KHẨU (Mở mắt lại) ---
         private void pwdBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            // Quay lại trạng thái nhìn theo độ dài tài khoản
             imgMascot.Source = defaultImage;
             UpdateBearFace();
         }
-
-        // --- CÁC LOGIC CŨ (GIỮ NGUYÊN) ---
 
         private void txtUser_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -193,48 +209,33 @@ namespace OrMan.Views
                 e.Handled = true;
             }
         }
+
         private void txtVisiblePass_GotFocus(object sender, RoutedEventArgs e)
         {
-            // Khi bấm vào ô hiện mật khẩu -> Gấu phải mở mắt ra
-            imgMascot.Source = noblindfoldImage;
+            if (noblindfoldImage != null)
+                imgMascot.Source = noblindfoldImage;
         }
+
         private void BtnEye_Click(object sender, RoutedEventArgs e)
         {
             if (btnEye.IsChecked == true)
             {
-                // TRƯỜNG HỢP: ĐANG HIỆN MẬT KHẨU (IsChecked = True)
-                // Hành động: Gấu bỏ tay ra, mở mắt nhìn
-
-                // Gọi hàm này để gấu quay về trạng thái bình thường 
-                // (hoặc nhìn theo độ dài tên đăng nhập nếu muốn)
-               
                 UpdateBearFace();
-                // Tiện tay Focus luôn vào ô hiện mật khẩu để người dùng gõ tiếp
                 txtVisiblePass.Focus();
                 txtVisiblePass.CaretIndex = txtVisiblePass.Text.Length;
             }
             else
             {
-                // TRƯỜNG HỢP: ĐANG ẨN MẬT KHẨU (IsChecked = False)
-                // Hành động: Gấu lấy tay CHE MẮT NGAY LẬP TỨC
-
-                if (blindfoldImage != null)
-                {
-                    imgMascot.Source = blindfoldImage;
-                }
-
-                // Tiện tay Focus lại vào ô ẩn mật khẩu
+                if (blindfoldImage != null) imgMascot.Source = blindfoldImage;
                 pwdBox.Focus();
             }
         }
+
         private void txtUser_GotFocus(object sender, RoutedEventArgs e)
         {
-            // Yêu cầu: Cả 2 trường hợp (bật mắt hay tắt mắt) đều hiện trạng thái mặc định.
-            // Không cần kiểm tra if (btnEye.IsChecked == true) nữa.
-
-            // Gọi hàm này để gấu quay về trạng thái nhìn theo chữ (hoặc nhìn thẳng nếu ô trống)
             UpdateBearFace();
         }
+
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             vm.MatKhau = pwdBox.Password;
@@ -252,6 +253,7 @@ namespace OrMan.Views
 
             var mainWindow = Application.Current.MainWindow as MainWindow;
 
+            // [MẸO] Dùng Task.Run để so sánh/xử lý đăng nhập nếu logic phức tạp hơn
             if (vm.TaiKhoan == admin.TaiKhoan && vm.MatKhau == admin.MatKhau)
             {
                 mainWindow?.ChuyenSangAdmin();

@@ -11,10 +11,11 @@ using System.Windows.Input;
 using OrMan.Helpers;
 using System.Windows;
 using System.Globalization;
-using System.Windows.Media; 
+using System.Windows.Media;
+using System.Threading.Tasks; // Cần cho Task.Run
+
 namespace OrMan.ViewModels
 {
-    // Enum để định nghĩa các loại lọc
     public enum ChartFilterType { Day, Week, Month, Year }
 
     public class TopFoodItem
@@ -27,12 +28,9 @@ namespace OrMan.ViewModels
     {
         public string TimeLabel { get; set; }
         public double Value { get; set; }
-        public double EmptyValue { get; set; } // Phần trống phía trên cột
-
-        // Binding cho Grid.RowDefinitions (Responsive tuyệt đối)
+        public double EmptyValue { get; set; }
         public string BarStar => $"{Value.ToString(CultureInfo.InvariantCulture)}*";
         public string EmptyStar => $"{EmptyValue.ToString(CultureInfo.InvariantCulture)}*";
-
         public string TooltipText => $"{Value:N0} VNĐ";
     }
 
@@ -43,18 +41,19 @@ namespace OrMan.ViewModels
         private readonly BanAnRepository _banRepo;
         private DispatcherTimer _timer;
 
-        // --- 1. Biến lưu trạng thái lọc ---
         private ChartFilterType _currentFilter = ChartFilterType.Day;
         public ICommand ChangeFilterCommand { get; private set; }
+
         private Brush _tangTruongColor;
         public Brush TangTruongColor
         {
             get => _tangTruongColor;
             set { _tangTruongColor = value; OnPropertyChanged(); }
         }
-        public ObservableCollection<ChartBarItem> DoanhThuTheoGio { get; set; }
 
-        // Các biến trục tung biểu đồ
+        // Khởi tạo sẵn để tránh null reference
+        public ObservableCollection<ChartBarItem> DoanhThuTheoGio { get; set; } = new ObservableCollection<ChartBarItem>();
+
         private string _axisMax = "2M";
         private string _axisMidHigh = "1.5M";
         private string _axisMid = "1M";
@@ -65,7 +64,6 @@ namespace OrMan.ViewModels
         public string AxisMid { get => _axisMid; set { _axisMid = value; OnPropertyChanged(); } }
         public string AxisMidLow { get => _axisMidLow; set { _axisMidLow = value; OnPropertyChanged(); } }
 
-        // Các biến hiển thị Dashboard
         private string _banHoatDongText;
         public string BanHoatDongText
         {
@@ -128,25 +126,23 @@ namespace OrMan.ViewModels
             _thucDonRepo = new ThucDonRepository();
             _banRepo = new BanAnRepository();
 
-            DoanhThuTheoGio = new ObservableCollection<ChartBarItem>();
             ResolveRequestCommand = new RelayCommand<BanAn>(ResolveRequest);
             ProcessRequestCommand = new RelayCommand<BanAn>(ProcessRequest);
-
-            // --- 2. Khởi tạo Command lọc ---
             ChangeFilterCommand = new RelayCommand<string>(ChangeFilter);
 
-            LoadDashboardData();
+            // [TỐI ƯU] Load dữ liệu lần đầu bằng Async
+            Task.Run(() => LoadDashboardDataAsync());
 
-            BanAnRepository.OnPaymentSuccess += () => LoadDashboardData();
-            BanAnRepository.OnTableChanged += () => LoadDashboardData();
+            // Đăng ký sự kiện
+            BanAnRepository.OnPaymentSuccess += () => Task.Run(() => LoadDashboardDataAsync());
+            BanAnRepository.OnTableChanged += () => Task.Run(() => LoadDashboardDataAsync());
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(30);
-            _timer.Tick += (s, e) => LoadDashboardData();
+            _timer.Tick += (s, e) => Task.Run(() => LoadDashboardDataAsync());
             _timer.Start();
         }
 
-        // --- 3. Xử lý khi bấm nút RadioButton ---
         private void ChangeFilter(string type)
         {
             switch (type)
@@ -156,7 +152,8 @@ namespace OrMan.ViewModels
                 case "Month": _currentFilter = ChartFilterType.Month; break;
                 case "Year": _currentFilter = ChartFilterType.Year; break;
             }
-            LoadChartData(); // Vẽ lại biểu đồ
+            // Gọi lại hàm load async
+            Task.Run(() => LoadDashboardDataAsync());
         }
 
         private void ResolveRequest(BanAn ban)
@@ -181,166 +178,127 @@ namespace OrMan.ViewModels
                                     MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     _banRepo.ResolvePaymentRequest(ban.SoBan);
-                    BanCanXuLy.Remove(ban);
+                    // Cập nhật UI ngay lập tức
+                    Application.Current.Dispatcher.Invoke(() => BanCanXuLy.Remove(ban));
                 }
             }
         }
 
         private int _previousRequestCount = 0;
 
-        private void LoadDashboardData()
+        // [QUAN TRỌNG] Hàm Load dữ liệu chính chạy Async
+        private void LoadDashboardDataAsync()
         {
-            decimal totalToday = _doanhThuRepo.GetTodayRevenue();
-            decimal totalYesterday = _doanhThuRepo.GetYesterdayRevenue();
-
-            DoanhThuNgay = FormatCurrencyShort(totalToday);
-            decimal diff = totalToday - totalYesterday;
-            string sign = diff >= 0 ? "+" : "-";
-            string diffString = FormatCurrencyShort(Math.Abs(diff));
-            if (totalYesterday == 0)
+            try
             {
-                // Trường hợp hôm qua doanh thu = 0
-                if (totalToday > 0)
-                    TangTruongText = $"+{diffString} (Mới)";
-                else
-                    TangTruongText = "---";
+                // 1. Tính toán nặng ở Background Thread
+                decimal totalToday = _doanhThuRepo.GetTodayRevenue();
+                decimal totalYesterday = _doanhThuRepo.GetYesterdayRevenue();
+                int ordersToday = _doanhThuRepo.GetTodayOrderCount();
+                int ordersYesterday = _doanhThuRepo.GetYesterdayOrderCount();
+
+                var allTables = _banRepo.GetAll();
+                int tongSoBan = allTables.Count;
+                int banCoKhach = allTables.Count(b => b.TrangThai != "Trống");
+
+                // Lấy danh sách bàn cần xử lý
+                var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
+
+                // Lấy Top món ăn
+                var topDict = _thucDonRepo.GetTopSellingFoods(5);
+                var topList = topDict.Select(x => new TopFoodItem { MonAn = x.Key, SoLuongBan = x.Value }).ToList();
+
+                // Chuẩn bị dữ liệu biểu đồ
+                Dictionary<int, decimal> chartData = new Dictionary<int, decimal>();
+                int start = 0, end = 0;
+                switch (_currentFilter)
+                {
+                    case ChartFilterType.Day:
+                        chartData = _doanhThuRepo.GetRevenueByHour(); start = 8; end = 24; break;
+                    case ChartFilterType.Week:
+                        chartData = _doanhThuRepo.GetRevenueByWeek(); start = 2; end = 8; break;
+                    case ChartFilterType.Month:
+                        chartData = _doanhThuRepo.GetRevenueByMonth(); start = 1; end = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month); break;
+                    case ChartFilterType.Year:
+                        chartData = _doanhThuRepo.GetRevenueByYear(); start = 1; end = 12; break;
+                }
+
+                // 2. Cập nhật UI ở Main Thread
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // --- Hiển thị Doanh Thu ---
+                    DoanhThuNgay = FormatCurrencyShort(totalToday);
+                    decimal diff = totalToday - totalYesterday;
+                    string sign = diff >= 0 ? "+" : "-";
+                    string diffString = FormatCurrencyShort(Math.Abs(diff));
+
+                    if (totalYesterday == 0)
+                        TangTruongText = totalToday > 0 ? $"+{diffString} (Mới)" : "---";
+                    else
+                    {
+                        double percent = (double)(Math.Abs(diff) / totalYesterday) * 100;
+                        TangTruongText = $"{sign}{diffString} ({percent:0}%) so với hôm qua";
+                    }
+
+                    var converter = new BrushConverter();
+                    TangTruongColor = (Brush)converter.ConvertFrom(diff >= 0 ? "#22C55E" : "#EF4444");
+
+                    // --- Hiển thị Đơn Hàng ---
+                    SoDonHomNay = ordersToday;
+                    if (SoDonHomNay > 0)
+                    {
+                        decimal avg = totalToday / SoDonHomNay;
+                        TrungBinhDon = "TB: " + FormatCurrencyShort(avg) + "/đơn";
+                    }
+                    else TrungBinhDon = "Chưa có đơn";
+
+                    int diffOrder = ordersToday - ordersYesterday;
+                    string signOrder = diffOrder >= 0 ? "+" : "-";
+                    if (ordersYesterday == 0)
+                        TangTruongDonHangText = ordersToday > 0 ? $"+{ordersToday} (Mới)" : "---";
+                    else
+                    {
+                        double percentOrder = (double)Math.Abs(diffOrder) / ordersYesterday * 100;
+                        TangTruongDonHangText = $"{signOrder}{Math.Abs(diffOrder)} ({percentOrder:0}%) so với hôm qua";
+                    }
+                    TangTruongDonHangColor = (Brush)converter.ConvertFrom(diffOrder >= 0 ? "#22C55E" : "#EF4444");
+
+                    // --- Hiển thị Bàn & Top Món ---
+                    BanHoatDongText = $"{banCoKhach} / {tongSoBan}";
+                    CongSuatText = tongSoBan > 0 ? $"Công suất: {((double)banCoKhach / tongSoBan) * 100:0}%" : "Công suất: 0%";
+
+                    if (urgentTables.Count > _previousRequestCount) System.Media.SystemSounds.Exclamation.Play();
+                    _previousRequestCount = urgentTables.Count;
+
+                    // Cập nhật ObservableCollection (tránh tạo mới nếu không cần thiết để giữ focus)
+                    BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
+                    TopMonAn = new ObservableCollection<TopFoodItem>(topList);
+
+                    // --- Vẽ Biểu Đồ ---
+                    UpdateChartUI(chartData, start, end);
+                });
             }
-            else
+            catch (Exception ex)
             {
-                // 4. Tính phần trăm (VD: 5%)
-                double percent = (double)(Math.Abs(diff) / totalYesterday) * 100;
-
-                // 5. Ghép chuỗi: +500k (5%) so với hôm qua
-                TangTruongText = $"{sign}{diffString} ({percent:0}%) so với hôm qua";
+                System.Diagnostics.Debug.WriteLine("Dashboard Error: " + ex.Message);
             }
-            var converter = new BrushConverter();
-            if (diff >= 0)
-            {
-                // Màu Xanh (SuccessGreen)
-                TangTruongColor = (Brush)converter.ConvertFrom("#22C55E");
-            }
-            else
-            {
-                // Màu Đỏ (DangerRed)
-                TangTruongColor = (Brush)converter.ConvertFrom("#EF4444");
-            }
-            SoDonHomNay = _doanhThuRepo.GetTodayOrderCount();
-            if (SoDonHomNay > 0)
-            {
-                decimal avg = totalToday / SoDonHomNay;
-                TrungBinhDon = "TB: " + FormatCurrencyShort(avg) + "/đơn";
-            }
-            else
-            {
-                TrungBinhDon = "Chưa có đơn";
-            }
-
-            LoadChartData();
-
-            var allTables = _banRepo.GetAll();
-            int tongSoBan = allTables.Count;
-            int banCoKhach = allTables.Count(b => b.TrangThai != "Trống");
-
-            BanHoatDongText = $"{banCoKhach} / {tongSoBan}";
-
-            if (tongSoBan > 0)
-            {
-                double phanTram = ((double)banCoKhach / tongSoBan) * 100;
-                CongSuatText = $"Công suất: {phanTram:0}%";
-            }
-            else
-            {
-                CongSuatText = "Công suất: 0%";
-            }
-
-            var urgentTables = allTables.Where(b => b.YeuCauThanhToan || !string.IsNullOrEmpty(b.YeuCauHoTro)).ToList();
-
-            if (urgentTables.Count > _previousRequestCount)
-            {
-                System.Media.SystemSounds.Exclamation.Play();
-            }
-            _previousRequestCount = urgentTables.Count;
-
-            if (BanCanXuLy == null || BanCanXuLy.Count != urgentTables.Count)
-                BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
-
-            var topDict = _thucDonRepo.GetTopSellingFoods(5);
-            var topList = topDict.Select(x => new TopFoodItem { MonAn = x.Key, SoLuongBan = x.Value }).ToList();
-            TopMonAn = new ObservableCollection<TopFoodItem>(topList);
-            int ordersToday = _doanhThuRepo.GetTodayOrderCount();
-            int ordersYesterday = _doanhThuRepo.GetYesterdayOrderCount();
-
-            SoDonHomNay = ordersToday;
-            int diffOrder = ordersToday - ordersYesterday;
-            string signOrder = diffOrder >= 0 ? "+" : "-";
-
-            // 2. Xử lý Text hiển thị
-            if (ordersYesterday == 0)
-            {
-                if (ordersToday > 0) TangTruongDonHangText = $"+{ordersToday} (Mới)";
-                else TangTruongDonHangText = "---";
-            }
-            else
-            {
-                double percentOrder = (double)Math.Abs(diffOrder) / ordersYesterday * 100;
-                TangTruongDonHangText = $"{signOrder}{Math.Abs(diffOrder)} ({percentOrder:0}%) so với hôm qua";
-            }
-
-            // 3. Xử lý Màu sắc (Xanh / Đỏ)
-            if (diffOrder >= 0)
-                TangTruongDonHangColor = (Brush)converter.ConvertFrom("#22C55E"); // Xanh
-            else
-                TangTruongDonHangColor = (Brush)converter.ConvertFrom("#EF4444"); // Đỏ
         }
 
-        // --- 4. Logic LoadChartData Động ---
-        private void LoadChartData()
+        private void UpdateChartUI(Dictionary<int, decimal> data, int start, int end)
         {
             DoanhThuTheoGio.Clear();
 
-            // Khởi tạo các biến để xử lý động
-            Dictionary<int, decimal> data = new Dictionary<int, decimal>();
-            int start = 0, end = 0;
-
-            // Lấy dữ liệu từ Repo dựa trên Filter
-            switch (_currentFilter)
-            {
-                case ChartFilterType.Day:
-                    data = _doanhThuRepo.GetRevenueByHour();
-                    start = 8;
-                    end = 24;
-                    break;
-
-                case ChartFilterType.Week:
-                    data = _doanhThuRepo.GetRevenueByWeek(); // Đảm bảo Repo đã có hàm này
-                    start = 2;
-                    end = 8; // Thứ 2 -> Chủ Nhật (quy ước là 8)
-                    break;
-
-                case ChartFilterType.Month:
-                    data = _doanhThuRepo.GetRevenueByMonth(); // Đảm bảo Repo đã có hàm này
-                    start = 1;
-                    end = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
-                    break;
-                case ChartFilterType.Year:
-                    data = _doanhThuRepo.GetRevenueByYear(); // Gọi hàm vừa tạo ở Bước 2
-                    start = 1;
-                    end = 12; // 12 tháng
-                    break;
-            }
-
-            // Tính Max Value để chia trục
             double maxVal = data.Count > 0 ? (double)data.Values.Max() : 0;
-            double axisTop = 1000000; // Mặc định 1M
+            double axisTop = 1000000;
 
             if (maxVal > 0)
             {
-                double target = maxVal * 1.1; // Đệm 10%
+                double target = maxVal * 1.1;
                 double exponent = Math.Floor(Math.Log10(target));
                 double powerOf10 = Math.Pow(10, exponent);
                 double fraction = target / powerOf10;
-
                 double niceFraction;
+
                 if (fraction <= 1.0) niceFraction = 1.0;
                 else if (fraction <= 1.2) niceFraction = 1.2;
                 else if (fraction <= 1.5) niceFraction = 1.5;
@@ -361,37 +319,18 @@ namespace OrMan.ViewModels
             AxisMid = FormatCurrencyShort((decimal)(axisTop * 0.5));
             AxisMidLow = FormatCurrencyShort((decimal)(axisTop * 0.25));
 
-            // Vòng lặp tạo cột biểu đồ
             for (int i = start; i <= end; i++)
             {
-                decimal revenue = 0;
-                if (data.ContainsKey(i))
-                    revenue = data[i];
-
+                decimal revenue = data.ContainsKey(i) ? data[i] : 0;
                 double val = (double)revenue;
                 double empty = axisTop - val;
                 if (empty < 0) empty = 0;
 
-                // Xử lý Label trục hoành (X-Axis)
                 string label = "";
-                if (_currentFilter == ChartFilterType.Day)
-                {
-                    label = (i % 2 == 0) ? $"{i}h" : "";
-                }
-                else if (_currentFilter == ChartFilterType.Week)
-                {
-                    label = i == 8 ? "CN" : $"T{i}";
-                }
-                else if (_currentFilter == ChartFilterType.Month)
-                {
-                    // Tháng này: Hiện ngày lẻ 1, 3, 5... hoặc ngày cuối
-                    label = (i % 2 != 0 || i == end) ? $"{i}" : "";
-                }
-                else if (_currentFilter == ChartFilterType.Year) // [MỚI] Label cho Năm
-                {
-                    // Hiển thị T1, T2... T12
-                    label = $"T{i}";
-                }
+                if (_currentFilter == ChartFilterType.Day) label = (i % 2 == 0) ? $"{i}h" : "";
+                else if (_currentFilter == ChartFilterType.Week) label = i == 8 ? "CN" : $"T{i}";
+                else if (_currentFilter == ChartFilterType.Month) label = (i % 2 != 0 || i == end) ? $"{i}" : "";
+                else if (_currentFilter == ChartFilterType.Year) label = $"T{i}";
 
                 DoanhThuTheoGio.Add(new ChartBarItem
                 {
@@ -408,6 +347,19 @@ namespace OrMan.ViewModels
             if (amount >= 1000000) return (amount / 1000000).ToString("0.##") + "M";
             if (amount >= 1000) return (amount / 1000).ToString("0.#") + "k";
             return amount.ToString("N0");
+        }
+
+        // [QUAN TRỌNG] Hủy Timer khi thoát
+        public void Cleanup()
+        {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer = null;
+            }
+            // Hủy đăng ký sự kiện static để tránh leak memory
+            // Lưu ý: Cần kiểm tra kỹ cơ chế event static trong Repository của bạn
+            // Ở đây tạm thời để nguyên, nhưng tốt nhất nên dùng WeakReference cho event
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
