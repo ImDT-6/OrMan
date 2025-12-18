@@ -15,6 +15,7 @@ namespace OrMan.Views.Admin
             var vm = new QuanLyBanViewModel();
             this.DataContext = vm;
 
+            // Đăng ký sự kiện dọn dẹp Timer
             this.Unloaded += QuanLyBanView_Unloaded;
         }
 
@@ -22,21 +23,18 @@ namespace OrMan.Views.Admin
         {
             if (this.DataContext is QuanLyBanViewModel vm)
             {
-                vm.Cleanup(); // Dừng Timer cập nhật trạng thái bàn
+                vm.Cleanup();
             }
         }
 
-        // Xử lý nút In tạm tính để tránh spam click
         private async void BtnInTamTinh_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             if (btn == null) return;
 
             btn.IsEnabled = false;
-
-            // Đợi 3 giây trước khi cho phép bấm lại
+            // Delay 3s để tránh spam lệnh in
             await Task.Delay(3000);
-
             btn.IsEnabled = true;
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks; // Cần thiết
 using System.Windows;
 using System.Windows.Input;
 using OrMan.Data;
@@ -27,10 +28,20 @@ namespace OrMan.ViewModels.Admin
         public ICommand AddCommand { get; private set; }
         public ICommand ToggleSoldOutCommand { get; private set; }
 
+        // Biến để Binding lên UI thay vì gọi hàm GetFilteredList
+        private ObservableCollection<MonAn> _danhSachHienThi;
+        public ObservableCollection<MonAn> DanhSachHienThi
+        {
+            get => _danhSachHienThi;
+            set { _danhSachHienThi = value; OnPropertyChanged(); }
+        }
+
         public ThucDonViewModel()
         {
             _repository = new ThucDonRepository();
-            LoadDataFromDb();
+
+            // [TỐI ƯU] Load dữ liệu bất đồng bộ
+            Task.Run(() => LoadDataFromDbAsync());
 
             DeleteCommand = new RelayCommand<MonAn>(DeleteMonAn);
             EditCommand = new RelayCommand<MonAn>(EditMonAn);
@@ -38,15 +49,24 @@ namespace OrMan.ViewModels.Admin
             ToggleSoldOutCommand = new RelayCommand<MonAn>(ToggleSoldOut);
         }
 
-        private void LoadDataFromDb()
+        private async Task LoadDataFromDbAsync()
         {
-            _danhSachGoc = _repository.GetAll();
-            if (_danhSachGoc.Count == 0)
+            var data = await Task.Run(() =>
             {
-                AddSampleData();
-                // [FIX LỖI] Reload data sau khi thêm mẫu để đảm bảo dữ liệu mới được load lại
-                _danhSachGoc = _repository.GetAll();
-            }
+                var list = _repository.GetAll();
+                if (list.Count == 0)
+                {
+                    AddSampleData(); // Hàm này sync nhưng chạy 1 lần đầu thì chấp nhận được
+                    list = _repository.GetAll();
+                }
+                return list;
+            });
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _danhSachGoc = data;
+                RefeshList(); // Cập nhật lại list hiển thị
+            });
         }
 
         private void AddSampleData()
@@ -57,14 +77,12 @@ namespace OrMan.ViewModels.Admin
         private void ToggleSoldOut(MonAn mon)
         {
             if (mon == null) return;
-
-            // [SỬA QUAN TRỌNG]
-            // Vì CheckBox đã tự đổi trạng thái IsSoldOut trên giao diện rồi,
-            // nên ở đây ta chỉ cần gọi Update để lưu trạng thái đó xuống DB.
-            // Không gọi ToggleSoldOut (đảo ngược) nữa.
-            _repository.Update(mon);
-
-            OnPropertyChanged("DataUpdated");
+            // DB Update chạy nhanh nên có thể để sync, hoặc bọc Task.Run nếu muốn
+            Task.Run(() =>
+            {
+                _repository.Update(mon);
+                Application.Current.Dispatcher.Invoke(() => RefeshList());
+            });
         }
 
         private void DeleteMonAn(MonAn mon)
@@ -73,20 +91,24 @@ namespace OrMan.ViewModels.Admin
 
             if (MessageBox.Show($"Xác nhận xóa món '{mon.TenMon}'? Thao tác này không thể hoàn tác!", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                try
+                Task.Run(() =>
                 {
-                    // 1. Xóa trong DB
-                    _repository.Delete(mon);
-                    // 2. Xóa khỏi danh sách gốc trong bộ nhớ
-                    _danhSachGoc.Remove(mon);
-                    // 3. Cập nhật lại UI
-                    RefeshList();
-                    MessageBox.Show("Xóa món thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi xóa món: {ex.Message}", "Lỗi Database", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    try
+                    {
+                        _repository.Delete(mon);
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            _danhSachGoc.Remove(mon);
+                            RefeshList();
+                            MessageBox.Show("Xóa món thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            MessageBox.Show($"Lỗi khi xóa món: {ex.Message}", "Lỗi Database", MessageBoxButton.OK, MessageBoxImage.Error));
+                    }
+                });
             }
         }
 
@@ -96,16 +118,23 @@ namespace OrMan.ViewModels.Admin
             if (window.ShowDialog() == true && window.MonAnResult != null)
             {
                 var monMoi = window.MonAnResult;
-                if (_danhSachGoc.Any(x => x.MaMon == monMoi.MaMon))
+                if (_danhSachGoc != null && _danhSachGoc.Any(x => x.MaMon == monMoi.MaMon))
                 {
                     MessageBox.Show("Mã món này đã tồn tại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _repository.Add(monMoi);
-                _danhSachGoc.Add(monMoi);
-                // 2. [MỚI] Lưu Công Thức
-                SaveRecipe(monMoi.MaMon, window.ListCongThucResult);
-                RefeshList();
+
+                Task.Run(() =>
+                {
+                    _repository.Add(monMoi);
+                    SaveRecipe(monMoi.MaMon, window.ListCongThucResult);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _danhSachGoc.Add(monMoi);
+                        RefeshList();
+                    });
+                });
             }
         }
 
@@ -118,9 +147,13 @@ namespace OrMan.ViewModels.Admin
                 mon.GiaBan = window.MonAnResult.GiaBan;
                 mon.DonViTinh = window.MonAnResult.DonViTinh;
                 mon.HinhAnhUrl = window.MonAnResult.HinhAnhUrl;
-                _repository.Update(mon);
-                SaveRecipe(mon.MaMon, window.ListCongThucResult);
-                RefeshList();
+
+                Task.Run(() =>
+                {
+                    _repository.Update(mon);
+                    SaveRecipe(mon.MaMon, window.ListCongThucResult);
+                    Application.Current.Dispatcher.Invoke(() => RefeshList());
+                });
             }
         }
 
@@ -128,24 +161,17 @@ namespace OrMan.ViewModels.Admin
         {
             using (var db = new MenuContext())
             {
-                // a. Xóa công thức cũ
                 var oldList = db.CongThucs.Where(x => x.MaMon == maMon);
                 db.CongThucs.RemoveRange(oldList);
-
-                // b. Thêm công thức mới
                 foreach (var dto in listDTO)
                 {
-                    var ct = new CongThuc
-                    {
-                        MaMon = maMon,
-                        NguyenLieuId = dto.NguyenLieuId,
-                        SoLuongCan = dto.SoLuongCan
-                    };
+                    var ct = new CongThuc { MaMon = maMon, NguyenLieuId = dto.NguyenLieuId, SoLuongCan = dto.SoLuongCan };
                     db.CongThucs.Add(ct);
                 }
                 db.SaveChanges();
             }
         }
+
         public string TuKhoaTimKiem
         {
             get => _tuKhoaTimKiem;
@@ -158,9 +184,11 @@ namespace OrMan.ViewModels.Admin
             RefeshList();
         }
 
-        public ObservableCollection<MonAn> GetFilteredList()
+        // Logic lọc dữ liệu (In-Memory)
+        private void RefeshList()
         {
-            if (_danhSachGoc == null) return new ObservableCollection<MonAn>();
+            if (_danhSachGoc == null) return;
+
             var query = _danhSachGoc.AsEnumerable();
 
             if (_currentTabTag == "Mì Cay") query = query.Where(x => x is MonMiCay);
@@ -171,13 +199,12 @@ namespace OrMan.ViewModels.Admin
                 string k = TuKhoaTimKiem.ToLower();
                 query = query.Where(x => x.TenMon.ToLower().Contains(k) || x.MaMon.ToLower().Contains(k));
             }
-            return new ObservableCollection<MonAn>(query);
+
+            DanhSachHienThi = new ObservableCollection<MonAn>(query);
         }
 
-        private void RefeshList()
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DataUpdated"));
-        }
+        // Để tương thích với code cũ nếu View gọi GetFilteredList (Optional)
+        public ObservableCollection<MonAn> GetFilteredList() => DanhSachHienThi;
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

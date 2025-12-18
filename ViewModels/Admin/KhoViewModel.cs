@@ -1,9 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks; // Cần thiết cho Task.Run
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading; // Cần thiết cho Timer
 using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
@@ -13,6 +16,8 @@ namespace OrMan.ViewModels.Admin
 {
     public class KhoViewModel : INotifyPropertyChanged
     {
+        private DispatcherTimer _timer; // Timer để tự động cập nhật kho
+
         private ObservableCollection<NguyenLieu> _danhSachNguyenLieu;
         public ObservableCollection<NguyenLieu> DanhSachNguyenLieu
         {
@@ -26,19 +31,22 @@ namespace OrMan.ViewModels.Admin
 
         public KhoViewModel()
         {
-            LoadData();
+            // [TỐI ƯU] Không gọi LoadData() trực tiếp, chạy ngầm
+            Task.Run(() => LoadDataAsync());
 
             AddCommand = new RelayCommand<object>((p) =>
             {
                 var wd = new ThemNguyenLieuWindow();
                 if (wd.ShowDialog() == true && wd.Result != null)
                 {
+                    // Thao tác ghi DB này nhanh nên có thể để sync, hoặc chuyển async nếu muốn
                     using (var db = new MenuContext())
                     {
                         db.NguyenLieus.Add(wd.Result);
                         db.SaveChanges();
                     }
-                    LoadData(); // Reload lại list
+                    // Load lại danh sách (Async)
+                    Task.Run(() => LoadDataAsync());
                 }
             });
 
@@ -50,7 +58,6 @@ namespace OrMan.ViewModels.Admin
                 {
                     using (var db = new MenuContext())
                     {
-                        // Cập nhật vào DB
                         var item = db.NguyenLieus.Find(nl.Id);
                         if (item != null)
                         {
@@ -62,7 +69,7 @@ namespace OrMan.ViewModels.Admin
                             db.SaveChanges();
                         }
                     }
-                    LoadData();
+                    Task.Run(() => LoadDataAsync());
                 }
             });
 
@@ -76,18 +83,50 @@ namespace OrMan.ViewModels.Admin
                         if (item != null) db.NguyenLieus.Remove(item);
                         db.SaveChanges();
                     }
-                    LoadData();
+                    Task.Run(() => LoadDataAsync());
                 }
             });
+
+            // [TỐI ƯU] Tự động cập nhật kho mỗi 30s (để đồng bộ khi Bếp trừ kho)
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromSeconds(30);
+            _timer.Tick += (s, e) => Task.Run(() => LoadDataAsync());
+            _timer.Start();
         }
 
-        private void LoadData()
+        // [QUAN TRỌNG] Hàm load dữ liệu chạy ngầm
+        private async void LoadDataAsync()
         {
-            using (var db = new MenuContext())
+            try
             {
-                // Load danh sách từ DB
-                var list = db.NguyenLieus.OrderBy(x => x.TenNguyenLieu).ToList();
-                DanhSachNguyenLieu = new ObservableCollection<NguyenLieu>(list);
+                // 1. Lấy dữ liệu ở Background Thread
+                var list = await Task.Run(() =>
+                {
+                    using (var db = new MenuContext())
+                    {
+                        return db.NguyenLieus.OrderBy(x => x.TenNguyenLieu).ToList();
+                    }
+                });
+
+                // 2. Cập nhật UI ở Main Thread
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DanhSachNguyenLieu = new ObservableCollection<NguyenLieu>(list);
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi Load Kho: " + ex.Message);
+            }
+        }
+
+        // [QUAN TRỌNG] Hàm dọn dẹp Timer
+        public void Cleanup()
+        {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer = null;
             }
         }
 

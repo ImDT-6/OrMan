@@ -1,20 +1,22 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using OrMan.Models;
-using OrMan.Services;
-using System.Collections.Generic;
-using System;
+using System.Threading.Tasks; // Cần thiết
+using System.Windows;
 using System.Windows.Input;
 using OrMan.Helpers;
+using OrMan.Models;
+using OrMan.Services;
 
 namespace OrMan.ViewModels
 {
     public class DoanhThuViewModel : INotifyPropertyChanged
     {
         private readonly DoanhThuRepository _repository;
-        private ObservableCollection<HoaDon> _allHoaDons; // Dữ liệu gốc
+        private List<HoaDon> _allHoaDons; // Dữ liệu gốc (List nhẹ hơn ObservableCollection khi xử lý ngầm)
 
         // [MỚI] Biến lưu trữ khoảng thời gian tùy chọn
         private DateTime _customFromDate;
@@ -35,7 +37,8 @@ namespace OrMan.ViewModels
             {
                 _tuKhoaTimKiem = value;
                 OnPropertyChanged();
-                FilterData();
+                // Tìm kiếm thì chạy nhanh, không cần Async cũng được, hoặc Async nếu muốn mượt tuyệt đối
+                Task.Run(() => FilterDataAsync());
             }
         }
 
@@ -49,17 +52,14 @@ namespace OrMan.ViewModels
                 {
                     _selectedTimeFilter = value;
                     OnPropertyChanged();
-                    // Lưu ý: Nếu set về các tag mặc định thì FilterData tự chạy
-                    // Nhưng nếu set "Tùy chọn" thì ta chờ hàm LocTheoKhoangThoiGian gọi FilterData sau
                     if (value != "Tùy chọn")
                     {
-                        FilterData();
+                        Task.Run(() => FilterDataAsync());
                     }
                 }
             }
         }
 
-        // Các chỉ số thống kê
         private string _tongDoanhThuText;
         public string TongDoanhThuText { get => _tongDoanhThuText; set { _tongDoanhThuText = value; OnPropertyChanged(); } }
 
@@ -72,100 +72,105 @@ namespace OrMan.ViewModels
         public DoanhThuViewModel()
         {
             _repository = new DoanhThuRepository();
-            LoadData();
-            BanAnRepository.OnPaymentSuccess += () => LoadData();
+
+            // [TỐI ƯU] Chạy ngầm ngay khi khởi tạo
+            Task.Run(() => LoadDataAsync());
+
+            // Sự kiện thanh toán thành công cũng reload ngầm
+            BanAnRepository.OnPaymentSuccess += () => Task.Run(() => LoadDataAsync());
         }
 
-        private void LoadData()
+        public void Cleanup()
         {
-            _allHoaDons = _repository.GetAll();
-            FilterData();
+            // Hủy đăng ký sự kiện để tránh leak memory
+            BanAnRepository.OnPaymentSuccess -= () => Task.Run(() => LoadDataAsync());
         }
 
-        // [MỚI] Hàm này được gọi từ View (Code-behind) khi nhấn nút "Xem thống kê"
+        // 1. Load toàn bộ dữ liệu từ DB (Nặng nhất)
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                var data = await Task.Run(() => _repository.GetAll().ToList()); // Chuyển sang List
+                _allHoaDons = data;
+                await FilterDataAsync(); // Sau khi có dữ liệu thì lọc
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi Load Doanh Thu: " + ex.Message);
+            }
+        }
+
         public void LocTheoKhoangThoiGian(DateTime from, DateTime to)
         {
-            _selectedTimeFilter = "Tùy chọn"; // Chuyển chế độ lọc sang Tùy chọn
+            _selectedTimeFilter = "Tùy chọn";
             _customFromDate = from;
             _customToDate = to;
 
-            FilterData(); // Thực hiện lọc lại
+            Task.Run(() => FilterDataAsync());
         }
 
-        // [CẬP NHẬT] Logic lọc dữ liệu
-        private void FilterData()
+        // 2. Lọc và Tính toán (Cũng có thể nặng nếu list dài)
+        private async Task FilterDataAsync()
         {
             if (_allHoaDons == null) return;
 
-            IEnumerable<HoaDon> query = _allHoaDons;
-            DateTime startDate = DateTime.MinValue;
-            DateTime endDate = DateTime.MaxValue;
-
-            // 1. Logic lọc thời gian
-            switch (_selectedTimeFilter)
+            await Task.Run(() =>
             {
-                case "Hôm nay":
-                    startDate = DateTime.Today;
-                    endDate = DateTime.Today.AddDays(1).AddTicks(-1);
-                    break;
+                IEnumerable<HoaDon> query = _allHoaDons;
+                DateTime startDate = DateTime.MinValue;
+                DateTime endDate = DateTime.MaxValue;
 
-                case "Tuần này":
-                    int diff = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
-                    startDate = DateTime.Today.AddDays(-1 * diff).Date;
-                    endDate = DateTime.Now; // Hoặc hết tuần tùy logic
-                    break;
+                switch (_selectedTimeFilter)
+                {
+                    case "Hôm nay":
+                        startDate = DateTime.Today;
+                        endDate = DateTime.Today.AddDays(1).AddTicks(-1);
+                        break;
+                    case "Tuần này":
+                        int diff = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                        startDate = DateTime.Today.AddDays(-1 * diff).Date;
+                        endDate = DateTime.Now;
+                        break;
+                    case "Tháng này":
+                        startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                        endDate = startDate.AddMonths(1).AddTicks(-1);
+                        break;
+                    case "Tùy chọn":
+                        startDate = _customFromDate;
+                        endDate = _customToDate;
+                        break;
+                }
 
-                case "Tháng này":
-                    startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-                    endDate = startDate.AddMonths(1).AddTicks(-1);
-                    break;
+                if (_selectedTimeFilter != "Tất cả")
+                {
+                    query = query.Where(h => h.NgayTao >= startDate && h.NgayTao <= endDate);
+                }
 
-                case "Tùy chọn":
-                    // [MỚI] Sử dụng ngày được truyền vào từ hàm LocTheoKhoangThoiGian
-                    startDate = _customFromDate;
-                    endDate = _customToDate;
-                    break;
+                if (!string.IsNullOrEmpty(TuKhoaTimKiem))
+                {
+                    string k = TuKhoaTimKiem.ToLower();
+                    query = query.Where(x => x.MaHoaDon.ToLower().Contains(k) ||
+                                             (x.NguoiTao != null && x.NguoiTao.ToLower().Contains(k)));
+                }
 
-                case "Tất cả":
-                    // Không làm gì cả, lấy hết
-                    break;
-            }
+                var resultList = new ObservableCollection<HoaDon>(query.OrderByDescending(h => h.NgayTao));
 
-            // Thực hiện query lọc ngày (trừ trường hợp Tất cả)
-            if (_selectedTimeFilter != "Tất cả")
-            {
-                query = query.Where(h => h.NgayTao >= startDate && h.NgayTao <= endDate);
-            }
+                // Tính toán thống kê
+                decimal total = 0;
+                int count = resultList.Count;
+                if (count > 0) total = resultList.Sum(x => x.TongTien);
+                decimal avg = count > 0 ? total / count : 0;
 
-            // 2. Lọc theo từ khóa
-            if (!string.IsNullOrEmpty(TuKhoaTimKiem))
-            {
-                string k = TuKhoaTimKiem.ToLower();
-                query = query.Where(x => x.MaHoaDon.ToLower().Contains(k) ||
-                                         (x.NguoiTao != null && x.NguoiTao.ToLower().Contains(k)));
-            }
-
-            // Cập nhật UI
-            DanhSachHoaDon = new ObservableCollection<HoaDon>(query.OrderByDescending(h => h.NgayTao));
-            TinhToanThongKe();
-        }
-
-        private void TinhToanThongKe()
-        {
-            if (DanhSachHoaDon == null || DanhSachHoaDon.Count == 0)
-            {
-                TongDoanhThuText = "0 VNĐ";
-                TongSoDon = 0;
-                TrungBinhDon = "0 VNĐ";
-                return;
-            }
-
-            decimal total = DanhSachHoaDon.Sum(x => x.TongTien);
-            TongDoanhThuText = total.ToString("N0") + " VNĐ";
-            TongSoDon = DanhSachHoaDon.Count;
-
-            decimal avg = total / TongSoDon;
-            TrungBinhDon = avg.ToString("N0") + " VNĐ";
+                // Cập nhật UI (Main Thread)
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DanhSachHoaDon = resultList;
+                    TongDoanhThuText = total.ToString("N0") + " VNĐ";
+                    TongSoDon = count;
+                    TrungBinhDon = avg.ToString("N0") + " VNĐ";
+                });
+            });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
