@@ -202,6 +202,34 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sql);
                 }
                 catch { }
+
+                // 11. [MỚI - QUAN TRỌNG] Tạo bảng Voucher/Kho Quà của khách
+                try
+                {
+                    string sqlVoucher = @"
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[VoucherCuaKhach]') AND type in (N'U'))
+        BEGIN
+            CREATE TABLE [dbo].[VoucherCuaKhach](
+                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                [KhachHangID] [int] NOT NULL,
+                [TenPhanThuong] [nvarchar](100) NOT NULL,
+                [NgayTrungThuong] [datetime] NOT NULL DEFAULT GETDATE(),
+                [DaSuDung] [bit] NOT NULL DEFAULT 0,
+                [NgaySuDung] [datetime] NULL,
+                [LoaiVoucher] [int] NOT NULL DEFAULT 0, 
+                [GiaTri] [float] NOT NULL DEFAULT 0
+            );
+            
+            -- Tạo Index cho KhachHangID để sau này load danh sách voucher của khách cho nhanh
+            CREATE NONCLUSTERED INDEX [IX_VoucherCuaKhach_KhachHangID] ON [dbo].[VoucherCuaKhach] ([KhachHangID] ASC);
+        END";
+                    context.Database.ExecuteSqlRaw(sqlVoucher);
+                }
+                catch (Exception ex)
+                {
+                    // Ghi log lỗi nếu cần thiết để debug
+                    Console.WriteLine("Lỗi tạo bảng VoucherCuaKhach: " + ex.Message);
+                }
             }
         }
     }

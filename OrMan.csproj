@@ -227,6 +227,7 @@
     <Compile Include="Models\MonAn.cs" />
     <Compile Include="Models\NguoiDung.cs" />
     <Compile Include="Models\NguyenLieu.cs" />
+    <Compile Include="Models\VoucherCuaKhach.cs" />
     <Compile Include="Services\BanAnRepository.cs" />
     <Compile Include="Services\DatabaseInitializer.cs" />
     <Compile Include="Services\DoanhThuRepository.cs" />

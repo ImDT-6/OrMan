@@ -13,7 +13,104 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="VoucherComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Background" Value="#30000000"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="15,0"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Height" Value="45"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
+                            <Grid>
+                                <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    CornerRadius="12"/>
 
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Left"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  IsHitTestVisible="False"/>
+
+                                    <ToggleButton Grid.Column="1" Focusable="false" 
+                                              IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" 
+                                              ClickMode="Press">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate>
+                                                <Border Background="Transparent">
+                                                    <Path Data="M0,0 L5,5 L10,0" Stroke="White" StrokeThickness="2" 
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+
+                                <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                    <Grid Name="DropDown" SnapsToDevicePixels="True" 
+                                      MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <Border x:Name="DropDownBorder" Background="#2D3748" 
+                                            BorderThickness="1" BorderBrush="{StaticResource GlassBorder}" 
+                                            CornerRadius="10" Margin="0,5,0,0">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="Black" BlurRadius="10" Opacity="0.5"/>
+                                            </Border.Effect>
+                                            <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Grid>
+                                </Popup>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="Padding" Value="15,10"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ComboBoxItem">
+                                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
+                                                <Setter Property="Foreground" Value="Black"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentGradient}"/>
+                                                <Setter Property="Foreground" Value="Black"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style x:Key="QtyBtnStyle" TargetType="Button">
                 <Setter Property="Width" Value="24"/>
                 <Setter Property="Height" Value="24"/>
@@ -157,10 +254,42 @@
                 </ScrollViewer>
             </Border>
 
-            <StackPanel Grid.Row="2" Margin="20,20,20,20">
+            <StackPanel Grid.Row="2" Margin="20,10,20,20">
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Mã ưu đãi:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Column="1" x:Name="cboVoucher" 
+                  Height="35"
+                  DisplayMemberPath="TenHienThi"
+                  SelectionChanged="CboVoucher_SelectionChanged"
+                              Style="{StaticResource VoucherComboBoxStyle}"
+                  Padding="10,0" VerticalContentAlignment="Center">
+                        <ComboBox.Resources>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="Padding" Value="5"/>
+                            </Style>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,0,0,5">
+                    <TextBlock Text="Giảm giá:" Foreground="#10B981" FontSize="14"/>
+                    <TextBlock x:Name="txtGiamGia" Text="0 VNĐ" Foreground="#10B981" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,5">
+                    <TextBlock Text="Tạm tính:" Foreground="White" FontSize="14"/>
+                    <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="White" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                </Grid>
+
                 <Grid Margin="0,0,0,15">
-                    <TextBlock Text="Tổng cộng:" Foreground="White" FontSize="16"/>
-                    <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>
+                    <TextBlock Text="THÀNH TIỀN:" Foreground="{StaticResource SuccessGreen}" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock x:Name="txtThanhTien" Text="0 VNĐ" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22" HorizontalAlignment="Right"/>
                 </Grid>
 
                 <Button Content="GỬI ĐƠN ĐẾN BẾP" Click="BtnSubmit_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource SuccessGreen}" Height="50" FontSize="16" FontWeight="Bold"/>

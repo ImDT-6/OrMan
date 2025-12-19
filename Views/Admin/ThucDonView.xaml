@@ -189,22 +189,14 @@
 
                                 <Grid Grid.Row="0">
                                     <TabPanel IsItemsHost="True" Background="Transparent" ZIndex="1"/>
-
-                                    <Border x:Name="PART_Indicator" 
-                                            Height="4" 
-                                            VerticalAlignment="Bottom" 
-                                            HorizontalAlignment="Left"
-                                            Background="{DynamicResource AccentGradient}" 
-                                            CornerRadius="2"
-                                            Width="0">
+                                    <Border x:Name="PART_Indicator" Height="4" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                                            Background="{DynamicResource AccentGradient}" CornerRadius="2" Width="0">
                                         <Border.RenderTransform>
                                             <TranslateTransform x:Name="IndicatorTransform" X="0"/>
                                         </Border.RenderTransform>
                                     </Border>
-
                                     <Border BorderBrush="#30FFFFFF" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
                                 </Grid>
-
                                 <ContentPresenter ContentSource="SelectedContent" Grid.Row="1"/>
                             </Grid>
                         </ControlTemplate>
@@ -266,10 +258,10 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Column="0" 
+                             x:Name="txtSearch"
                              ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
                              Tag="{StaticResource IconSearch}"
-                             Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}"
-                             TextChanged="TextBox_TextChanged"
+                             TextChanged="TxtSearch_TextChanged"
                              Style="{StaticResource SearchTextBoxStyle}" 
                              Height="45" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
 
@@ -290,18 +282,21 @@
 
                 <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
                     <ListBox x:Name="ListBoxMiCay" 
+                             ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
                              Margin="0,10,0,0"/>
                 </TabItem>
 
                 <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
                     <ListBox x:Name="ListBoxDoChien" 
+                             ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
                              Margin="0,10,0,0"/>
                 </TabItem>
 
                 <TabItem Header="🥤 NƯỚC UỐNG" Tag="Nước Uống">
                     <ListBox x:Name="ListBoxNuocUong" 
+                             ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
                              Margin="0,10,0,0"/>
                 </TabItem>

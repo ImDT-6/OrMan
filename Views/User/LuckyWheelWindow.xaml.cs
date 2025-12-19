@@ -51,74 +51,111 @@ namespace OrMan.Views.User
                 btnSpin.Opacity = btnSpin.IsEnabled ? 1 : 0.5;
             }
         }
+        // Thêm hàm helper để convert từ PhanThuong object sang Data Model
+        private void LuuPhanThuongVaoDb(PhanThuong prize)
+        {
+            // Nếu trúng ô "Chúc may mắn" thì không lưu gì cả
+            if (prize.Ten.Contains("Chúc may mắn") || prize.Ten.Contains("Trượt")) return;
 
+            using (var db = new MenuContext())
+            {
+                var voucher = new VoucherCuaKhach
+                {
+                    KhachHangID = _khachHang.KhachHangID,
+                    TenPhanThuong = prize.Ten,
+                    NgayTrungThuong = DateTime.Now,
+                    DaSuDung = false
+                };
+
+                // Phân loại đơn giản dựa trên Tên (Hoặc bạn có thể thêm thuộc tính Type vào class PhanThuong)
+                if (prize.Ten.Contains("Voucher 50k")) { voucher.LoaiVoucher = 1; voucher.GiaTri = 50000; }
+                else if (prize.Ten.Contains("Voucher 20k")) { voucher.LoaiVoucher = 1; voucher.GiaTri = 20000; }
+                else if (prize.Ten.Contains("%"))
+                {
+                    voucher.LoaiVoucher = 2;
+                    // Lấy số ra từ chuỗi (ví dụ "10%" -> 10)
+                    voucher.GiaTri = double.Parse(System.Text.RegularExpressions.Regex.Match(prize.Ten, @"\d+").Value);
+                }
+                else // Tặng món (Free Pepsi, Free Kimchi)
+                {
+                    voucher.LoaiVoucher = 3;
+                    voucher.GiaTri = 0;
+                }
+
+                db.VoucherCuaKhachs.Add(voucher);
+                db.SaveChanges();
+            }
+        }
+        // Cập nhật sự kiện Click
         private void BtnSpin_Click(object sender, RoutedEventArgs e)
         {
             if (_isSpinning) return;
+
+            // 1. Kiểm tra điểm local trước cho nhanh
             if (_khachHang.DiemTichLuy < _costPerSpin)
             {
                 MessageBox.Show("Bạn không đủ điểm để quay!", "Thông báo");
                 return;
             }
 
-            // 1. Trừ điểm ngay lập tức
+            _isSpinning = true;
+            btnSpin.Content = "Đang quay...";
+
+            // 2. Tính toán kết quả TRƯỚC khi quay (Backend Logic)
+            int selectedIndex = GetRandomPrizeIndex();
+            PhanThuong wonPrize = _prizes[selectedIndex];
+
+            // 3. Trừ điểm và Lưu quà vào DB NGAY LẬP TỨC (Tránh trường hợp khách tắt máy giữa chừng)
             using (var db = new MenuContext())
             {
                 var k = db.KhachHangs.Find(_khachHang.KhachHangID);
                 if (k != null)
                 {
-                    k.DiemTichLuy -= _costPerSpin;
-                    db.SaveChanges();
+                    if (k.DiemTichLuy < _costPerSpin)
+                    {
+                        MessageBox.Show("Điểm không đủ (đồng bộ chậm). Vui lòng thử lại.");
+                        _isSpinning = false;
+                        return;
+                    }
 
-                    _khachHang.DiemTichLuy = k.DiemTichLuy; // Cập nhật local
+                    k.DiemTichLuy -= _costPerSpin;
+                    db.SaveChanges(); // Lưu trừ điểm
+
+                    // Cập nhật giao diện
+                    _khachHang.DiemTichLuy = k.DiemTichLuy;
                     UpdatePointDisplay();
                 }
             }
 
-            _isSpinning = true;
-            btnSpin.Content = "Đang quay...";
+            // Lưu phần thưởng (Hàm viết ở trên)
+            LuuPhanThuongVaoDb(wonPrize);
 
-            // 2. Chọn giải thưởng ngẫu nhiên theo tỉ lệ
-            int selectedIndex = GetRandomPrizeIndex();
-            PhanThuong wonPrize = _prizes[selectedIndex];
-
-            // 3. Tính toán góc quay
-            // Một vòng 360 độ, có 8 ô -> mỗi ô 45 độ
-            // Vì mũi tên cố định ở trên (Góc 0), nên muốn trúng ô Index i, ta phải xoay sao cho ô i nằm ở vị trí 0.
-            // Công thức: 360 - (Index * 45) - (Lệch tâm 22.5 để vào giữa ô)
-
-            double segmentAngle = 360.0 / _prizes.Count; // 45 độ
+            // 4. Bắt đầu Animation (UI Logic)
+            double segmentAngle = 360.0 / _prizes.Count;
             double targetAngle = 360 - (selectedIndex * segmentAngle) - (segmentAngle / 2);
-
-            // Cộng thêm 5 vòng quay (5 * 360) để tạo hiệu ứng quay nhanh
             double totalRotation = (360 * 5) + targetAngle;
 
-            // 4. Animation
             DoubleAnimation rotateAnim = new DoubleAnimation
             {
                 From = 0,
                 To = totalRotation,
-                Duration = new Duration(TimeSpan.FromSeconds(5)), // Quay trong 5 giây
-                EasingFunction = new PowerEase { EasingMode = EasingMode.EaseOut, Power = 6 } // Quay nhanh rồi chậm dần
+                Duration = new Duration(TimeSpan.FromSeconds(5)),
+                EasingFunction = new PowerEase { EasingMode = EasingMode.EaseOut, Power = 6 }
             };
 
             rotateAnim.Completed += (s, _) =>
             {
                 _isSpinning = false;
                 btnSpin.Content = $"QUAY NGAY ({_costPerSpin} điểm)";
+                WheelRotation.Angle = targetAngle; // Giữ nguyên vị trí kim
 
-                // Reset góc quay về vị trí thực tế (để lần sau quay tiếp không bị lỗi)
-                WheelRotation.Angle = targetAngle;
-
-                // 5. Thông báo kết quả
                 if (wonPrize.Ten.Contains("Chúc may mắn"))
                 {
                     MessageBox.Show("Rất tiếc! Chúc bạn may mắn lần sau.", "Kết quả");
                 }
                 else
                 {
-                    MessageBox.Show($"CHÚC MỪNG! Bạn nhận được: {wonPrize.Ten}\n(Đưa màn hình này cho nhân viên để nhận quà)", "TRÚNG THƯỞNG");
-                    // Ở đây bạn có thể lưu Voucher vào Database nếu muốn
+                    MessageBox.Show($"CHÚC MỪNG! Bạn trúng: {wonPrize.Ten}\n\nVoucher đã được lưu vào Kho quà của bạn.", "TRÚNG THƯỞNG");
                 }
             };
 

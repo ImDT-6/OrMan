@@ -292,20 +292,55 @@ namespace OrMan.Views.User
             if (txtLangName != null) txtLangName.Text = "English";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
         }
+        // Tìm hàm BtnLuckyWheel_Click cũ và thay bằng đoạn này
         private void BtnLuckyWheel_Click(object sender, RoutedEventArgs e)
         {
             var vm = (UserViewModel)this.DataContext;
+
+            // --- TRƯỜNG HỢP 1: Chưa có ai đăng nhập ---
             if (vm.CurrentCustomer == null || vm.CurrentCustomer.KhachHangID == 0)
             {
-                MessageBox.Show("Vui lòng nhập SĐT thành viên để tham gia!", "Chưa đăng nhập");
+                var ask = MessageBox.Show("Chương trình chỉ dành cho Thành Viên.\nBạn có muốn nhập SĐT để tham gia không?",
+                                          "Yêu cầu thành viên", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (ask == MessageBoxResult.Yes)
+                {
+                    // Mở form tích điểm để đăng nhập/đăng ký
+                    var tichDiemWin = new TichDiemWindow(vm);
+                    tichDiemWin.Owner = Application.Current.MainWindow;
+
+                    // Nếu đăng nhập thành công (DialogResult == true) thì tự mở vòng quay luôn
+                    if (tichDiemWin.ShowDialog() == true)
+                    {
+                        // Đệ quy: Gọi lại chính hàm này, lúc này đã có Customer nên sẽ nhảy xuống Bước 2
+                        BtnLuckyWheel_Click(sender, e);
+                    }
+                }
                 return;
             }
 
-            var wheelWindow = new LuckyWheelWindow(vm.CurrentCustomer);
-            wheelWindow.ShowDialog();
+            // --- TRƯỜNG HỢP 2: Đã có khách đăng nhập (Có thể là khách cũ quên thoát) ---
+            // Hiện tên khách để xác nhận
+            var confirm = MessageBox.Show($"Xin chào: {vm.CurrentCustomer.HoTen}\nĐiểm hiện tại: {vm.CurrentCustomer.DiemTichLuy:N0}\n\nĐây có phải là bạn không?",
+                                          "Xác nhận tài khoản", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
-            // Sau khi đóng vòng quay, cập nhật lại điểm ra ngoài màn hình chính
-            vm.OnPropertyChanged(nameof(vm.CurrentCustomer));
+            if (confirm == MessageBoxResult.Yes)
+            {
+                // Đúng người -> Mở vòng quay
+                var wheelWindow = new LuckyWheelWindow(vm.CurrentCustomer);
+                wheelWindow.Owner = Application.Current.MainWindow;
+                wheelWindow.ShowDialog();
+
+                // Quay xong thì cập nhật lại điểm ra màn hình ngoài
+                vm.OnPropertyChanged(nameof(vm.CurrentCustomer));
+            }
+            else if (confirm == MessageBoxResult.No)
+            {
+                // Sai người -> Reset về khách mới và cho nhập lại
+                vm.ResetSession();
+                BtnLuckyWheel_Click(sender, e); // Gọi lại để nhập SĐT mới
+            }
+            // Nếu Cancel thì thôi, không làm gì
         }
         private string GetRes(string key)
         {

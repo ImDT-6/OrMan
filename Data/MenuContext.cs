@@ -17,6 +17,8 @@ namespace OrMan.Data
         public DbSet<NguyenLieu> NguyenLieus { get; set; }
         public DbSet<CongThuc> CongThucs { get; set; }
         public DbSet<DanhGia> DanhGias { get; set; }
+
+        public DbSet<VoucherCuaKhach> VoucherCuaKhachs { get; set; }
         // ...
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
