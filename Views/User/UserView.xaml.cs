@@ -242,6 +242,12 @@ namespace OrMan.Views.User
 
         private void BtnTichDiem_Click(object sender, RoutedEventArgs e)
         {
+            if (_vm.CurrentTable <= 0)
+            {
+                if (_vm.ChonBanCommand.CanExecute(null))
+                    _vm.ChonBanCommand.Execute(null);
+                if (_vm.CurrentTable <= 0) return;
+            }
             var popup = new TichDiemWindow(_vm);
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null) mainWindow.Opacity = 0.4;
@@ -300,27 +306,17 @@ namespace OrMan.Views.User
             // --- TRƯỜNG HỢP 1: Chưa có ai đăng nhập ---
             if (vm.CurrentCustomer == null || vm.CurrentCustomer.KhachHangID == 0)
             {
-                var ask = MessageBox.Show("Chương trình chỉ dành cho Thành Viên.\nBạn có muốn nhập SĐT để tham gia không?",
-                                          "Yêu cầu thành viên", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (ask == MessageBoxResult.Yes)
-                {
-                    // Mở form tích điểm để đăng nhập/đăng ký
-                    var tichDiemWin = new TichDiemWindow(vm);
-                    tichDiemWin.Owner = Application.Current.MainWindow;
-
-                    // Nếu đăng nhập thành công (DialogResult == true) thì tự mở vòng quay luôn
-                    if (tichDiemWin.ShowDialog() == true)
-                    {
-                        // Đệ quy: Gọi lại chính hàm này, lúc này đã có Customer nên sẽ nhảy xuống Bước 2
-                        BtnLuckyWheel_Click(sender, e);
-                    }
-                }
+                MessageBox.Show("Vui lòng nhập số điện thoại tích điểm trước khi tham gia quay thưởng!",
+                        "Yêu cầu thành viên",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
                 return;
+
             }
 
             // --- TRƯỜNG HỢP 2: Đã có khách đăng nhập (Có thể là khách cũ quên thoát) ---
             // Hiện tên khách để xác nhận
+
             var confirm = MessageBox.Show($"Xin chào: {vm.CurrentCustomer.HoTen}\nĐiểm hiện tại: {vm.CurrentCustomer.DiemTichLuy:N0}\n\nĐây có phải là bạn không?",
                                           "Xác nhận tài khoản", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
