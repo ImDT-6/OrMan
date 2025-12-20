@@ -46,7 +46,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-            
+
             <Style x:Key="GlassCalendarArrowButtonStyle" TargetType="Button">
                 <Setter Property="Template">
                     <Setter.Value>

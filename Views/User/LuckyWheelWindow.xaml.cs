@@ -22,11 +22,11 @@ namespace OrMan.Views.User
         {
             new PhanThuong { Ten = "Voucher 10%", TiLe = 5 },    // Index 0
             new PhanThuong { Ten = "Chúc may mắn", TiLe = 40 },  // Index 1
-            new PhanThuong { Ten = "Free Pepsi", TiLe = 20 },    // Index 2
+            new PhanThuong { Ten = "Pepsi", TiLe = 20 },    // Index 2
             new PhanThuong { Ten = "Voucher 20k", TiLe = 5 },    // Index 3
             new PhanThuong { Ten = "Chúc may mắn", TiLe = 40 },  // Index 4
             new PhanThuong { Ten = "Voucher 5%", TiLe = 10 },    // Index 5
-            new PhanThuong { Ten = "Free Kimchi", TiLe = 20 },   // Index 6
+            new PhanThuong { Ten = "Kimchi", TiLe = 20 },   // Index 6
             new PhanThuong { Ten = "Voucher 50k", TiLe = 1 }     // Index 7 (Hiếm nhất)
         };
 

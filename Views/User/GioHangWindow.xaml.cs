@@ -12,70 +12,83 @@ namespace OrMan.Views.User
     public partial class GioHangWindow : Window
     {
         private UserViewModel _vm;
+        private VoucherCuaKhach _selectedDiscountVoucher = null;
+        private decimal _finalTotal = 0;
 
-        // Biến lưu voucher đang chọn
-        private VoucherCuaKhach _selectedVoucher = null;
-        private decimal _finalTotal = 0; // Lưu số tiền cuối cùng để thanh toán
+        // Danh sách ID các voucher quà tặng ĐANG CHỜ DÙNG trong phiên này
+        private List<int> _pendingGiftVoucherIds = new List<int>();
 
         public GioHangWindow(UserViewModel vm)
         {
             InitializeComponent();
             _vm = vm;
             this.DataContext = _vm;
-
-            // Load voucher và tính tiền lần đầu
             Loaded += GioHangWindow_Loaded;
         }
 
-        // Nút Đóng (X)
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
             this.Close();
         }
 
-        // Sự kiện khi cửa sổ hiện lên
         private void GioHangWindow_Loaded(object sender, RoutedEventArgs e)
         {
             LoadVouchers();
-            CalculateTotal(); // Tính toán hiển thị ban đầu
+            CalculateTotal();
         }
 
-        // [QUAN TRỌNG] Hàm tải danh sách voucher từ Database
+        // --- 1. LOGIC TẢI VÀ PHÂN LOẠI VOUCHER ---
         private void LoadVouchers()
         {
             try
             {
-                // Kiểm tra null để tránh lỗi
                 if (_vm.CurrentCustomer == null || _vm.CurrentCustomer.KhachHangID <= 0) return;
 
                 using (var db = new MenuContext())
                 {
-                    var list = db.VoucherCuaKhachs
-                                 .Where(v => v.KhachHangID == _vm.CurrentCustomer.KhachHangID && v.DaSuDung == false)
-                                 .ToList();
+                    var rawList = db.VoucherCuaKhachs
+                                    .Where(v => v.KhachHangID == _vm.CurrentCustomer.KhachHangID && v.DaSuDung == false)
+                                    .ToList();
 
-                    // Sử dụng class VoucherItem (khai báo ở cuối file) thay vì dynamic để hiển thị tên đẹp
-                    var displayList = new List<VoucherItem>();
+                    // A. Voucher GIẢM TIỀN (Loại 1 & 2)
+                    var discountVouchers = rawList
+                        .Where(x => x.LoaiVoucher == 1 || x.LoaiVoucher == 2)
+                        .GroupBy(x => new { x.LoaiVoucher, x.GiaTri, x.TenPhanThuong })
+                        .Select(g => new VoucherItem
+                        {
+                            Id = g.First().Id,
+                            Data = g.First(),
+                            TenHienThi = FormatVoucherName(g.First(), g.Count())
+                        })
+                        .ToList();
 
-                    // Thêm option mặc định
-                    displayList.Add(new VoucherItem { Id = 0, TenHienThi = "--- Chọn mã ưu đãi ---", Data = null });
-
-                    foreach (var v in list)
-                    {
-                        string ten = v.TenPhanThuong;
-                        // Format tên cho đẹp
-                        if (v.LoaiVoucher == 1) ten += $" (Giảm {v.GiaTri:N0}đ)";
-                        else if (v.LoaiVoucher == 2) ten += $" (Giảm {v.GiaTri}%)";
-
-                        displayList.Add(new VoucherItem { Id = v.Id, TenHienThi = ten, Data = v });
-                    }
+                    discountVouchers.Insert(0, new VoucherItem { Id = 0, TenHienThi = "--- Chọn mã giảm giá ---", Data = null });
 
                     if (cboVoucher != null)
                     {
-                        cboVoucher.ItemsSource = displayList;
-                        cboVoucher.DisplayMemberPath = "TenHienThi"; // Chỉ định hiển thị thuộc tính TenHienThi
+                        cboVoucher.ItemsSource = discountVouchers;
                         cboVoucher.SelectedIndex = 0;
+                    }
+
+                    // B. Voucher TẶNG MÓN (Loại 3)
+                    // Chỉ hiện những voucher CHƯA nằm trong danh sách pending
+                    var giftVouchers = rawList
+                        .Where(x => x.LoaiVoucher == 3 && !_pendingGiftVoucherIds.Contains(x.Id))
+                        .GroupBy(x => x.TenPhanThuong)
+                        .Select(g => new GiftItem
+                        {
+                            Id = g.First().Id,
+                            TenHienThi = g.First().TenPhanThuong,
+                            SoLuongConLai = g.Count(),
+                            Data = g.First()
+                        })
+                        .ToList();
+
+                    if (icGifts != null)
+                    {
+                        icGifts.ItemsSource = giftVouchers;
+                        icGifts.Visibility = giftVouchers.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
             }
@@ -85,96 +98,197 @@ namespace OrMan.Views.User
             }
         }
 
-        // Sự kiện khi chọn Voucher
+        private string FormatVoucherName(VoucherCuaKhach v, int count)
+        {
+            string ten = v.TenPhanThuong;
+            if (v.LoaiVoucher == 1) ten += $" (Giảm {v.GiaTri:N0}đ)";
+            else if (v.LoaiVoucher == 2) ten += $" (Giảm {v.GiaTri}%)";
+
+            if (count > 1) ten += $" (x{count})";
+            return ten;
+        }
+
+        // --- 2. XỬ LÝ NHẬN QUÀ TẶNG ---
+        private void BtnNhanQua_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            var gift = btn.Tag as GiftItem;
+
+            if (gift != null && gift.Data != null)
+            {
+                bool success = AddGiftToCart(gift.Data);
+                if (success)
+                {
+                    _pendingGiftVoucherIds.Add(gift.Data.Id); // Đưa vào danh sách đen tạm thời
+                    LoadVouchers();
+                    CalculateTotal();
+                }
+            }
+        }
+
+        private bool AddGiftToCart(VoucherCuaKhach voucher)
+        {
+            try
+            {
+                using (var db = new MenuContext())
+                {
+                    var monAn = db.MonAns.FirstOrDefault(m => m.TenMon == voucher.TenPhanThuong);
+
+                    if (monAn == null)
+                        monAn = db.MonAns.FirstOrDefault(m => m.TenMon.Contains(voucher.TenPhanThuong));
+
+                    if (monAn == null)
+                    {
+                        string maMonAo = "GIFT_" + DateTime.Now.Ticks.ToString().Substring(10);
+
+                        var newMon = new MonPhu(
+                            maMonAo, voucher.TenPhanThuong, 0, "Phần", "Quà Tặng"
+                        );
+                        newMon.HinhAnhUrl = "";
+                        newMon.IsSoldOut = false;
+
+                        db.MonAns.Add(newMon);
+                        db.SaveChanges();
+                        monAn = newMon;
+                    }
+
+                    _vm.AddToCart(monAn, 1, 0, " (Quà tặng)");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi thêm quà: " + ex.Message);
+                return false;
+            }
+        }
+
+        // [MỚI] Hàm trả lại Voucher khi xóa món quà
+        private void RestoreGiftVoucher(string tenMonQua)
+        {
+            if (_pendingGiftVoucherIds.Count == 0) return;
+
+            using (var db = new MenuContext())
+            {
+                // Lấy thông tin các voucher đang bị treo (pending)
+                var pendingVouchers = db.VoucherCuaKhachs
+                                        .Where(v => _pendingGiftVoucherIds.Contains(v.Id))
+                                        .ToList();
+
+                // Tìm voucher nào khớp tên với món quà vừa xóa
+                var voucherToRestore = pendingVouchers.FirstOrDefault(v => v.TenPhanThuong == tenMonQua);
+
+                // Nếu tìm chính xác không thấy, thử tìm gần đúng (do lúc thêm mình tìm Contains)
+                if (voucherToRestore == null)
+                {
+                    voucherToRestore = pendingVouchers.FirstOrDefault(v => tenMonQua.Contains(v.TenPhanThuong));
+                }
+
+                if (voucherToRestore != null)
+                {
+                    _pendingGiftVoucherIds.Remove(voucherToRestore.Id); // Xóa khỏi danh sách đen
+                    LoadVouchers(); // Load lại để hiện nút "Thêm"
+                }
+            }
+        }
+
         private void CboVoucher_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cboVoucher == null) return;
-
-            // Ép kiểu về VoucherItem
             var selectedItem = cboVoucher.SelectedItem as VoucherItem;
 
             if (selectedItem != null)
             {
-                _selectedVoucher = selectedItem.Data; // Lấy dữ liệu thật
+                _selectedDiscountVoucher = selectedItem.Data;
                 CalculateTotal();
             }
         }
 
-        // Hàm tính toán lại tiền
+        // --- 3. TÍNH TOÁN ---
         private void CalculateTotal()
         {
-            // Lấy tổng tiền gốc từ ViewModel
-            decimal subTotal = _vm.TongTienCart;
-            decimal discountAmount = 0;
+            decimal totalCart = _vm.TongTienCart;
 
-            if (_selectedVoucher != null)
+            decimal giftValue = _vm.GioHang
+                .Where(x => x.GhiChu != null && x.GhiChu.Contains("(Quà tặng)"))
+                .Sum(x => x.ThanhTien);
+
+            decimal billableAmount = totalCart - giftValue;
+            decimal voucherDiscount = 0;
+
+            if (_selectedDiscountVoucher != null)
             {
-                if (_selectedVoucher.LoaiVoucher == 1) // Giảm tiền mặt
-                {
-                    discountAmount = (decimal)_selectedVoucher.GiaTri;
-                }
-                else if (_selectedVoucher.LoaiVoucher == 2) // Giảm %
-                {
-                    discountAmount = subTotal * (decimal)(_selectedVoucher.GiaTri / 100.0);
-                }
+                if (_selectedDiscountVoucher.LoaiVoucher == 1)
+                    voucherDiscount = (decimal)_selectedDiscountVoucher.GiaTri;
+                else if (_selectedDiscountVoucher.LoaiVoucher == 2)
+                    voucherDiscount = billableAmount * (decimal)(_selectedDiscountVoucher.GiaTri / 100.0);
             }
 
-            // Không cho giảm quá số tiền gốc
-            if (discountAmount > subTotal) discountAmount = subTotal;
+            decimal totalDiscountDisplay = voucherDiscount + giftValue;
+            if (totalDiscountDisplay > totalCart) totalDiscountDisplay = totalCart;
 
-            // Cập nhật giao diện (Kiểm tra null an toàn)
             if (txtGiamGia != null)
-                txtGiamGia.Text = $"-{discountAmount:N0} VNĐ";
+                txtGiamGia.Text = $"-{totalDiscountDisplay:N0} VNĐ";
 
-            _finalTotal = subTotal - discountAmount;
-
+            _finalTotal = totalCart - totalDiscountDisplay;
             if (txtThanhTien != null)
                 txtThanhTien.Text = $"{_finalTotal:N0} VNĐ";
         }
 
-        // Nút Gửi Đơn / Thanh Toán
+        // --- 4. GỬI ĐƠN ---
         private void BtnSubmit_Click(object sender, RoutedEventArgs e)
         {
-            decimal tongGoc = _vm.TongTienCart;
-            decimal tienGiam = tongGoc - _finalTotal;
-            _vm.GiamGiaTamTinh = tienGiam;
-
             if (_vm.GioHang.Count == 0)
             {
                 MessageBox.Show("Giỏ hàng đang trống!");
                 return;
             }
 
-            // Xử lý Voucher: Đánh dấu đã dùng
-            if (_selectedVoucher != null)
+            decimal tongGoc = _vm.TongTienCart;
+            decimal tienGiam = tongGoc - _finalTotal;
+            _vm.GiamGiaTamTinh = tienGiam;
+
+            using (var db = new MenuContext())
             {
-                using (var db = new MenuContext())
+                if (_selectedDiscountVoucher != null)
                 {
-                    var v = db.VoucherCuaKhachs.Find(_selectedVoucher.Id);
-                    if (v != null)
-                    {
-                        v.DaSuDung = true;
-                        v.NgaySuDung = DateTime.Now;
-                        db.SaveChanges();
-                    }
+                    var v = db.VoucherCuaKhachs.Find(_selectedDiscountVoucher.Id);
+                    if (v != null) { v.DaSuDung = true; v.NgaySuDung = DateTime.Now; }
                 }
-                MessageBox.Show($"Áp dụng voucher thành công! Tổng thanh toán: {_finalTotal:N0}đ");
+
+                foreach (int pendingId in _pendingGiftVoucherIds)
+                {
+                    var vGift = db.VoucherCuaKhachs.Find(pendingId);
+                    if (vGift != null) { vGift.DaSuDung = true; vGift.NgaySuDung = DateTime.Now; }
+                }
+
+                db.SaveChanges();
             }
 
-            // Đóng cửa sổ và trả về Result = true
             this.DialogResult = true;
             this.Close();
         }
 
-        // --- Các nút Tăng/Giảm/Xóa ---
+        // --- Event Button Tăng/Giảm/Xóa ---
         private void BtnDecrease_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             var item = btn.DataContext as CartItem;
             if (item != null)
             {
+                // Lưu lại thông tin trước khi giảm (phòng trường hợp món bị xóa mất)
+                bool isGift = item.GhiChu != null && item.GhiChu.Contains("(Quà tặng)");
+                string tenMon = item.MonAn.TenMon;
+
                 _vm.GiamSoLuongMon(item);
-                CalculateTotal(); // Tính lại tiền ngay
+
+                // Kiểm tra xem món có bị xóa khỏi giỏ chưa
+                if (isGift && !_vm.GioHang.Contains(item))
+                {
+                    RestoreGiftVoucher(tenMon);
+                }
+
+                CalculateTotal();
             }
         }
 
@@ -185,7 +299,7 @@ namespace OrMan.Views.User
             if (item != null)
             {
                 _vm.TangSoLuongMon(item);
-                CalculateTotal(); // Tính lại tiền ngay
+                CalculateTotal();
             }
         }
 
@@ -193,31 +307,37 @@ namespace OrMan.Views.User
         {
             var btn = sender as Button;
             var itemToDelete = btn.DataContext as CartItem;
-
             if (itemToDelete != null)
             {
-                var result = MessageBox.Show($"Bạn có chắc muốn bỏ món '{itemToDelete.TenHienThi}' không?",
-                                             "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show($"Bỏ món '{itemToDelete.TenHienThi}'?", "Xác nhận", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
+                    // [QUAN TRỌNG] Nếu xóa món quà, trả lại voucher
+                    if (itemToDelete.GhiChu != null && itemToDelete.GhiChu.Contains("(Quà tặng)"))
+                    {
+                        RestoreGiftVoucher(itemToDelete.MonAn.TenMon);
+                    }
+
                     _vm.XoaMonKhoiGio(itemToDelete);
-                    CalculateTotal(); // Tính lại tiền ngay sau khi xóa
+                    CalculateTotal();
                 }
             }
         }
     }
 
-    // [CLASS MỚI] Dùng class này để hiển thị trên ComboBox đẹp hơn
     public class VoucherItem
     {
         public int Id { get; set; }
         public string TenHienThi { get; set; }
         public VoucherCuaKhach Data { get; set; }
+        public override string ToString() => TenHienThi;
+    }
 
-        // Hàm này giúp ComboBox hiển thị tên thay vì tên Class
-        public override string ToString()
-        {
-            return TenHienThi;
-        }
+    public class GiftItem
+    {
+        public int Id { get; set; }
+        public string TenHienThi { get; set; }
+        public int SoLuongConLai { get; set; }
+        public VoucherCuaKhach Data { get; set; }
     }
 }
