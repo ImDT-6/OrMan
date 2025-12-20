@@ -148,31 +148,32 @@ namespace OrMan.Views.Admin
             if (saveFileDialog.ShowDialog() == true)
             {
                 string filePath = saveFileDialog.FileName;
-                var dataToExport = _viewModel.DanhSachHoaDon; // Copy tham chiếu để đưa vào luồng phụ
+                var dataToExport = _viewModel.DanhSachHoaDon;
 
                 try
                 {
-                    // Chạy việc tạo và lưu file Excel ở Background Thread
                     await Task.Run(() =>
                     {
                         using (var workbook = new XLWorkbook())
                         {
                             var worksheet = workbook.Worksheets.Add("DoanhThu");
 
-                            // Tạo header cột
+                            // [CẬP NHẬT] Thêm cột Giảm giá và Thực thu
                             worksheet.Cell(1, 1).Value = "Mã Hóa Đơn";
                             worksheet.Cell(1, 2).Value = "Thời Gian";
                             worksheet.Cell(1, 3).Value = "Bàn";
-                            worksheet.Cell(1, 4).Value = "Nhân Viên";
-                            worksheet.Cell(1, 5).Value = "Tổng Tiền";
+                            worksheet.Cell(1, 4).Value = "Nhân Viên / Khách";
+                            worksheet.Cell(1, 5).Value = "Tổng Tiền Hàng"; // Tiền gốc
+                            worksheet.Cell(1, 6).Value = "Giảm Giá";      // [MỚI]
+                            worksheet.Cell(1, 7).Value = "Thực Thu";      // [MỚI] Tiền thực tế
 
-                            // Tô nền cho header
-                            var headerRange = worksheet.Range(1, 1, 1, 5);
+                            // Tô nền header (mở rộng range ra cột 7)
+                            var headerRange = worksheet.Range(1, 1, 1, 7);
                             headerRange.Style.Font.Bold = true;
                             headerRange.Style.Fill.BackgroundColor = XLColor.LightGreen;
                             headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
-                            // Điền dữ liệu
                             int row = 2;
                             foreach (var item in dataToExport)
                             {
@@ -180,17 +181,47 @@ namespace OrMan.Views.Admin
                                 worksheet.Cell(row, 2).Value = item.NgayTao;
                                 worksheet.Cell(row, 2).Style.DateFormat.Format = "dd/MM/yyyy HH:mm";
                                 worksheet.Cell(row, 3).Value = $"Bàn {item.SoBan}";
-                                worksheet.Cell(row, 4).Value = item.NguoiTao ?? "";
+                                worksheet.Cell(row, 4).Value = item.NguoiTao ?? "Khách vãng lai";
+
+                                // Cột 5: Tổng tiền hàng (Gốc)
                                 worksheet.Cell(row, 5).Value = item.TongTien;
-                                // Định dạng số thập phân 
                                 worksheet.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+
+                                // [MỚI] Cột 6: Giảm giá
+                                worksheet.Cell(row, 6).Value = item.GiamGia;
+                                worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
+                                // Tô đỏ nếu có giảm giá
+                                if (item.GiamGia > 0)
+                                    worksheet.Cell(row, 6).Style.Font.FontColor = XLColor.Red;
+
+                                // [MỚI] Cột 7: Thực thu (Quan trọng nhất)
+                                decimal thucThu = item.TongTien - item.GiamGia;
+                                worksheet.Cell(row, 7).Value = thucThu;
+                                worksheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
+                                worksheet.Cell(row, 7).Style.Font.Bold = true;
+
                                 row++;
                             }
 
-                            // Auto-fit cột
-                            worksheet.Columns().AdjustToContents();
+                            // Tính tổng cộng ở dòng cuối
+                            worksheet.Cell(row, 4).Value = "TỔNG CỘNG:";
+                            worksheet.Cell(row, 4).Style.Font.Bold = true;
 
-                            // Lưu file
+                            // Tổng tiền hàng
+                            worksheet.Cell(row, 5).FormulaA1 = $"SUM(E2:E{row - 1})";
+                            worksheet.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+
+                            // Tổng giảm giá
+                            worksheet.Cell(row, 6).FormulaA1 = $"SUM(F2:F{row - 1})";
+                            worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
+
+                            // Tổng thực thu
+                            worksheet.Cell(row, 7).FormulaA1 = $"SUM(G2:G{row - 1})";
+                            worksheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
+                            worksheet.Cell(row, 7).Style.Font.Bold = true;
+                            worksheet.Cell(row, 7).Style.Fill.BackgroundColor = XLColor.Yellow;
+
+                            worksheet.Columns().AdjustToContents();
                             workbook.SaveAs(filePath);
                         }
                     });

@@ -592,7 +592,9 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Thời Gian" Binding="{Binding NgayTao, StringFormat='dd/MM/yyyy HH:mm'}" Width="*"/>
+
+                        <DataGridTextColumn Header="Thời Gian" Binding="{Binding NgayTao, StringFormat='dd/MM/yyyy HH:mm'}" Width="140"/>
+
                         <DataGridTemplateColumn Header="Bàn" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -602,18 +604,53 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Nhân Viên" Binding="{Binding NguoiTao}" Width="*"/>
-                        <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TongTien, StringFormat=N0}" Width="*" FontWeight="Bold" Foreground="{StaticResource SuccessGreen}"/>
+
+                        <DataGridTextColumn Header="Người tạo" Binding="{Binding NguoiTao}" Width="*"/>
+
+                        <DataGridTextColumn Header="Tiền hàng" Binding="{Binding TongTien, StringFormat=N0}" Width="110">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="Gray"/>
+                                    <Setter Property="Padding" Value="0,0,10,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Giảm giá" Binding="{Binding GiamGia, StringFormat=N0}" Width="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                    <Setter Property="Padding" Value="0,0,10,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="THỰC THU" Binding="{Binding ThanhTien, StringFormat=N0}" Width="130">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="FontSize" Value="14"/>
+                                    <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
+                                    <Setter Property="Padding" Value="0,0,10,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
                         <DataGridTemplateColumn Header="Hành Động" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Chi tiết" 
-                                            Style="{StaticResource DataGridActionButtonStyle}" 
-                                            FontSize="12" Height="30" Padding="10,0" 
-                                            Background="#203B82F6" Foreground="#3B82F6" 
-                                            Margin="0"
-                                            HorizontalAlignment="Center"/>
+                        Style="{StaticResource DataGridActionButtonStyle}" 
+                        FontSize="12" Height="30" Padding="10,0" 
+                        Background="#203B82F6" Foreground="#3B82F6" 
+                        Margin="0"
+                        HorizontalAlignment="Center"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

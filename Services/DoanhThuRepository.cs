@@ -1,7 +1,5 @@
 ﻿using OrMan.Data;
 using OrMan.Models;
-using OrMan.Data;
-using OrMan.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,10 +13,10 @@ namespace OrMan.Services
         {
             using (var context = new MenuContext())
             {
-                // [FIX] Chỉ lấy các hóa đơn ĐÃ THANH TOÁN
                 var list = context.HoaDons
                                   .Where(h => h.DaThanhToan == true)
-                                  .OrderByDescending(h => h.NgayTao).ToList();
+                                  .OrderByDescending(h => h.NgayTao)
+                                  .ToList();
                 return new ObservableCollection<HoaDon>(list);
             }
         }
@@ -28,10 +26,10 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 var today = DateTime.Today;
-                // [FIX] Thêm điều kiện h.DaThanhToan
+                // [FIX] Doanh thu thực = Tổng tiền - Giảm giá
                 return context.HoaDons
                               .Where(h => h.NgayTao >= today && h.DaThanhToan == true)
-                              .Sum(h => h.TongTien);
+                              .Sum(h => h.TongTien - h.GiamGia);
             }
         }
 
@@ -41,10 +39,11 @@ namespace OrMan.Services
             {
                 var today = DateTime.Today;
                 var yesterday = today.AddDays(-1);
-                // [FIX] Thêm điều kiện h.DaThanhToan
+
+                // [FIX] Doanh thu thực = Tổng tiền - Giảm giá
                 return context.HoaDons
                               .Where(h => h.NgayTao >= yesterday && h.NgayTao < today && h.DaThanhToan == true)
-                              .Sum(h => h.TongTien);
+                              .Sum(h => h.TongTien - h.GiamGia);
             }
         }
 
@@ -53,30 +52,39 @@ namespace OrMan.Services
             using (var context = new MenuContext())
             {
                 var today = DateTime.Today;
-                // [FIX] Chỉ đếm đơn đã thanh toán
                 return context.HoaDons.Count(h => h.NgayTao >= today && h.DaThanhToan == true);
             }
         }
+
+        public int GetYesterdayOrderCount()
+        {
+            using (var context = new MenuContext())
+            {
+                var today = DateTime.Today;
+                var yesterday = today.AddDays(-1);
+
+                return context.HoaDons
+                    .Count(h => h.DaThanhToan && h.NgayTao >= yesterday && h.NgayTao < today);
+            }
+        }
+
         public Dictionary<int, decimal> GetRevenueByYear()
         {
             using (var context = new MenuContext())
             {
                 int currentYear = DateTime.Now.Year;
 
-                // Lấy tất cả hóa đơn đã thanh toán trong năm nay
+                // [FIX] Tính thực thu ngay lúc Select
                 var query = context.HoaDons
                     .Where(h => h.DaThanhToan && h.NgayTao.Year == currentYear)
-                    .Select(h => new { h.NgayTao.Month, h.TongTien })
+                    .Select(h => new { h.NgayTao.Month, ThucThu = h.TongTien - h.GiamGia })
                     .ToList();
 
-                // Gom nhóm theo Tháng
-                var result = query
-                    .GroupBy(x => x.Month)
-                    .ToDictionary(g => g.Key, g => g.Sum(x => x.TongTien));
-
-                return result;
+                return query.GroupBy(x => x.Month)
+                            .ToDictionary(g => g.Key, g => g.Sum(x => x.ThucThu));
             }
         }
+
         public Dictionary<int, decimal> GetRevenueByHour()
         {
             using (var context = new MenuContext())
@@ -84,23 +92,17 @@ namespace OrMan.Services
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
 
-                // [FIX] Chỉ lấy đơn đã thanh toán để vẽ biểu đồ
+                // [FIX] Tính thực thu
                 var rawData = context.HoaDons
                     .Where(h => h.NgayTao >= today && h.NgayTao < tomorrow && h.DaThanhToan == true)
-                    .Select(h => new { h.NgayTao, h.TongTien })
+                    .Select(h => new { h.NgayTao, ThucThu = h.TongTien - h.GiamGia })
                     .ToList();
 
                 return rawData.GroupBy(h => h.NgayTao.Hour)
-                              .ToDictionary(g => g.Key, g => g.Sum(h => h.TongTien));
+                              .ToDictionary(g => g.Key, g => g.Sum(h => h.ThucThu));
             }
         }
 
-        // ... (Các hàm cũ giữ nguyên) ...
-
-        /// <summary>
-        /// Lấy doanh thu Tuần này (Từ Thứ 2 -> Chủ Nhật)
-        /// Trả về Dictionary với Key: 2=Thứ 2, ..., 7=Thứ 7, 8=Chủ Nhật
-        /// </summary>
         public Dictionary<int, decimal> GetRevenueByWeek()
         {
             using (var context = new MenuContext())
@@ -108,29 +110,25 @@ namespace OrMan.Services
                 var today = DateTime.Today;
 
                 // Tính ngày Thứ 2 đầu tuần hiện tại
-                // (DayOfWeek của C#: Sunday=0, Monday=1, ... Saturday=6)
                 int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
                 var startOfWeek = today.AddDays(-1 * diff).Date;
-                var endOfWeek = startOfWeek.AddDays(7); // Đầu thứ 2 tuần sau
+                var endOfWeek = startOfWeek.AddDays(7);
 
+                // [FIX] Tính thực thu
                 var rawData = context.HoaDons
                     .Where(h => h.NgayTao >= startOfWeek && h.NgayTao < endOfWeek && h.DaThanhToan == true)
-                    .Select(h => new { h.NgayTao, h.TongTien })
+                    .Select(h => new { h.NgayTao, ThucThu = h.TongTien - h.GiamGia })
                     .ToList();
 
-                // Group theo thứ (Cần convert DayOfWeek sang kiểu VN: T2->2, CN->8)
+                // Group theo thứ (Convert DayOfWeek sang kiểu VN: T2->2, CN->8)
                 return rawData.GroupBy(h => h.NgayTao.DayOfWeek)
                               .ToDictionary(
                                   g => g.Key == DayOfWeek.Sunday ? 8 : (int)g.Key + 1,
-                                  g => g.Sum(h => h.TongTien)
+                                  g => g.Sum(h => h.ThucThu)
                               );
             }
         }
 
-        /// <summary>
-        /// Lấy doanh thu Tháng này (Từ ngày 1 -> Cuối tháng)
-        /// Trả về Dictionary với Key: Ngày trong tháng (1, 2, ..., 31)
-        /// </summary>
         public Dictionary<int, decimal> GetRevenueByMonth()
         {
             using (var context = new MenuContext())
@@ -139,26 +137,14 @@ namespace OrMan.Services
                 var startOfMonth = new DateTime(today.Year, today.Month, 1);
                 var startOfNextMonth = startOfMonth.AddMonths(1);
 
+                // [FIX] Tính thực thu
                 var rawData = context.HoaDons
                     .Where(h => h.NgayTao >= startOfMonth && h.NgayTao < startOfNextMonth && h.DaThanhToan == true)
-                    .Select(h => new { h.NgayTao, h.TongTien })
+                    .Select(h => new { h.NgayTao, ThucThu = h.TongTien - h.GiamGia })
                     .ToList();
 
-                // Group theo ngày trong tháng (1 -> 31)
                 return rawData.GroupBy(h => h.NgayTao.Day)
-                              .ToDictionary(g => g.Key, g => g.Sum(h => h.TongTien));
-            }
-        }
-        public int GetYesterdayOrderCount()
-        {
-            using (var context = new MenuContext())
-            {
-                var today = DateTime.Today;
-                var yesterday = today.AddDays(-1);
-
-                // Đếm số đơn đã thanh toán ngày hôm qua
-                return context.HoaDons
-                    .Count(h => h.DaThanhToan && h.NgayTao >= yesterday && h.NgayTao < today);
+                              .ToDictionary(g => g.Key, g => g.Sum(h => h.ThucThu));
             }
         }
     }

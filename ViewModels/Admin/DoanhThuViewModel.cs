@@ -21,7 +21,12 @@ namespace OrMan.ViewModels
         // [MỚI] Biến lưu trữ khoảng thời gian tùy chọn
         private DateTime _customFromDate;
         private DateTime _customToDate;
-
+        private string _tongDoanhThuHienTai = "0 VNĐ";
+        public string TongDoanhThuHienTai
+        {
+            get => _tongDoanhThuHienTai;
+            set { _tongDoanhThuHienTai = value; OnPropertyChanged(); }
+        }
         private ObservableCollection<HoaDon> _danhSachHoaDon;
         public ObservableCollection<HoaDon> DanhSachHoaDon
         {
@@ -101,13 +106,23 @@ namespace OrMan.ViewModels
             }
         }
 
-        public void LocTheoKhoangThoiGian(DateTime from, DateTime to)
+        // Thêm từ khóa 'async' vào khai báo hàm
+        public async void LocTheoKhoangThoiGian(DateTime from, DateTime to)
         {
             _selectedTimeFilter = "Tùy chọn";
             _customFromDate = from;
             _customToDate = to;
 
-            Task.Run(() => FilterDataAsync());
+            // 1. Chờ hàm lọc dữ liệu chạy xong (để DanhSachHoaDon được cập nhật mới)
+            await FilterDataAsync();
+
+            // 2. Sau khi có dữ liệu mới thì mới tính tổng
+            if (DanhSachHoaDon != null)
+            {
+                // Tính tổng thực thu = Tổng tiền - Giảm giá
+                decimal total = DanhSachHoaDon.Sum(x => x.TongTien - x.GiamGia);
+                TongDoanhThuHienTai = total.ToString("N0") + " VNĐ";
+            }
         }
 
         // 2. Lọc và Tính toán (Cũng có thể nặng nếu list dài)
