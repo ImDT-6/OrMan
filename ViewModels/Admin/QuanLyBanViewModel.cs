@@ -26,7 +26,14 @@ namespace OrMan.ViewModels.Admin
             get => _danhSachBan;
             set { _danhSachBan = value; OnPropertyChanged(); }
         }
+        private decimal _tienGiamGia;
+        public decimal TienGiamGia
+        {
+            get => _tienGiamGia;
+            set { _tienGiamGia = value; OnPropertyChanged(); OnPropertyChanged(nameof(TongTienThanhToan)); }
+        }
 
+        public decimal TongTienThanhToan => TongTienCanThu - TienGiamGia;
         private BanAn _selectedBan;
         public BanAn SelectedBan
         {
@@ -239,22 +246,34 @@ namespace OrMan.ViewModels.Admin
             {
                 var details = await Task.Run(() =>
                 {
+                    // Lấy hóa đơn đang hoạt động
                     var hd = _repository.GetActiveOrder(SelectedBan.SoBan);
+                    // Lấy chi tiết món
                     var list = hd != null ? _repository.GetOrderDetails(hd.MaHoaDon) : new List<ChiTietHoaDon>();
+
                     return new { HoaDon = hd, List = list };
                 });
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     _currentHoaDon = details.HoaDon;
+
+                    // Nếu ChiTietDonHang là ObservableCollection thì cần bọc lại, nếu là List thì giữ nguyên
+                    // (Tùy theo khai báo của bạn, đoạn này mình giữ theo code gốc của bạn)
                     ChiTietDonHang = details.List;
+
                     TongTienCanThu = _currentHoaDon?.TongTien ?? 0;
+
+                    // [THÊM DÒNG NÀY] Lấy tiền giảm giá từ Hóa đơn lên giao diện
+                    TienGiamGia = _currentHoaDon?.GiamGia ?? 0;
                 });
             }
             else
             {
                 ChiTietDonHang = null;
                 TongTienCanThu = 0;
+                // [THÊM DÒNG NÀY] Reset về 0 khi bàn trống
+                TienGiamGia = 0;
             }
         }
 

@@ -21,7 +21,7 @@ namespace OrMan.ViewModels.User
         private readonly ThucDonRepository _repo;
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
-
+        public decimal GiamGiaTamTinh { get; set; } = 0; // Biến này sẽ được set từ Giỏ hàng
         private bool _isNutGoiHoTroEnabled = true;
         public bool IsNutGoiHoTroEnabled
         {
@@ -305,7 +305,7 @@ namespace OrMan.ViewModels.User
                 OpenChonBanWindow(null);
                 if (CurrentTable <= 0) return false;
             }
-            _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang);
+            _repo.CreateOrder(CurrentTable, TongTienCart, "Đơn từ Tablet", GioHang, GiamGiaTamTinh);
 
             if (CurrentCustomer != null && CurrentCustomer.KhachHangID > 0)
             {
@@ -334,7 +334,7 @@ namespace OrMan.ViewModels.User
                     }
                 }
             }
-
+            GiamGiaTamTinh = 0;
             GioHang.Clear();
             UpdateCartInfo();
             return true;

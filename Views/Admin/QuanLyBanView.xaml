@@ -314,21 +314,39 @@
 
                         <StackPanel Grid.Row="3" Margin="0,15,0,0">
                             <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,0,0,15"/>
-                            <Grid Margin="0,0,0,15">
-                                <TextBlock Text="TỔNG CỘNG:" Foreground="White" FontWeight="Bold" FontSize="16"/>
+
+                            <Grid Margin="0,0,0,5">
+                                <TextBlock Text="Tổng tiền hàng:" Foreground="#94A3B8" FontSize="14"/>
                                 <TextBlock Text="{Binding TongTienCanThu, StringFormat='{}{0:N0} VNĐ'}" 
-                                           Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right"/>
+                   Foreground="White" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
                             </Grid>
+
+                            <Grid Margin="0,0,0,5">
+                                <TextBlock Text="Giảm giá (Voucher):" Foreground="#10B981" FontSize="14"/>
+                                <TextBlock Text="{Binding TienGiamGia, StringFormat='-{0:N0} VNĐ'}" 
+                   Foreground="#10B981" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <Separator Background="{StaticResource GlassBorder}" Margin="0,5,0,10" Opacity="0.5"/>
+
+                            <Grid Margin="0,0,0,15">
+                                <TextBlock Text="KHÁCH CẦN TRẢ:" Foreground="White" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+
+                                <TextBlock Text="{Binding TongTienThanhToan, StringFormat='{}{0:N0} VNĐ'}" 
+                   Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="24" HorizontalAlignment="Right"/>
+                            </Grid>
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="10"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
+
                                 <Button Grid.Column="0" x:Name="btnInTamTinh" Click="BtnInTamTinh_Click" 
-                                        Command="{Binding PrintBillCommand}"
-                                        Height="50" FontSize="13" FontWeight="SemiBold"
-                                        Background="{DynamicResource AccentGradient}" Foreground="White">
+                Command="{Binding PrintBillCommand}"
+                Height="50" FontSize="13" FontWeight="SemiBold"
+                Background="{DynamicResource AccentGradient}" Foreground="White">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource GlassButtonStyle}">
                                             <Setter Property="Content" Value="🖨️ In Tạm Tính"/>
@@ -345,10 +363,11 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
+
                                 <Button Grid.Column="2" Command="{Binding CheckoutCommand}"
-                                        Content="✅ Xác Nhận Thu"
-                                        Height="50" FontSize="13" FontWeight="Bold"
-                                        Background="{StaticResource SuccessGreen}" Foreground="White">
+                Content="✅ Xác Nhận Thu"
+                Height="50" FontSize="13" FontWeight="Bold"
+                Background="{StaticResource SuccessGreen}" Foreground="White">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource GlassButtonStyle}">
                                             <Setter Property="IsEnabled" Value="False"/>

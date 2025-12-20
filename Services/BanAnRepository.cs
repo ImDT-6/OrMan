@@ -25,6 +25,7 @@ namespace OrMan.Services
             using (var freshContext = new MenuContext())
             {
                 var list = freshContext.BanAns.OrderBy(b => b.SoBan).ToList();
+
                 return new ObservableCollection<BanAn>(list);
             }
         }

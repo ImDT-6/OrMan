@@ -135,6 +135,10 @@ namespace OrMan.Views.User
         // Nút Gửi Đơn / Thanh Toán
         private void BtnSubmit_Click(object sender, RoutedEventArgs e)
         {
+            decimal tongGoc = _vm.TongTienCart;
+            decimal tienGiam = tongGoc - _finalTotal;
+            _vm.GiamGiaTamTinh = tienGiam;
+
             if (_vm.GioHang.Count == 0)
             {
                 MessageBox.Show("Giỏ hàng đang trống!");

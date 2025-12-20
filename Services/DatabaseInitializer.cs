@@ -230,6 +230,16 @@ namespace OrMan.Services
                     // Ghi log lỗi nếu cần thiết để debug
                     Console.WriteLine("Lỗi tạo bảng VoucherCuaKhach: " + ex.Message);
                 }
+                try
+                {
+                    string sqlGiamGia = @"
+        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'GiamGia' AND Object_ID = Object_ID(N'HoaDon'))
+        BEGIN
+            ALTER TABLE HoaDon ADD GiamGia DECIMAL(18,0) NOT NULL DEFAULT 0;
+        END";
+                    context.Database.ExecuteSqlRaw(sqlGiamGia);
+                }
+                catch { }
             }
         }
     }

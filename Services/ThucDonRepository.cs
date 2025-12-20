@@ -4,7 +4,7 @@ using OrMan.Data;
 using OrMan.Models;
 using System.Collections.Generic;
 using System;
-using Microsoft.EntityFrameworkCore; // Cần thêm dòng này
+using Microsoft.EntityFrameworkCore;
 
 namespace OrMan.Services
 {
@@ -37,10 +37,8 @@ namespace OrMan.Services
 
         public void Add(MonAn monAn) { _context.MonAns.Add(monAn); _context.SaveChanges(); }
 
-        // [SỬA LỖI QUAN TRỌNG] Triển khai hàm Delete
         public void Delete(MonAn monAn)
         {
-            // Tìm món ăn trong Context và xóa
             var monCanXoa = _context.MonAns.Find(monAn.MaMon);
             if (monCanXoa != null)
             {
@@ -55,64 +53,70 @@ namespace OrMan.Services
             _context.SaveChanges();
         }
 
-        public void ToggleSoldOut(string maMon) { /*...*/ } // Giữ nguyên code cũ
-
-        // Tìm đến hàm CreateOrder và thay thế bằng nội dung này:
-        public void CreateOrder(int soBan, decimal tongTien, string ghiChu, IEnumerable<CartItem> gioHang)
+        public void ToggleSoldOut(string maMon)
         {
-            // [MỚI] 1. Kiểm tra xem bàn này đã có hóa đơn nào đang mở (chưa thanh toán) không?
-            var hoaDonHienTai = _context.HoaDons
-                                        .FirstOrDefault(h => h.SoBan == soBan && h.DaThanhToan == false);
-
-            string maHD;
-
-            if (hoaDonHienTai == null)
+            using (var context = new MenuContext())
             {
-                // TRƯỜNG HỢP 1: Bàn chưa có đơn -> Tạo hóa đơn mới (Logic cũ)
-                maHD = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                var hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan);
-                _context.HoaDons.Add(hoaDon);
-
-                // Cập nhật trạng thái bàn
-                var ban = _context.BanAns.Find(soBan);
-                if (ban == null)
+                var mon = context.MonAns.Find(maMon);
+                if (mon != null)
                 {
-                    ban = new BanAn(soBan, "Có Khách");
-                    _context.BanAns.Add(ban);
+                    mon.IsSoldOut = !mon.IsSoldOut;
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        // [QUAN TRỌNG] Đã thêm tham số 'decimal tienGiamGia = 0' vào cuối dòng này
+        // File: Services/ThucDonRepository.cs
+
+        public void CreateOrder(int soBan, decimal tongTien, string ghiChu, IEnumerable<CartItem> gioHang, decimal tienGiamGia = 0)
+        {
+            using (var context = new MenuContext())
+            {
+                // 1. Tìm hóa đơn chưa thanh toán
+                var hoaDon = context.HoaDons.FirstOrDefault(h => h.SoBan == soBan && !h.DaThanhToan);
+                string maHD;
+
+                if (hoaDon == null)
+                {
+                    maHD = DateTime.Now.ToString("yyMMddHHmmss");
+                    hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan, tienGiamGia);
+                    context.HoaDons.Add(hoaDon);
                 }
                 else
                 {
-                    ban.TrangThai = "Có Khách";
-                    ban.YeuCauThanhToan = false;
+                    maHD = hoaDon.MaHoaDon;
+                    hoaDon.TongTien += tongTien;
+                    hoaDon.GiamGia += tienGiamGia;
                 }
+
+                // 2. Thêm món vào chi tiết
+                foreach (var item in gioHang)
+                {
+                    var chiTiet = new ChiTietHoaDon(maHD, item.MonAn, item.SoLuong, item.CapDoCay, item.GhiChu);
+
+                    // [QUAN TRỌNG] Gán thời gian gọi món để Bếp sắp xếp thứ tự
+                    chiTiet.ThoiGianGoiMon = DateTime.Now;
+
+                    context.ChiTietHoaDons.Add(chiTiet);
+                }
+
+                // --- [SỬA LỖI TẠI ĐÂY] ---
+                // 3. Cập nhật trạng thái Bàn -> "Có Khách"
+                var banAn = context.BanAns.Find(soBan);
+                if (banAn != null)
+                {
+                    banAn.TrangThai = "Có Khách"; // Dòng này giúp bên Admin đổi màu bàn
+                }
+                // -------------------------
+
+                context.SaveChanges();
             }
-            else
-            {
-                // TRƯỜNG HỢP 2: Bàn đã có đơn -> Dùng lại hóa đơn cũ
-                maHD = hoaDonHienTai.MaHoaDon;
-
-                // Cộng dồn tổng tiền
-                hoaDonHienTai.TongTien += tongTien;
-
-                // (Tùy chọn) Cập nhật người sửa hoặc thời gian nếu cần
-            }
-
-            // 2. Thêm các món mới vào bảng ChiTietHoaDon
-            foreach (var item in gioHang)
-            {
-                // Lưu món mới vào DB với maHD (dù là mới hay cũ)
-                var chiTiet = new ChiTietHoaDon(maHD, item.MonAn, item.SoLuong, item.CapDoCay, item.GhiChu);
-                _context.ChiTietHoaDons.Add(chiTiet);
-            }
-
-            _context.SaveChanges();
         }
-
         public Dictionary<MonAn, int> GetTopSellingFoods(int topCount)
         {
             using (var context = new MenuContext())
             {
-                // 1. Group theo Mã Món và tính tổng số lượng
                 var topList = context.ChiTietHoaDons
                                      .AsEnumerable()
                                      .GroupBy(ct => ct.MaMon)
@@ -121,7 +125,6 @@ namespace OrMan.Services
                                      .Take(topCount)
                                      .ToList();
 
-                // 2. Lấy thông tin chi tiết món ăn
                 var result = new Dictionary<MonAn, int>();
                 foreach (var item in topList)
                 {
