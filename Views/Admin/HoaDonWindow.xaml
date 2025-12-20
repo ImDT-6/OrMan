@@ -79,14 +79,21 @@
 
                     <Rectangle Height="1" Stroke="Black" StrokeThickness="1" StrokeDashArray="4 2" SnapsToDevicePixels="True" Margin="0,10"/>
 
-                    <Grid Margin="0,0,0,2">
-                        <TextBlock Text="Thành tiền:" FontSize="12"/>
-                        <TextBlock x:Name="txtTongTien" Text="57,000 đ" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    <Grid Margin="0,0,0,5">
+                        <TextBlock Text="Tổng tiền hàng:" FontSize="13"/>
+                        <TextBlock x:Name="txtTongTienHang" Text="0 đ" FontSize="13" HorizontalAlignment="Right"/>
                     </Grid>
 
+                    <Grid Margin="0,0,0,5" x:Name="gridGiamGia" Visibility="Collapsed">
+                        <TextBlock Text="Voucher / Giảm giá:" FontSize="13" FontStyle="Italic"/>
+                        <TextBlock x:Name="txtGiamGia" Text="-0 đ" FontSize="13" HorizontalAlignment="Right" FontStyle="Italic"/>
+                    </Grid>
+
+                    <Rectangle Height="1" Stroke="Black" StrokeThickness="1" SnapsToDevicePixels="True" Margin="0,5,0,5"/>
+
                     <Grid Margin="0,0,0,10">
-                        <TextBlock Text="Tổng cộng:" FontSize="14" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding Text, ElementName=txtTongTien}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        <TextBlock Text="THANH TOÁN:" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock x:Name="txtThanhToan" Text="0 đ" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"/>
                     </Grid>
 
                     <StackPanel x:Name="pnlQR" Margin="0,10,0,0" Visibility="Collapsed">
