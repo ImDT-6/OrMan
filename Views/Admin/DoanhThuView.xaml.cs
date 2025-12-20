@@ -1,15 +1,17 @@
-﻿using OrMan.ViewModels;
+﻿using ClosedXML.Excel;
+using Microsoft.Win32;
+using OrMan.ViewModels;
 using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
 using System.Threading.Tasks; // Cần cho Task.Run
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using Microsoft.Win32;
 
 namespace OrMan.Views.Admin
 {
@@ -139,8 +141,8 @@ namespace OrMan.Views.Admin
 
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Filter = "Excel File (*.csv)|*.csv",
-                FileName = $"BaoCaoDoanhThu_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                Filter = "Excel File (*.xlsx)|*.xlsx",
+                FileName = $"BaoCaoDoanhThu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
             };
 
             if (saveFileDialog.ShowDialog() == true)
@@ -150,23 +152,47 @@ namespace OrMan.Views.Admin
 
                 try
                 {
-                    // Chạy việc ghi file ở Background Thread
+                    // Chạy việc tạo và lưu file Excel ở Background Thread
                     await Task.Run(() =>
                     {
-                        StringBuilder csvContent = new StringBuilder();
-                        csvContent.AppendLine("Mã Hóa Đơn,Thời Gian,Bàn,Nhân Viên,Tổng Tiền");
-
-                        foreach (var item in dataToExport)
+                        using (var workbook = new XLWorkbook())
                         {
-                            string ngayTao = item.NgayTao.ToString("dd/MM/yyyy HH:mm");
-                            // Dùng culture Invariant để đảm bảo dấu chấm/phẩy đồng nhất
-                            string tongTien = item.TongTien.ToString("N0").Replace(",", ".");
-                            // Bọc trong ngoặc kép để an toàn với CSV
-                            string newLine = $"\"{item.MaHoaDon}\",\"{ngayTao}\",\"Bàn {item.SoBan}\",\"{item.NguoiTao}\",\"{tongTien}\"";
-                            csvContent.AppendLine(newLine);
-                        }
+                            var worksheet = workbook.Worksheets.Add("DoanhThu");
 
-                        File.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8);
+                            // Tạo header cột
+                            worksheet.Cell(1, 1).Value = "Mã Hóa Đơn";
+                            worksheet.Cell(1, 2).Value = "Thời Gian";
+                            worksheet.Cell(1, 3).Value = "Bàn";
+                            worksheet.Cell(1, 4).Value = "Nhân Viên";
+                            worksheet.Cell(1, 5).Value = "Tổng Tiền";
+
+                            // Tô nền cho header
+                            var headerRange = worksheet.Range(1, 1, 1, 5);
+                            headerRange.Style.Font.Bold = true;
+                            headerRange.Style.Fill.BackgroundColor = XLColor.LightGreen;
+                            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                            // Điền dữ liệu
+                            int row = 2;
+                            foreach (var item in dataToExport)
+                            {
+                                worksheet.Cell(row, 1).Value = item.MaHoaDon ?? "";
+                                worksheet.Cell(row, 2).Value = item.NgayTao;
+                                worksheet.Cell(row, 2).Style.DateFormat.Format = "dd/MM/yyyy HH:mm";
+                                worksheet.Cell(row, 3).Value = $"Bàn {item.SoBan}";
+                                worksheet.Cell(row, 4).Value = item.NguoiTao ?? "";
+                                worksheet.Cell(row, 5).Value = item.TongTien;
+                                // Định dạng số thập phân 
+                                worksheet.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+                                row++;
+                            }
+
+                            // Auto-fit cột
+                            worksheet.Columns().AdjustToContents();
+
+                            // Lưu file
+                            workbook.SaveAs(filePath);
+                        }
                     });
 
                     var result = MessageBox.Show("Xuất file thành công! Bạn có muốn mở file ngay không?",
