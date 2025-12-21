@@ -18,7 +18,9 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <DataTemplate x:Key="FoodCardTemplate">
-                <Border Width="210" Height="300" Margin="10" 
+                <!-- Sửa số 6 ở dòng dưới đây để thay đổi khoảng cách -->
+                <!-- Ví dụ: Margin="10" sẽ làm các thẻ xa nhau hơn, Margin="4" sẽ gần hơn -->
+                <Border Width="210" Height="280" Margin="6" 
                         Background="#15FFFFFF" 
                         BorderBrush="{StaticResource GlassBorder}" 
                         BorderThickness="1" 
@@ -243,37 +245,54 @@
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource MainBackgroundGradient}" MouseDown="RootGrid_MouseDown">
-        <Grid Margin="25,5,25,0">
+        <!-- Đã giảm Margin bao quanh từ 25 xuống 15 để mở rộng không gian -->
+        <Grid Margin="15,10,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                <TextBlock Text="QUẢN LÝ THỰC ĐƠN" FontSize="28" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
-                <Grid Margin="0,0,0,15">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <!-- GỘP HEADER: Đưa Tiêu đề, Search, và Nút thêm vào chung 1 Grid ngang -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Tiêu đề -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Khoảng đệm -->
+                    <ColumnDefinition Width="350"/>
+                    <!-- Ô tìm kiếm -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Nút thêm -->
+                </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" 
-                             x:Name="txtSearch"
-                             ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
-                             Tag="{StaticResource IconSearch}"
-                             TextChanged="TxtSearch_TextChanged"
-                             Style="{StaticResource SearchTextBoxStyle}" 
-                             Height="45" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
+                <!-- Tiêu đề (Cột 0) -->
+                <TextBlock Grid.Column="0" 
+                           Text="QUẢN LÝ THỰC ĐƠN" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="White" 
+                           VerticalAlignment="Center"/>
 
-                    <Button Grid.Column="1" 
-                            Command="{Binding AddCommand}" 
-                            Content="+ Thêm Món" 
-                            Style="{StaticResource GlassDismissButtonStyle}" 
-                            Height="45" Width="120" Padding="25,0" 
-                            Background="{StaticResource SuccessGreen}" FontSize="15"/>
-                </Grid>
-            </StackPanel>
+                <!-- Ô tìm kiếm (Cột 2) - Chiều cao giảm còn 40 -->
+                <TextBox Grid.Column="2" 
+                         x:Name="txtSearch"
+                         ToolTip="Tìm kiếm món ăn, nguyên liệu..." 
+                         Tag="{StaticResource IconSearch}"
+                         TextChanged="TxtSearch_TextChanged"
+                         Style="{StaticResource SearchTextBoxStyle}" 
+                         Height="40" VerticalContentAlignment="Center" 
+                         Margin="20,0,15,0"/>
 
+                <!-- Nút thêm (Cột 3) - Chiều cao giảm còn 40 -->
+                <Button Grid.Column="3" 
+                        Command="{Binding AddCommand}" 
+                        Content="+ Thêm Món" 
+                        Style="{StaticResource GlassDismissButtonStyle}" 
+                        Height="40" Width="120" Padding="10,0" 
+                        Background="{StaticResource SuccessGreen}" FontSize="14" FontWeight="SemiBold"/>
+            </Grid>
+
+            <!-- Nội dung chính -->
             <TabControl Grid.Row="1" 
                         x:Name="MenuTabControl" 
                         Style="{StaticResource SlidingTabControlStyle}"
@@ -285,6 +304,7 @@
                              ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
                              Margin="0,10,0,0"/>
+                    <!-- ^ Sửa số 10 ở trên: Tăng lên để cách xa Tab hơn, giảm xuống để gần hơn -->
                 </TabItem>
 
                 <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
