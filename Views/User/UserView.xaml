@@ -100,7 +100,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- 1. Logo & Địa chỉ -->
-                <StackPanel Grid.Row="0" Margin="0,25" HorizontalAlignment="Center">
+                <StackPanel Grid.Row="0" Margin="0,25" HorizontalAlignment="Left">
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Border Width="45" Height="45" CornerRadius="12" Background="{DynamicResource AccentGradient}" Margin="0,0,15,0">
@@ -115,13 +115,13 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8" HorizontalAlignment="Center">
-                        <TextBlock Text="📍" Foreground="#F87171" FontSize="12" Margin="0,0,5,0"/>
+                        <TextBlock Text="📍" Foreground="#F87171" FontSize="12" Margin="55,0,5,0"/>
                         <TextBlock Text="{DynamicResource Str_Address}" Foreground="{StaticResource TextSecondary}" FontSize="11" 
                                    TextWrapping="Wrap" TextAlignment="Center" MaxWidth="190"/>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- 2. Menu -->
+                <!-- 2. Menu (ĐÃ CẬP NHẬT ICON MỚI) -->
                 <StackPanel Grid.Row="1">
                     <TextBlock Text="{DynamicResource Str_Category_Title}" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,10" Opacity="0.7"/>
                     <Grid>
@@ -137,41 +137,80 @@
                             </Border.RenderTransform>
                         </Border>
                         <StackPanel x:Name="MenuPanel">
-                            <RadioButton Content="{DynamicResource Str_Menu_Noodles}" Style="{StaticResource CategoryTabStyle}" IsChecked="True" Click="Filter_Click" Tag="Mì Cay"/>
-                            <RadioButton Content="{DynamicResource Str_Menu_Snacks}" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ Chiên"/>
-                            <RadioButton Content="{DynamicResource Str_Menu_Drinks}" Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Nước Uống"/>
+                            <!-- Mì Cay: Icon Tô Mì -->
+                            <RadioButton Style="{StaticResource CategoryTabStyle}" IsChecked="True" Click="Filter_Click" Tag="Mì Cay">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="M21,10.5C21,15.75 16.75,20 11.5,20H12.5V22H11.5C6.25,20 2,15.75 2,10.5V10H21V10.5M5.5,8C5.5,8 5.5,5 8.5,5C9.5,5 10.5,5.5 11,6.2C11.5,5.5 12.5,5 13.5,5C16.5,5 16.5,8 16.5,8H14.5C14.5,8 14.5,7 13.5,7C13,7 12.5,7.3 12.5,8H11.5C11.5,6.8 10.8,6.5 10.5,6.5C10.2,6.5 9.5,6.8 9.5,8H5.5Z" 
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                          Stretch="Uniform" Width="20" Height="20" Margin="0,0,15,0"/>
+                                    <TextBlock Text="{DynamicResource Str_Menu_Noodles}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Ăn Vặt: Icon Khoai Tây Chiên (French Fries) -->
+                            <RadioButton Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Ăn Vặt">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- [CẬP NHẬT] Đổi sang icon Khoai Tây Chiên -->
+                                    <Path Data="M17,11H19V3H17V11M13,11H15V1H13V11M9,11H11V3H9V11M5,11H7V3H5V11M2,13V21C2,22.1 2.9,23 4,23H20C21.1,23 22,22.1 22,21V13H2Z" 
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                          Stretch="Uniform" Width="18" Height="18" Margin="0,0,17,0"/>
+                                    <TextBlock Text="{DynamicResource Str_Menu_Snacks}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <!-- Nước Uống: Icon Ly Nước Ngọt (Soft Drink Cup) -->
+                            <RadioButton Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Nước Uống">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- [CẬP NHẬT] Đổi sang icon Ly nước có ống hút -->
+                                    <Path Data="M18,6H13V3H19V1H11V3H6L7,22H17L18,6M10.8,19L10,8H11.5L12,19H10.8M14.5,19L14,8H15.5L15,19H14.5Z" 
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                          Stretch="Uniform" Width="18" Height="18" Margin="0,0,17,0"/>
+                                    <TextBlock Text="{DynamicResource Str_Menu_Drinks}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
 
-                <!-- 3. Chức năng thêm (Dưới các mục menu) -->
+                <!-- 3. Chức năng thêm (CÓ TIÊU ĐỀ "TIỆN ÍCH") -->
                 <StackPanel Grid.Row="2" Margin="0,10,0,0">
                     <Rectangle Height="1" Fill="{StaticResource GlassBorder}" Margin="20,5,20,10" Opacity="0.5"/>
 
+                    <TextBlock Text="TIỆN ÍCH" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,5" Opacity="0.7"/>
+
+                    <!-- Nút Tích điểm -->
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnTichDiem_Click" ToolTip="{DynamicResource Str_Points}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{DynamicResource Str_Points}" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="{DynamicResource Str_Points}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
+                    <!-- Nút Đánh giá -->
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnDanhGia_Click" ToolTip="{DynamicResource Str_Review}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{DynamicResource Str_Review}" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M14,11H6V9H14M18,7H6V5H18" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="{DynamicResource Str_Review}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
+                    <!-- Nút Vòng quay -->
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnLuckyWheel_Click" ToolTip="Quay thưởng may mắn">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconWheelGeo}" 
-                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                  Stretch="Uniform" Width="18" Height="18" Margin="0,0,10,0"/>
-
-                            <TextBlock Text="Vòng quay" FontWeight="SemiBold"/>
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0"/>
+                            <TextBlock Text="Vòng quay" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
                 </StackPanel>
-                <!-- 4. Ngôn ngữ (Góc dưới bên trái) -->
+
+                <!-- 4. Ngôn ngữ -->
                 <Button Grid.Row="4" Style="{StaticResource SidebarButtonStyle}" Click="BtnLanguage_Click">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="txtLangFlag" Text="🇻🇳" Margin="0,0,10,0"/>
@@ -188,7 +227,7 @@
             </Grid>
         </Border>
 
-        <!-- HEADER AREA (Cột phải, Hàng trên) -->
+        <!-- HEADER AREA (GIỮ NGUYÊN NHƯ CŨ) -->
         <Border Grid.Row="0" Grid.Column="1" Height="120" Margin="20,20,20,10" CornerRadius="20" ClipToBounds="True">
             <Grid>
                 <Grid x:Name="GridMorning" Visibility="Collapsed">
