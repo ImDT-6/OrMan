@@ -282,7 +282,7 @@ namespace OrMan.ViewModels.Admin
             if (SelectedBan == null || _currentHoaDon == null) return;
 
             string thongBao = $"Bạn có chắc chắn muốn kết thúc đơn hàng bàn {SelectedBan.TenBan}?\n" +
-                              $"Tổng tiền thu: {TongTienCanThu:N0} VNĐ";
+                              $"Tổng tiền thu: {TongTienThanhToan:N0} VNĐ";
 
             if (MessageBox.Show(thongBao, "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {

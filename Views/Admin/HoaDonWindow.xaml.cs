@@ -2,30 +2,37 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;           // Để dùng FontFamily
-using System.Windows.Media.Imaging;   // Để xử lý ảnh Bitmap (QR Code)
-using System.Windows.Documents;       // Để dùng FlowDocument, Paragraph...
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Documents;
 using System.Windows.Markup;
 using OrMan.Models;
+using System.IO; // Cần thêm để xử lý MemoryStream cho ảnh QR
 
 namespace OrMan.Views.Admin
 {
     public partial class HoaDonWindow : Window
     {
-        // Cấu hình tài khoản ngân hàng nhận tiền
-        private const string BANK_ID = "MB";             // Ngân hàng MBBank
-        private const string ACCOUNT_NO = "06618706666"; // Số tài khoản
-        private const string ACCOUNT_NAME = "TRAN DUC TRONG"; // Tên tài khoản
-        private const string TEMPLATE = "qr_only";       // Mẫu QR gọn
+        // Cấu hình ngân hàng
+        private const string BANK_ID = "MB";
+        private const string ACCOUNT_NO = "06618706666";
+        private const string ACCOUNT_NAME = "TRAN DUC TRONG";
+        private const string TEMPLATE = "qr_only";
+
+        // [MỚI] Biến lưu hình thức thanh toán để dùng khi bấm nút In
+        private string _hinhThucThanhToan;
+        private string _tenBan; // Lưu lại tên bàn để in tiêu đề
 
         public HoaDonWindow(string tenBan, HoaDon hoaDon, List<ChiTietHoaDon> chiTiet, string hinhThucThanhToan)
         {
             InitializeComponent();
 
+            // Lưu lại giá trị
+            _hinhThucThanhToan = hinhThucThanhToan;
+            _tenBan = tenBan;
+
             // 1. Gán dữ liệu cơ bản
             txtBan.Text = tenBan;
-
-            // Xử lý mã hóa đơn
             if (!string.IsNullOrEmpty(hoaDon.MaHoaDon) && hoaDon.MaHoaDon.Length >= 8)
                 txtMaHD.Text = $"HD: #{hoaDon.MaHoaDon.Substring(0, 8).ToUpper()}";
             else
@@ -33,15 +40,13 @@ namespace OrMan.Views.Admin
 
             txtNgay.Text = hoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm");
 
-            // --- [PHẦN MỚI] Xử lý hiển thị tiền nong ---
+            // --- Xử lý hiển thị tiền nong ---
             decimal tongTienHang = hoaDon.TongTien;
             decimal giamGia = hoaDon.GiamGia;
             decimal thucTra = tongTienHang - giamGia;
 
-            // a. Tổng tiền hàng
             txtTongTienHang.Text = tongTienHang.ToString("N0") + " đ";
 
-            // b. Giảm giá (Ẩn nếu = 0)
             if (giamGia > 0)
             {
                 txtGiamGia.Text = "-" + giamGia.ToString("N0") + " đ";
@@ -50,24 +55,20 @@ namespace OrMan.Views.Admin
             else
             {
                 gridGiamGia.Visibility = Visibility.Collapsed;
-                txtGiamGia.Text = "0"; // Để tránh lỗi null khi in
+                txtGiamGia.Text = "0";
             }
 
-            // c. Thành tiền chốt
             txtThanhToan.Text = thucTra.ToString("N0") + " đ";
-            // -------------------------------------------
-
             txtHinhThuc.Text = hinhThucThanhToan;
             ListMonAn.ItemsSource = chiTiet;
 
-            // 2. Xử lý QR Code (Dùng số tiền thực trả 'thucTra')
-            if (hinhThucThanhToan == "Chuyển khoản")
+            // 2. Xử lý QR Code trên màn hình xem trước (UI)
+            // Chỉ hiện QR nếu là "Chuyển khoản"
+            if (_hinhThucThanhToan == "Chuyển khoản")
             {
                 if (pnlQR != null) pnlQR.Visibility = Visibility.Visible;
 
                 string content = Uri.EscapeDataString($"{tenBan} TT");
-
-                // [FIX] Dùng 'thucTra' thay vì 'hoaDon.TongTien'
                 string qrUrl = $"https://img.vietqr.io/image/{BANK_ID}-{ACCOUNT_NO}-{TEMPLATE}.png?amount={(long)thucTra}&addInfo={content}&accountName={Uri.EscapeDataString(ACCOUNT_NAME)}";
 
                 try
@@ -87,6 +88,7 @@ namespace OrMan.Views.Admin
             }
             else
             {
+                // [QUAN TRỌNG] Nếu không phải CK thì ẩn đi
                 if (pnlQR != null) pnlQR.Visibility = Visibility.Collapsed;
             }
         }
@@ -111,7 +113,7 @@ namespace OrMan.Views.Admin
                 // 2. Thông tin chung
                 Paragraph info = new Paragraph();
                 info.FontSize = 12;
-                info.Inlines.Add(new Run($"Bàn: {txtBan.Text}\n"));
+                info.Inlines.Add(new Run($"Bàn: {_tenBan}\n"));
                 info.Inlines.Add(new Run($"{txtMaHD.Text}\n"));
                 info.Inlines.Add(new Run($"Ngày: {txtNgay.Text}"));
                 info.TextAlignment = TextAlignment.Left;
@@ -125,7 +127,7 @@ namespace OrMan.Views.Admin
                 if (listMon != null)
                 {
                     Table table = new Table();
-                    table.CellSpacing = 0; // Sát nhau cho đẹp
+                    table.CellSpacing = 0;
                     table.Columns.Add(new TableColumn() { Width = new GridLength(3, GridUnitType.Star) });
                     table.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
                     table.Columns.Add(new TableColumn() { Width = new GridLength(1.5, GridUnitType.Star) });
@@ -143,10 +145,9 @@ namespace OrMan.Views.Admin
                     doc.Blocks.Add(table);
                 }
 
-                // 5. Footer tính tiền (ĐÃ CẬP NHẬT LOGIC MỚI)
+                // 5. Footer tính tiền
                 doc.Blocks.Add(new Paragraph(new Run("--------------------------------")) { TextAlignment = TextAlignment.Center, Margin = new Thickness(0) });
 
-                // 5.1 Tổng tiền hàng
                 Paragraph pTong = new Paragraph();
                 pTong.Inlines.Add(new Run("Tổng tiền:   "));
                 pTong.Inlines.Add(new Run(txtTongTienHang.Text));
@@ -154,7 +155,6 @@ namespace OrMan.Views.Admin
                 pTong.Margin = new Thickness(0, 5, 0, 0);
                 doc.Blocks.Add(pTong);
 
-                // 5.2 Voucher (Nếu có)
                 if (gridGiamGia.Visibility == Visibility.Visible)
                 {
                     Paragraph pGiam = new Paragraph();
@@ -165,7 +165,6 @@ namespace OrMan.Views.Admin
                     doc.Blocks.Add(pGiam);
                 }
 
-                // 5.3 THANH TOÁN (To và Đậm)
                 Paragraph pFinal = new Paragraph();
                 pFinal.FontSize = 14;
                 pFinal.FontWeight = FontWeights.Bold;
@@ -174,15 +173,46 @@ namespace OrMan.Views.Admin
                 pFinal.Margin = new Thickness(0, 5, 0, 10);
                 doc.Blocks.Add(pFinal);
 
-                // 6. Lời cảm ơn
-                Paragraph footer = new Paragraph(new Run("Cảm ơn quý khách & Hẹn gặp lại!"));
+                // --- [MỚI] 6. IN MÃ QR CODE VÀO BILL (CHỈ KHI CHUYỂN KHOẢN) ---
+                if (_hinhThucThanhToan == "Chuyển khoản" && imgQR.Source != null)
+                {
+                    // Kẻ ngang ngăn cách
+                    doc.Blocks.Add(new Paragraph(new Run("- - - - - - - - - - - - - - - -")) { TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 10, 0, 0) });
+
+                    Paragraph pQRHeader = new Paragraph(new Run("QUÉT MÃ ĐỂ THANH TOÁN"));
+                    pQRHeader.FontSize = 10;
+                    pQRHeader.FontWeight = FontWeights.Bold;
+                    pQRHeader.TextAlignment = TextAlignment.Center;
+                    pQRHeader.Margin = new Thickness(0, 5, 0, 0);
+                    doc.Blocks.Add(pQRHeader);
+
+                    // Tạo ảnh để chèn vào FlowDocument
+                    Image qrImage = new Image();
+                    qrImage.Source = imgQR.Source;
+                    qrImage.Width = 150; // Kích thước in ra
+                    qrImage.Stretch = Stretch.Uniform;
+
+                    BlockUIContainer imgContainer = new BlockUIContainer(qrImage);
+                    doc.Blocks.Add(imgContainer); // Thêm ảnh vào văn bản in
+
+                    Paragraph pQRInfo = new Paragraph();
+                    pQRInfo.Inlines.Add(new Run($"MB Bank: {ACCOUNT_NO}\n"));
+                    pQRInfo.Inlines.Add(new Run(ACCOUNT_NAME));
+                    pQRInfo.FontSize = 10;
+                    pQRInfo.TextAlignment = TextAlignment.Center;
+                    doc.Blocks.Add(pQRInfo);
+                }
+                // -------------------------------------------------------------
+
+                // 7. Lời cảm ơn
+                Paragraph footer = new Paragraph(new Run("\nCảm ơn quý khách & Hẹn gặp lại!"));
                 footer.FontSize = 10;
                 footer.FontStyle = FontStyles.Italic;
                 footer.TextAlignment = TextAlignment.Center;
                 doc.Blocks.Add(footer);
 
                 IDocumentPaginatorSource idpSource = doc;
-                printDialog.PrintDocument(idpSource.DocumentPaginator, "Hoa Don Ban " + txtBan.Text);
+                printDialog.PrintDocument(idpSource.DocumentPaginator, "Hoa Don Ban " + _tenBan);
 
                 this.DialogResult = true;
             }
