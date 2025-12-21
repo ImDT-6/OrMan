@@ -646,11 +646,16 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Chi tiết" 
-                        Style="{StaticResource DataGridActionButtonStyle}" 
-                        FontSize="12" Height="30" Padding="10,0" 
-                        Background="#203B82F6" Foreground="#3B82F6" 
-                        Margin="0"
-                        HorizontalAlignment="Center"/>
+                    
+                    Command="{Binding DataContext.ViewDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    
+                    CommandParameter="{Binding}"
+
+                    Style="{StaticResource DataGridActionButtonStyle}" 
+                    FontSize="12" Height="30" Padding="10,0" 
+                    Background="#203B82F6" Foreground="#3B82F6" 
+                    Margin="0"
+                    HorizontalAlignment="Center"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

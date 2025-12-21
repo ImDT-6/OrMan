@@ -1,4 +1,5 @@
-﻿using OrMan.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using OrMan.Data;
 using OrMan.Models;
 using System;
 using System.Collections.Generic;
@@ -128,7 +129,18 @@ namespace OrMan.Services
                               );
             }
         }
-
+        public List<ChiTietHoaDon> GetChiTietHoaDon(string maHD)
+        {
+            using (var context = new MenuContext())
+            {
+                // Lấy danh sách món ăn trong hóa đơn đó
+                // Include(x => x.MonAn) để lấy được tên món ăn
+                return context.ChiTietHoaDons
+                              .Include(x => x.MonAn)
+                              .Where(x => x.MaHoaDon == maHD)
+                              .ToList();
+            }
+        }
         public Dictionary<int, decimal> GetRevenueByMonth()
         {
             using (var context = new MenuContext())

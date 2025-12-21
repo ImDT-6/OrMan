@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks; // Cần thiết
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using OrMan.Helpers;
@@ -16,17 +16,21 @@ namespace OrMan.ViewModels
     public class DoanhThuViewModel : INotifyPropertyChanged
     {
         private readonly DoanhThuRepository _repository;
-        private List<HoaDon> _allHoaDons; // Dữ liệu gốc (List nhẹ hơn ObservableCollection khi xử lý ngầm)
+        private List<HoaDon> _allHoaDons;
+        public ICommand ViewDetailCommand { get; private set; }
 
-        // [MỚI] Biến lưu trữ khoảng thời gian tùy chọn
+        // Biến lưu khoảng thời gian tùy chọn
         private DateTime _customFromDate;
         private DateTime _customToDate;
+
+        // [MỚI] Biến dùng chung để hiển thị Tổng Doanh Thu (Thực Thu)
         private string _tongDoanhThuHienTai = "0 VNĐ";
         public string TongDoanhThuHienTai
         {
             get => _tongDoanhThuHienTai;
             set { _tongDoanhThuHienTai = value; OnPropertyChanged(); }
         }
+
         private ObservableCollection<HoaDon> _danhSachHoaDon;
         public ObservableCollection<HoaDon> DanhSachHoaDon
         {
@@ -42,7 +46,6 @@ namespace OrMan.ViewModels
             {
                 _tuKhoaTimKiem = value;
                 OnPropertyChanged();
-                // Tìm kiếm thì chạy nhanh, không cần Async cũng được, hoặc Async nếu muốn mượt tuyệt đối
                 Task.Run(() => FilterDataAsync());
             }
         }
@@ -65,9 +68,6 @@ namespace OrMan.ViewModels
             }
         }
 
-        private string _tongDoanhThuText;
-        public string TongDoanhThuText { get => _tongDoanhThuText; set { _tongDoanhThuText = value; OnPropertyChanged(); } }
-
         private int _tongSoDon;
         public int TongSoDon { get => _tongSoDon; set { _tongSoDon = value; OnPropertyChanged(); } }
 
@@ -77,28 +77,36 @@ namespace OrMan.ViewModels
         public DoanhThuViewModel()
         {
             _repository = new DoanhThuRepository();
-
-            // [TỐI ƯU] Chạy ngầm ngay khi khởi tạo
             Task.Run(() => LoadDataAsync());
-
-            // Sự kiện thanh toán thành công cũng reload ngầm
             BanAnRepository.OnPaymentSuccess += () => Task.Run(() => LoadDataAsync());
+            ViewDetailCommand = new RelayCommand<HoaDon>(OpenDetailWindow);
+        }
+
+        // [MỚI] Hàm mở cửa sổ chi tiết
+        private void OpenDetailWindow(HoaDon hd)
+        {
+            if (hd == null) return;
+            var listMonAn = _repository.GetChiTietHoaDon(hd.MaHoaDon);
+            string tenBan = "Bàn " + hd.SoBan.ToString("00");
+            string hinhThuc = "Đã thanh toán";
+
+            // Lưu ý: Cần import OrMan.Views.Admin
+            OrMan.Views.Admin.HoaDonWindow view = new OrMan.Views.Admin.HoaDonWindow(tenBan, hd, listMonAn, hinhThuc);
+            view.ShowDialog();
         }
 
         public void Cleanup()
         {
-            // Hủy đăng ký sự kiện để tránh leak memory
             BanAnRepository.OnPaymentSuccess -= () => Task.Run(() => LoadDataAsync());
         }
 
-        // 1. Load toàn bộ dữ liệu từ DB (Nặng nhất)
         private async Task LoadDataAsync()
         {
             try
             {
-                var data = await Task.Run(() => _repository.GetAll().ToList()); // Chuyển sang List
+                var data = await Task.Run(() => _repository.GetAll().ToList());
                 _allHoaDons = data;
-                await FilterDataAsync(); // Sau khi có dữ liệu thì lọc
+                await FilterDataAsync();
             }
             catch (Exception ex)
             {
@@ -106,26 +114,17 @@ namespace OrMan.ViewModels
             }
         }
 
-        // Thêm từ khóa 'async' vào khai báo hàm
-        public async void LocTheoKhoangThoiGian(DateTime from, DateTime to)
+        // [SỬA LẠI] Hàm lọc theo ngày chỉ cần set biến và gọi FilterDataAsync
+        public void LocTheoKhoangThoiGian(DateTime from, DateTime to)
         {
             _selectedTimeFilter = "Tùy chọn";
             _customFromDate = from;
             _customToDate = to;
 
-            // 1. Chờ hàm lọc dữ liệu chạy xong (để DanhSachHoaDon được cập nhật mới)
-            await FilterDataAsync();
-
-            // 2. Sau khi có dữ liệu mới thì mới tính tổng
-            if (DanhSachHoaDon != null)
-            {
-                // Tính tổng thực thu = Tổng tiền - Giảm giá
-                decimal total = DanhSachHoaDon.Sum(x => x.TongTien - x.GiamGia);
-                TongDoanhThuHienTai = total.ToString("N0") + " VNĐ";
-            }
+            // Gọi lọc dữ liệu (việc tính toán sẽ nằm trong FilterDataAsync)
+            Task.Run(() => FilterDataAsync());
         }
 
-        // 2. Lọc và Tính toán (Cũng có thể nặng nếu list dài)
         private async Task FilterDataAsync()
         {
             if (_allHoaDons == null) return;
@@ -171,17 +170,26 @@ namespace OrMan.ViewModels
 
                 var resultList = new ObservableCollection<HoaDon>(query.OrderByDescending(h => h.NgayTao));
 
-                // Tính toán thống kê
-                decimal total = 0;
+                // [QUAN TRỌNG] Tính toán thống kê CHÍNH XÁC (Trừ giảm giá)
+                decimal totalThucThu = 0;
                 int count = resultList.Count;
-                if (count > 0) total = resultList.Sum(x => x.TongTien);
-                decimal avg = count > 0 ? total / count : 0;
+
+                if (count > 0)
+                {
+                    // Công thức đúng: Tổng tiền - Giảm giá
+                    totalThucThu = resultList.Sum(x => x.TongTien - x.GiamGia);
+                }
+
+                decimal avg = count > 0 ? totalThucThu / count : 0;
 
                 // Cập nhật UI (Main Thread)
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     DanhSachHoaDon = resultList;
-                    TongDoanhThuText = total.ToString("N0") + " VNĐ";
+
+                    // Cập nhật biến hiển thị Tổng Doanh Thu (To bự dưới đáy)
+                    TongDoanhThuHienTai = totalThucThu.ToString("N0") + " VNĐ";
+
                     TongSoDon = count;
                     TrungBinhDon = avg.ToString("N0") + " VNĐ";
                 });
