@@ -85,7 +85,7 @@ namespace OrMan.Views.User
             else
             {
                 if (GridNight != null) GridNight.Visibility = Visibility.Visible;
-                greetingText = (hour >= 22 || hour < 4) ? "Chúc ngủ ngon" : "Chào buổi tối";
+                greetingText =  "Chào buổi tối";
             }
 
             if (txtGreeting != null) txtGreeting.Text = greetingText;
