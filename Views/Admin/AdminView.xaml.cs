@@ -21,7 +21,7 @@ namespace OrMan.Views.Admin
             InitializeComponent();
             // Khởi tạo DataContext cho AdminView (Nếu cần, thường là DashboardViewModel)
             // this.DataContext = new DashboardViewModel(); 
-
+            _banView = new QuanLyBanView();
             // Mặc định vào là hiện Dashboard
             ChuyenSangChucNang("Tổng Quan"); // Truyền thêm nút mặc định
         }
