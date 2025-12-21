@@ -242,11 +242,15 @@ namespace OrMan.Views.User
 
         private void BtnTichDiem_Click(object sender, RoutedEventArgs e)
         {
-            if (_vm.CurrentTable <= 0)
+            var vm = (UserViewModel)this.DataContext;
+
+            if (vm.CurrentTable <= 0)
             {
-                if (_vm.ChonBanCommand.CanExecute(null))
-                    _vm.ChonBanCommand.Execute(null);
-                if (_vm.CurrentTable <= 0) return;
+                MessageBox.Show("Vui lòng chọn bàn trước khi tích điểm!",
+                        "Yêu cầu chọn bàn",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                return;
             }
             var popup = new TichDiemWindow(_vm);
             var mainWindow = Application.Current.MainWindow;
@@ -258,6 +262,17 @@ namespace OrMan.Views.User
 
         private void BtnDanhGia_Click(object sender, RoutedEventArgs e)
         {
+            var vm = (UserViewModel)this.DataContext;
+
+            
+            if (vm.CurrentTable <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn bàn trước khi đánh giá!",
+                        "Yêu cầu chọn bàn",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                return;
+            }
             var reviewWindow = new DanhGiaWindow(_vm);
 
             // Làm mờ màn hình chính cho đẹp
