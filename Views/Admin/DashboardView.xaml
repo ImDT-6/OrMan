@@ -17,6 +17,7 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <helpers:IndexConverter x:Key="IndexConverter"/>
             <helpers:RankToColorConverter x:Key="RankToColorConverter"/>
+
             <Style x:Key="FilterRadioButtonStyle" TargetType="RadioButton">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
@@ -44,6 +45,32 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <!-- Style cho TabItem để ẩn header xấu xí và làm đẹp -->
+            <Style x:Key="DashboardTabItemStyle" TargetType="TabItem">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border x:Name="Bd" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="15,10" Margin="0,0,10,0" Cursor="Hand">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource WarningYellow}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource WarningYellow}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -53,12 +80,14 @@
             <ColumnDefinition Width="1.5*"/>
         </Grid.ColumnDefinitions>
 
+        <!-- CỘT TRÁI (Biểu đồ) -->
         <Grid Grid.Column="0" Margin="0,0,20,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- 4 Thẻ Summary -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -70,20 +99,19 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Doanh Thu -->
                 <Border Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
                             <TextBlock Text="DOANH THU" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
                             <Path Data="{StaticResource IconMoneyGeo}" Fill="{StaticResource SuccessGreen}" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
                         </Grid>
-
                         <TextBlock Text="{Binding DoanhThuNgay}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22"/>
-
                         <TextBlock Text="{Binding TangTruongText}" Foreground="{Binding TangTruongColor}" FontSize="10" Margin="0,2,0,0" FontWeight="SemiBold"/>
-
                     </StackPanel>
                 </Border>
 
+                <!-- Đơn Hàng -->
                 <Border Grid.Column="2" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
@@ -95,29 +123,36 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Bàn Hoạt Động -->
                 <Border Grid.Column="4" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
                             <TextBlock Text="BÀN HOẠT ĐỘNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
-                            <TextBlock Text="🍽️" FontSize="12" HorizontalAlignment="Right" Foreground="Orange"/>
+                            <TextBlock Text="🍽️" FontSize="12" HorizontalAlignment="Right" Foreground="MediumPurple"/>
                         </Grid>
-                        <TextBlock Text="{Binding BanHoatDongText}" Foreground="#F59E0B" FontWeight="Bold" FontSize="22"/>
+                        <TextBlock Text="{Binding BanHoatDongText}" Foreground="MediumPurple" FontWeight="Bold" FontSize="22"/>
                         <TextBlock Text="{Binding CongSuatText}" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
 
+                <!-- [ĐÃ SỬA] Thẻ Đánh Giá (Thay cho Khách Hàng) -->
                 <Border Grid.Column="6" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
-                            <TextBlock Text="KHÁCH HÀNG" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
-                            <TextBlock Text="👥" FontSize="12" HorizontalAlignment="Right" Foreground="HotPink" />
+                            <TextBlock Text="ĐÁNH GIÁ" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="Bold"/>
+                            <!-- Icon Star -->
+                            <Path Data="{StaticResource StarIcon}" Fill="#F59E0B" Height="14" Stretch="Uniform" HorizontalAlignment="Right"/>
                         </Grid>
-                        <TextBlock Text="124" Foreground="#EC4899" FontWeight="Bold" FontSize="22"/>
-                        <TextBlock Text="3 khách mới" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding DiemDanhGiaTB, StringFormat={}{0:0.0}}" Foreground="#F59E0B" FontWeight="Bold" FontSize="22"/>
+                            <TextBlock Text="/5" Foreground="{StaticResource TextSecondary}" FontSize="14" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding SoLuotDanhGia, StringFormat={}{0} lượt góp ý}" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
+            <!-- Biểu Đồ (Giữ nguyên) -->
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -132,26 +167,10 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-
-                            <RadioButton Content="Hôm nay" IsChecked="True" 
-                 Style="{StaticResource FilterRadioButtonStyle}"
-                 Command="{Binding ChangeFilterCommand}" 
-                 CommandParameter="Day"/>
-
-                            <RadioButton Content="Tuần này" 
-                 Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0"
-                 Command="{Binding ChangeFilterCommand}" 
-                 CommandParameter="Week"/>
-
-                            <RadioButton Content="Tháng này" 
-                 Style="{StaticResource FilterRadioButtonStyle}"
-                 Command="{Binding ChangeFilterCommand}" 
-                 CommandParameter="Month"/>
-                            <RadioButton Content="Năm này" 
-                 Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0,0,0"
-                 Command="{Binding ChangeFilterCommand}" 
-                 CommandParameter="Year"/>
-
+                            <RadioButton Content="Hôm nay" IsChecked="True" Style="{StaticResource FilterRadioButtonStyle}" Command="{Binding ChangeFilterCommand}" CommandParameter="Day"/>
+                            <RadioButton Content="Tuần này" Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0" Command="{Binding ChangeFilterCommand}" CommandParameter="Week"/>
+                            <RadioButton Content="Tháng này" Style="{StaticResource FilterRadioButtonStyle}" Command="{Binding ChangeFilterCommand}" CommandParameter="Month"/>
+                            <RadioButton Content="Năm này" Style="{StaticResource FilterRadioButtonStyle}" Margin="5,0,0,0" Command="{Binding ChangeFilterCommand}" CommandParameter="Year"/>
                         </StackPanel>
                     </Grid>
 
@@ -160,7 +179,6 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Grid Grid.Column="0" Margin="0,0,15,30">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
@@ -180,7 +198,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -193,7 +210,6 @@
                                 <Border Grid.Row="2" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,0"/>
                                 <Border Grid.Row="3" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,1"/>
                             </Grid>
-
                             <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Stretch">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -207,13 +223,11 @@
                                                 <RowDefinition Height="{Binding EmptyStar}"/>
                                                 <RowDefinition Height="{Binding BarStar}"/>
                                             </Grid.RowDefinitions>
-
                                             <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,-20,0,0" Panel.ZIndex="1">
                                                 <Border Background="#20303030" CornerRadius="5" Padding="5,2" HorizontalAlignment="Center" Visibility="{Binding Value, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                     <TextBlock Text="{Binding Value, StringFormat='{}{0:N0}'}" FontSize="10" Foreground="White"/>
                                                 </Border>
                                             </StackPanel>
-
                                             <Border Grid.Row="1" CornerRadius="4,4,0,0" ToolTip="{Binding TooltipText}" MinHeight="2" VerticalAlignment="Stretch">
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
@@ -226,7 +240,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
                             <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -245,12 +258,14 @@
             </Border>
         </Grid>
 
+        <!-- CỘT PHẢI (Cần xử lý & Tab Góp ý/Top món) -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- Cần Xử Lý (Giữ nguyên) -->
             <Border Grid.Row="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource DangerRed}" BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -265,16 +280,7 @@
                         </Border>
                     </StackPanel>
 
-                    <ListBox x:Name="ListBoxCanXuLy" 
-                             Grid.Row="1" 
-                             ItemsSource="{Binding BanCanXuLy}" 
-                             Background="Transparent" 
-                             BorderThickness="0" 
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             MaxHeight="240"
-                             Padding="0">
-
+                    <ListBox x:Name="ListBoxCanXuLy" Grid.Row="1" ItemsSource="{Binding BanCanXuLy}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="240" Padding="0">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Background" Value="Transparent"/>
@@ -282,11 +288,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
-                                            <Border x:Name="ItemBorder" 
-                                                    CornerRadius="12" 
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="Transparent"
-                                                    BorderThickness="1">
+                                            <Border x:Name="ItemBorder" CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="1">
                                                 <ContentPresenter/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -303,7 +305,6 @@
                                 </Setter>
                             </Style>
                         </ListBox.ItemContainerStyle>
-
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="#10EF4444" CornerRadius="12" Padding="10">
@@ -313,40 +314,19 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-
                                         <Border Grid.Column="0" Width="45" Height="45" CornerRadius="12" Background="{StaticResource DangerRed}">
                                             <Grid>
-                                                <TextBlock Text="{Binding SoBan}" 
-                                                           Foreground="White" 
-                                                           FontWeight="Bold" 
-                                                           FontSize="18" 
-                                                           HorizontalAlignment="Center" 
-                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding SoBan}" Foreground="White" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
-
                                         <StackPanel Grid.Column="1" Margin="15,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,3"/>
                                             <TextBlock Text="{Binding HienThiYeuCau}" Foreground="#FF8A80" FontSize="13" TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
-
-                                        <Button Grid.Column="2" 
-                                                Content="Xử lý"
-                                                Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                VerticalAlignment="Center"
-                                                Height="32"
-                                                FontSize="13"
-                                                FontWeight="SemiBold"
-                                                Foreground="White"
-                                                Cursor="Hand"
-                                                BorderThickness="0">
+                                        <Button Grid.Column="2" Content="Xử lý" Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" VerticalAlignment="Center" Height="32" FontSize="13" FontWeight="SemiBold" Foreground="White" Cursor="Hand" BorderThickness="0">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="BtnBorder" 
-                                                            CornerRadius="16" 
-                                                            Background="#EF4444" 
-                                                            RenderTransformOrigin="0.5,0.5">
+                                                    <Border x:Name="BtnBorder" CornerRadius="16" Background="#EF4444" RenderTransformOrigin="0.5,0.5">
                                                         <Border.RenderTransform>
                                                             <ScaleTransform x:Name="ScaleTrans" ScaleX="1" ScaleY="1"/>
                                                         </Border.RenderTransform>
@@ -400,95 +380,131 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+            <!-- [ĐÃ SỬA] TABCONTROL: Góp Ý Mới & Top Món -->
+            <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="15">
+                <TabControl Background="Transparent" BorderThickness="0" Padding="0">
 
-                    <TextBlock Text="🔥 TOP MÓN BÁN CHẠY" FontSize="16" FontWeight="Bold" Foreground="{StaticResource WarningYellow}" Margin="0,0,0,15"/>
+                    <!-- TAB 1: GÓP Ý MỚI -->
+                    <TabItem Header="Góp Ý Mới" Style="{StaticResource DashboardTabItemStyle}">
+                        <Grid Margin="0,10,0,0">
+                            <TextBlock Text="Chưa có đánh giá nào." Foreground="{StaticResource TextSecondary}" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" FontStyle="Italic"
+                                       Visibility="{Binding IsNoReviews, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <ListBox Grid.Row="1" ItemsSource="{Binding TopMonAn}" 
-                             Background="Transparent" 
-                             BorderThickness="0" 
-                             Padding="0" 
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox ItemsSource="{Binding DanhSachDanhGia}" Background="Transparent" BorderThickness="0" 
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Margin" Value="0,0,0,10"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <ContentPresenter/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#10FFFFFF" CornerRadius="12" Padding="12" BorderBrush="#20FFFFFF" BorderThickness="1">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <!-- Header: Sao + Thời gian -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding SoSao}" Foreground="#F59E0B" FontWeight="Bold" FontSize="14"/>
+                                                        <Path Data="{StaticResource StarIcon}" Fill="#F59E0B" Height="12" Stretch="Uniform" Margin="4,0,0,2" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding SoDienThoai}" Foreground="{StaticResource TextSecondary}" Margin="10,0,0,0" FontSize="12" VerticalAlignment="Center" FontStyle="Italic"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding NgayTao, StringFormat='HH:mm - dd/MM'}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" FontSize="11" Opacity="0.7"/>
+                                                </Grid>
 
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListBoxItem">
-                                            <ContentPresenter/>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
+                                                <!-- Nội dung: Tags + Text -->
+                                                <StackPanel Grid.Row="1">
+                                                    <TextBlock Text="{Binding CacTag}" Foreground="White" FontSize="13" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4"/>
 
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="35"/>
-                                        <ColumnDefinition Width="55"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                                                    <!-- Hiển thị nội dung nếu có -->
+                                                    <TextBlock Text="{Binding NoiDung}" Foreground="{StaticResource TextSecondary}" FontSize="13" TextWrapping="Wrap" LineHeight="18">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding NoiDung}" Value="">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding NoiDung}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
 
-                                    <TextBlock Grid.Column="0" 
-                                               Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource IndexConverter}}"
-                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource RankToColorConverter}}"
-                                               FontWeight="Bold" 
-                                               FontSize="16" 
-                                               HorizontalAlignment="Left" 
-                                               VerticalAlignment="Center"
-                                               Margin="5,0,0,0"/>
+                    <!-- TAB 2: TOP MÓN (Code cũ) -->
+                    <TabItem Header="Top Món" Style="{StaticResource DashboardTabItemStyle}">
+                        <Grid Margin="0,10,0,0">
+                            <ListBox ItemsSource="{Binding TopMonAn}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <ContentPresenter/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
 
-                                    <Border Grid.Column="1" 
-                                            CornerRadius="12" 
-                                            ClipToBounds="True" 
-                                            Height="45" Width="45" 
-                                            Background="#15FFFFFF" 
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Center">
-                                        <Image Source="{Binding MonAn.HinhAnhUrl}" 
-                                               Stretch="UniformToFill"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
-                                    </Border>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="35"/>
+                                                <ColumnDefinition Width="55"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="2" Margin="10,0,15,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding MonAn.TenMon}" 
-                                                   Foreground="White" 
-                                                   FontWeight="SemiBold" 
-                                                   FontSize="14" 
-                                                   TextTrimming="CharacterEllipsis" 
-                                                   ToolTip="{Binding MonAn.TenMon}"/>
-                                        <TextBlock Text="{Binding MonAn.MaMon}" 
-                                                   Foreground="{StaticResource TextSecondary}" 
-                                                   FontSize="12" 
-                                                   Margin="0,2,0,0"/>
-                                    </StackPanel>
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource IndexConverter}}"
+                                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource RankToColorConverter}}"
+                                                       FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"/>
 
-                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding SoLuongBan}" 
-                                                   Foreground="{StaticResource SuccessGreen}" 
-                                                   FontWeight="Bold" 
-                                                   FontSize="15"/>
-                                        <TextBlock Text=" bán" 
-                                                   Foreground="{StaticResource SuccessGreen}" 
-                                                   FontSize="12" 
-                                                   Opacity="0.8"
-                                                   VerticalAlignment="Bottom" 
-                                                   Margin="3,0,0,2"/>
-                                    </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
+                                            <Border Grid.Column="1" CornerRadius="12" ClipToBounds="True" Height="45" Width="45" Background="#15FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <Image Source="{Binding MonAn.HinhAnhUrl}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <StackPanel Grid.Column="2" Margin="10,0,15,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding MonAn.TenMon}" Foreground="White" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" ToolTip="{Binding MonAn.TenMon}"/>
+                                                <TextBlock Text="{Binding MonAn.MaMon}" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding SoLuongBan}" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="15"/>
+                                                <TextBlock Text=" bán" Foreground="{StaticResource SuccessGreen}" FontSize="12" Opacity="0.8" VerticalAlignment="Bottom" Margin="3,0,0,2"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
             </Border>
         </Grid>
     </Grid>

@@ -40,7 +40,8 @@ namespace OrMan.Views.Admin
             this.Focus();
         }
 
-        private void TimeFilter_Click(object sender, RoutedEventArgs e)
+        // [ĐÃ SỬA] Thêm async để xử lý độ trễ mượt mà
+        private async void TimeFilter_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as RadioButton;
             if (button == null) return;
@@ -57,10 +58,14 @@ namespace OrMan.Views.Admin
             DoubleAnimation animation = new DoubleAnimation
             {
                 To = targetX,
-                Duration = TimeSpan.FromSeconds(0.2),
+                Duration = TimeSpan.FromSeconds(0.2), // Animation chạy trong 200ms
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
             IndicatorTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+            // [FIX LAG] Đợi 250ms cho animation chạy xong rồi mới load dữ liệu
+            // Việc này tách rời quá trình Render UI và Xử lý Logic, giúp nút trượt mượt mà không bị khựng
+            await Task.Delay(250);
 
             if (_viewModel != null)
             {

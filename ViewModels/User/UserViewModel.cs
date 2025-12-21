@@ -353,20 +353,37 @@ namespace OrMan.ViewModels.User
             UpdateCartInfo();
         }
 
-        // [QUAN TRỌNG] Hàm gửi đánh giá đã được cập nhật
+        // [QUAN TRỌNG] Đã cập nhật: Lưu kèm số Bàn vào thông tin người gửi
         public void GuiDanhGia(int soSao, string tags, string noiDung)
         {
             using (var context = new MenuContext())
             {
+                // 1. Xác định tên bàn
+                string tenBan = CurrentTable > 0 ? $"Bàn {CurrentTable:00}" : "Khách vãng lai";
+
+                // 2. Xác định SĐT khách (nếu có)
+                string sdtKhach = (CurrentCustomer != null && !string.IsNullOrEmpty(CurrentCustomer.SoDienThoai))
+                                  ? CurrentCustomer.SoDienThoai
+                                  : null;
+
+                // 3. Tạo chuỗi định danh hiển thị trên Dashboard Admin
+                // Ví dụ: "Bàn 05 - 0909123456" hoặc "Bàn 02 (Ẩn danh)"
+                string dinhDanhNguoiGui;
+                if (sdtKhach != null)
+                {
+                    dinhDanhNguoiGui = $"{tenBan} - {sdtKhach}";
+                }
+                else
+                {
+                    dinhDanhNguoiGui = $"{tenBan} (Ẩn danh)";
+                }
+
                 var danhGia = new DanhGia
                 {
                     SoSao = soSao,
                     CacTag = tags,
                     NoiDung = noiDung,
-                    // [TỰ ĐỘNG] Lấy số điện thoại từ khách hàng hiện tại (nếu có)
-                    SoDienThoai = CurrentCustomer != null && !string.IsNullOrEmpty(CurrentCustomer.SoDienThoai)
-                                  ? CurrentCustomer.SoDienThoai
-                                  : "Ẩn danh",
+                    SoDienThoai = dinhDanhNguoiGui, // Lưu chuỗi đã format
                     NgayTao = DateTime.Now
                 };
                 context.DanhGias.Add(danhGia);
