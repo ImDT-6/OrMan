@@ -38,7 +38,61 @@ namespace OrMan.Views.Admin
             }
         }
 
-        // --- [MỚI] XỬ LÝ SLIDING TAB (TRƯỢT) ---
+        // --- [MỚI] XỬ LÝ SLIDING FILTER (THANH LỌC THỜI GIAN - VIÊN THUỐC TRƯỢT) ---
+        private void FilterOption_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton btn)
+            {
+                UpdateFilterIndicator(btn);
+            }
+        }
+
+        // Sự kiện Loaded của nút "Hôm nay" (hoặc nút mặc định) để khởi tạo vị trí Indicator ban đầu
+        private void FilterOption_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton btn && btn.IsChecked == true)
+            {
+                // Gọi ngay để set vị trí ban đầu
+                // Dùng Dispatcher để đảm bảo UI đã render xong layout mới tính toán vị trí chính xác
+                Dispatcher.BeginInvoke(new Action(() => UpdateFilterIndicator(btn)), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        }
+
+        private void UpdateFilterIndicator(RadioButton selectedButton)
+        {
+            // Kiểm tra các element có tồn tại trong XAML không (FilterIndicator & FilterGrid phải có x:Name trong XAML)
+            if (FilterIndicator == null || FilterGrid == null) return;
+
+            // 1. Hiện Indicator (ban đầu Opacity=0 để tránh hiện sai vị trí lúc load)
+            FilterIndicator.Opacity = 1;
+
+            try
+            {
+                // 2. Tính vị trí tương đối của nút được chọn so với container cha (FilterGrid)
+                Point relativeLocation = selectedButton.TranslatePoint(new Point(0, 0), FilterGrid);
+
+                // 3. Animation thay đổi chiều rộng (Width) của viên thuốc cho bằng chiều rộng nút
+                DoubleAnimation widthAnimation = new DoubleAnimation
+                {
+                    To = selectedButton.ActualWidth,
+                    Duration = TimeSpan.FromSeconds(0.3), // Thời gian chạy animation (0.3s)
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } // Hiệu ứng trượt mượt mà (nhanh đầu, chậm dần cuối)
+                };
+                FilterIndicator.BeginAnimation(WidthProperty, widthAnimation);
+
+                // 4. Animation di chuyển (Translate X) viên thuốc đến vị trí nút mới
+                DoubleAnimation translateAnimation = new DoubleAnimation
+                {
+                    To = relativeLocation.X,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+                FilterIndicatorTransform.BeginAnimation(TranslateTransform.XProperty, translateAnimation);
+            }
+            catch { }
+        }
+
+        // --- XỬ LÝ SLIDING TAB (THANH TRƯỢT MÀU VÀNG Ở DƯỚI) ---
 
         private void FeedbackTabControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -47,7 +101,7 @@ namespace OrMan.Views.Admin
 
         private void FeedbackTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Chỉ chạy hiệu ứng khi sự kiện đến từ chính TabControl (tránh nhầm với ListBox con)
+            // Chỉ chạy hiệu ứng khi sự kiện đến từ chính TabControl (tránh nhầm với sự kiện click của ListBox con bên trong)
             if (e.Source is TabControl)
             {
                 UpdateIndicator();
@@ -59,21 +113,23 @@ namespace OrMan.Views.Admin
             // Tìm TabItem đang được chọn
             if (!(FeedbackTabControl.SelectedItem is TabItem selectedTab)) return;
 
-            // Tìm thanh trượt (PART_Indicator) trong template
+            // Tìm thanh trượt (PART_Indicator) trong template của TabControl
             var indicator = FeedbackTabControl.Template.FindName("PART_Indicator", FeedbackTabControl) as Border;
-            var transform = indicator?.RenderTransform as TranslateTransform;
+            if (indicator == null) return;
 
-            if (indicator == null || transform == null) return;
+            // Tìm Transform để di chuyển thanh trượt
+            var transform = indicator.RenderTransform as TranslateTransform;
+            if (transform == null) return;
 
             // Dùng Dispatcher để đảm bảo UI đã render xong mới tính toán vị trí
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    // Tính toán vị trí X của tab hiện tại so với TabControl
+                    // Lấy vị trí X của tab hiện tại so với TabControl cha
                     Point relativeLocation = selectedTab.TranslatePoint(new Point(0, 0), FeedbackTabControl);
 
-                    // Animation 1: Thay đổi chiều rộng (Width) cho khớp với tab mới
+                    // Animation 1: Thay đổi chiều rộng (Width) cho khớp với độ rộng của tab mới
                     DoubleAnimation widthAnimation = new DoubleAnimation
                     {
                         To = selectedTab.ActualWidth,
