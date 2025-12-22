@@ -15,35 +15,9 @@
             </ResourceDictionary.MergedDictionaries>
 
             <helpers:NullToBoolConverter x:Key="NullToBoolConverter"/>
-            
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-            <Style x:Key="GlassTooltipStyle" TargetType="ToolTip">
-                <Setter Property="OverridesDefaultStyle" Value="True"/>
-                <Setter Property="HasDropShadow" Value="True"/>
 
-                <Setter Property="Placement" Value="Mouse"/>
-                <Setter Property="VerticalOffset" Value="10"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ToolTip">
-                            <Border CornerRadius="8" Background="#1E293B" 
-                        BorderBrush="#334155" BorderThickness="1" 
-                        Padding="12" Margin="5">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="3" Opacity="0.4"/>
-                                </Border.Effect>
-                                <StackPanel MaxWidth="250">
-                                    <TextBlock Text="📝 CHI TIẾT GHI CHÚ" 
-                                   Foreground="#60A5FA" FontWeight="Bold" FontSize="10" Margin="0,0,0,4" Opacity="0.8"/>
-                                    <TextBlock Text="{TemplateBinding Content}" 
-                                   Foreground="White" FontSize="13" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            <!-- Style RadioButton Filter -->
             <Style x:Key="SegmentRadioButtonStyle" TargetType="RadioButton">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="#A0AEC0"/>
@@ -75,15 +49,20 @@
         <Grid Margin="15,10,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <!-- Title -->
                 <RowDefinition Height="Auto"/>
+                <!-- Search & Filter -->
                 <RowDefinition Height="*"/>
+                <!-- List Cards -->
             </Grid.RowDefinitions>
 
+            <!-- 1. HEADER TITLE -->
             <StackPanel Grid.Row="0" Margin="0,0,0,15">
                 <TextBlock Text="BẾP &amp; QUẦY BAR" FontSize="24" FontWeight="Bold" Foreground="White"/>
                 <TextBlock Text="Quản lý danh sách món chờ chế biến" Foreground="{StaticResource TextSecondary}" FontSize="13" Margin="0,4,0,0"/>
             </StackPanel>
 
+            <!-- 2. SEARCH & FILTER BAR -->
             <Grid Grid.Row="1" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -103,6 +82,7 @@
                 </StackPanel>
             </Grid>
 
+            <!-- 3. LIST CARD (TICKET STYLE - GLASSMORPHISM) -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl ItemsSource="{Binding DanhSachCanLam}">
                     <ItemsControl.ItemsPanel>
@@ -113,58 +93,82 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0,0,15,15" CornerRadius="12" Background="#1E293B" 
-                BorderBrush="#334155" BorderThickness="1">
+                            <!-- CARD CONTAINER: Hiệu ứng Kính Trong Suốt -->
+                            <Border Margin="0,0,15,15" CornerRadius="12" 
+                                    Background="#15FFFFFF" 
+                                    BorderBrush="#20FFFFFF" 
+                                    BorderThickness="1">
+
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="0.1" Opacity="0.3"/>
+                                    <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="4" Opacity="0.2"/>
                                 </Border.Effect>
 
                                 <Grid Height="Auto" MinHeight="85">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <!-- Cột 1: Thông tin Bàn (Tăng width lên chút) -->
                                         <ColumnDefinition Width="*"/>
+                                        <!-- Cột 2: Nội dung Món -->
                                         <ColumnDefinition Width="160"/>
+                                        <!-- Cột 3: Số lượng & Nút -->
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Grid.Column="0" Background="#10000000" CornerRadius="12,0,0,12" BorderBrush="#20FFFFFF" BorderThickness="0,0,1,0">
+                                    <!-- CỘT 1: SỐ BÀN & THỜI GIAN -->
+                                    <Border Grid.Column="0" Background="#05FFFFFF" CornerRadius="12,0,0,12" 
+                                            BorderBrush="#10FFFFFF" BorderThickness="0,0,1,0">
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                                            <!-- Badge Bàn: [ĐÃ SỬA] Hiện chữ 'Bàn 1' -->
                                             <Border Background="{DynamicResource AccentGradient}" 
-                                CornerRadius="8" Padding="0" Width="60" Height="36" Margin="0,0,0,8">
-                                                <TextBlock Text="{Binding SoBan}" 
-                                       FontWeight="Bold" Foreground="White" FontSize="18" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    CornerRadius="8" Padding="0" Width="80" Height="36" Margin="0,0,0,8">
+                                                <TextBlock FontWeight="Bold" Foreground="White" FontSize="16" 
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Run Text="Bàn"/>
+                                                    <Run Text=" "/>
+                                                    <Run Text="{Binding SoBan}"/>
+                                                </TextBlock>
                                             </Border>
 
-                                            <Border Background="#20EF4444" CornerRadius="4" Padding="6,2">
+                                            <!-- Đồng hồ -->
+                                            <Border Background="#20EF4444" CornerRadius="4" Padding="8,2">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <TextBlock Text="⏱" Foreground="#EF4444" FontSize="10" Margin="0,1,3,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding ThoiGianChoHienThi}" FontSize="11" FontWeight="Bold" Foreground="#EF4444" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="⏱" Foreground="#EF4444" FontSize="11" Margin="0,1,4,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding ThoiGianChoHienThi}" FontSize="12" FontWeight="Bold" Foreground="#EF4444" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
                                     </Border>
 
+                                    <!-- CỘT 2: TÊN MÓN & GHI CHÚ -->
                                     <Grid Grid.Column="1" Margin="20,12">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
+                                            <!-- Tên món -->
                                             <RowDefinition Height="Auto"/>
+                                            <!-- Badge Cấp độ -->
                                             <RowDefinition Height="*"/>
+                                            <!-- Ghi chú -->
                                         </Grid.RowDefinitions>
 
+                                        <!-- Tên món -->
                                         <TextBlock Grid.Row="0" Text="{Binding TenMonGoc}" 
-                               FontSize="17" FontWeight="Bold" Foreground="White" 
-                               TextWrapping="Wrap" LineHeight="24"/>
+                                                   FontSize="18" FontWeight="Bold" Foreground="White" 
+                                                   TextWrapping="Wrap" LineHeight="24"/>
 
+                                        <!-- Badge Cấp độ -->
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0">
                                             <Border BorderBrush="#EF4444" BorderThickness="1" 
-                                CornerRadius="4" Padding="6,1" Background="#10EF4444" 
-                                Visibility="{Binding CoCapDo, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                Margin="0,0,8,0">
+                                                    CornerRadius="4" Padding="6,1" Background="#10EF4444" 
+                                                    Visibility="{Binding CoCapDo, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                    Margin="0,0,8,0">
                                                 <TextBlock Text="{Binding BadgeCapDo}" Foreground="#EF4444" FontWeight="Bold" FontSize="11"/>
                                             </Border>
                                         </StackPanel>
 
-                                        <Border Grid.Row="2" Margin="0,8,0,0" CornerRadius="6" Background="#15F59E0B" BorderBrush="#30F59E0B" BorderThickness="1" Padding="8,6">
+                                        <!-- GHI CHÚ (Trong suốt, viền vàng) -->
+                                        <Border Grid.Row="2" Margin="0,8,0,0" CornerRadius="6" 
+                                                Background="#05F59E0B" BorderBrush="#40F59E0B" BorderThickness="1" 
+                                                Padding="8,6">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
@@ -180,27 +184,29 @@
                                             </Border.Style>
                                             <DockPanel>
                                                 <Path DockPanel.Dock="Left" Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z" 
-                                   Fill="#F59E0B" Width="12" Height="12" Stretch="Uniform" Margin="0,2,8,0" VerticalAlignment="Top"/>
+                                                       Fill="#F59E0B" Width="12" Height="12" Stretch="Uniform" Margin="0,2,8,0" VerticalAlignment="Top"/>
                                                 <TextBlock Text="{Binding ChiTiet.GhiChu}" 
-                                       Foreground="#FCD34D" FontSize="13" FontStyle="Normal" FontWeight="SemiBold"
-                                       TextWrapping="Wrap"/>
+                                                           Foreground="#FCD34D" FontSize="14" FontStyle="Normal" FontWeight="SemiBold"
+                                                           TextWrapping="Wrap"/>
                                             </DockPanel>
                                         </Border>
                                     </Grid>
 
+                                    <!-- CỘT 3: SỐ LƯỢNG & HÀNH ĐỘNG -->
                                     <Grid Grid.Column="2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="60"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Border Grid.Column="0" Background="#08FFFFFF" BorderBrush="#10FFFFFF" BorderThickness="1,0,0,0">
+                                        <!-- Số lượng -->
+                                        <Border Grid.Column="0" Background="#05FFFFFF" BorderBrush="#10FFFFFF" BorderThickness="1,0,0,0">
                                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <TextBlock Text="SL" Foreground="{StaticResource TextSecondary}" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="SL" Foreground="#A0AEC0" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center"/>
 
                                                 <TextBlock Text="{Binding ChiTiet.SoLuong}" 
-                                       Foreground="#F59E0B" FontWeight="Bold" FontSize="32" 
-                                       HorizontalAlignment="Center" Margin="0,-4,0,0">
+                                                           Foreground="#F59E0B" FontWeight="Bold" FontSize="32" 
+                                                           HorizontalAlignment="Center" Margin="0,-4,0,0">
                                                     <TextBlock.Effect>
                                                         <DropShadowEffect Color="#F59E0B" BlurRadius="10" ShadowDepth="0.1" Opacity="0.4"/>
                                                     </TextBlock.Effect>
@@ -208,31 +214,46 @@
                                             </StackPanel>
                                         </Border>
 
+                                        <!-- Nút Xong [ĐÃ SỬA]: Gradient Xanh Neon -->
                                         <Button Grid.Column="1" 
-                            Command="{Binding DataContext.XongMonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            CommandParameter="{Binding}"
-                            Margin="10" Cursor="Hand" BorderThickness="0">
+                                                Command="{Binding DataContext.XongMonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Margin="10" Cursor="Hand" BorderThickness="0">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="bdr" CornerRadius="8" Background="#10B981">
+                                                    <Border x:Name="bdr" CornerRadius="8">
+                                                        <Border.Background>
+                                                            <!-- Gradient Xanh Neon: Sáng -> Đậm -->
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#4ADE80" Offset="0"/>
+                                                                <!-- Light Neon Green -->
+                                                                <GradientStop Color="#16A34A" Offset="1"/>
+                                                                <!-- Darker Green -->
+                                                            </LinearGradientBrush>
+                                                        </Border.Background>
+
                                                         <Grid>
                                                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                                                 <Path Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
-                                                  Fill="White" Width="24" Height="24" Stretch="Uniform" Margin="0,0,0,2"/>
+                                                                      Fill="White" Width="24" Height="24" Stretch="Uniform" Margin="0,0,0,2">
+                                                                    <Path.Effect>
+                                                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.3"/>
+                                                                    </Path.Effect>
+                                                                </Path>
                                                             </StackPanel>
                                                         </Grid>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="bdr" Property="Background" Value="#059669"/>
+                                                            <Setter TargetName="bdr" Property="Opacity" Value="0.9"/>
+                                                            <!-- Hiệu ứng Glow khi hover -->
                                                             <Setter TargetName="bdr" Property="Effect">
                                                                 <Setter.Value>
-                                                                    <DropShadowEffect Color="#10B981" BlurRadius="10" ShadowDepth="0.1" Opacity="0.6"/>
+                                                                    <DropShadowEffect Color="#4ADE80" BlurRadius="15" ShadowDepth="0" Opacity="0.6"/>
                                                                 </Setter.Value>
                                                             </Setter>
                                                         </Trigger>
                                                         <Trigger Property="IsPressed" Value="True">
-                                                            <Setter TargetName="bdr" Property="Opacity" Value="0.8"/>
                                                             <Setter TargetName="bdr" Property="RenderTransform">
                                                                 <Setter.Value>
                                                                     <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="40" CenterY="35"/>
@@ -252,4 +273,4 @@
             </ScrollViewer>
         </Grid>
     </Grid>
-</UserControl>
+</UserControl>  
