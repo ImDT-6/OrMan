@@ -3,21 +3,35 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks; // Cần thiết cho Task.Run
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
+using Microsoft.EntityFrameworkCore; // Cần để dùng .Include
 
 namespace OrMan.ViewModels.Admin
 {
+    // [CẢI TIẾN] Class chứa dữ liệu đã được xử lý sẵn cho UI
     public class BepOrderItem
     {
         public int SoBan { get; set; }
-        public string ThoiGianOrder { get; set; }
         public ChiTietHoaDon ChiTiet { get; set; }
+
+        // 1. Tên món đã tách bỏ phần "(Cấp ...)"
+        public string TenMonGoc { get; set; }
+
+        // 2. Phần cấp độ cay tách riêng (nếu có)
+        public string BadgeCapDo { get; set; }
+        public bool CoCapDo => !string.IsNullOrEmpty(BadgeCapDo);
+
+        // 3. Thời gian chờ (Ví dụ: "5 phút", "12 phút")
+        public string ThoiGianChoHienThi { get; set; }
+
+        // 4. Màu sắc cảnh báo (Green -> Yellow -> Red)
+        public string MauSacCanhBao { get; set; }
     }
 
     public class BepViewModel : INotifyPropertyChanged
@@ -37,44 +51,70 @@ namespace OrMan.ViewModels.Admin
         {
             XongMonCommand = new RelayCommand<BepOrderItem>(XongMon);
 
-            // [TỐI ƯU] Không gọi LoadData() trực tiếp để tránh đơ lúc khởi tạo
             LoadDataAsync();
 
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(10); // Cập nhật mỗi 10s
+            _timer.Interval = TimeSpan.FromSeconds(10); // 10s cập nhật 1 lần
             _timer.Tick += (s, e) => LoadDataAsync();
             _timer.Start();
         }
 
-        // [QUAN TRỌNG] Chuyển sang xử lý bất đồng bộ
         private async void LoadDataAsync()
         {
             try
             {
-                // 1. Chạy query nặng ở luồng phụ (Background Thread)
                 var data = await Task.Run(() =>
                 {
                     using (var context = new MenuContext())
                     {
-                        var query = from ct in context.ChiTietHoaDons
+                        // Lấy dữ liệu thô
+                        var query = from ct in context.ChiTietHoaDons.Include("MonAn")
                                     join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
                                     where !hd.DaThanhToan && ct.TrangThaiCheBien == 0
                                     orderby hd.NgayTao
-                                    select new BepOrderItem
-                                    {
-                                        SoBan = hd.SoBan,
-                                        ThoiGianOrder = (ct.ThoiGianGoiMon ?? hd.NgayTao).ToString("HH:mm"),
-                                        ChiTiet = ct
-                                    };
-                        // ToList() để thực thi câu lệnh SQL ngay tại đây
-                        return query.ToList();
+                                    select new { ct, hd };
+
+                        var rawList = query.ToList();
+
+                        // [CẢI TIẾN UX] Xử lý dữ liệu ngay tại đây để View chỉ việc hiện
+                        return rawList.Select(item => {
+                            // 1. Tính thời gian chờ
+                            var thoiGianGoi = item.ct.ThoiGianGoiMon ?? item.hd.NgayTao;
+                            var phutCho = (DateTime.Now - thoiGianGoi).TotalMinutes;
+
+                            // 2. Xác định màu sắc khẩn cấp
+                            string mauSac = "#22C55E"; // Xanh (Mặc định)
+                            if (phutCho > 20) mauSac = "#EF4444";      // Đỏ (Khẩn cấp)
+                            else if (phutCho > 10) mauSac = "#F59E0B"; // Vàng (Cảnh báo)
+
+                            // 3. Tách Cấp độ cay từ tên món
+                            // Giả sử tên là "Mỳ Cay (Cấp 1)" -> Tách thành "Mỳ Cay" và "Cấp 1"
+                            string tenDayDu = item.ct.TenMonHienThi ?? "";
+                            string tenGoc = tenDayDu;
+                            string badge = null;
+
+                            int indexMoNgoac = tenDayDu.LastIndexOf("(Cấp");
+                            if (indexMoNgoac > 0)
+                            {
+                                tenGoc = tenDayDu.Substring(0, indexMoNgoac).Trim();
+                                badge = tenDayDu.Substring(indexMoNgoac).Replace("(", "").Replace(")", ""); // Lấy chữ "Cấp X"
+                            }
+
+                            return new BepOrderItem
+                            {
+                                SoBan = item.hd.SoBan,
+                                ChiTiet = item.ct,
+                                TenMonGoc = tenGoc,
+                                BadgeCapDo = badge,
+                                ThoiGianChoHienThi = $"{(int)phutCho} phút",
+                                MauSacCanhBao = mauSac
+                            };
+                        }).ToList();
                     }
                 });
 
-                // 2. Cập nhật UI ở luồng chính (Main Thread)
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Tạo ObservableCollection mới từ danh sách đã lấy
                     DanhSachCanLam = new ObservableCollection<BepOrderItem>(data);
                 });
             }
@@ -87,8 +127,8 @@ namespace OrMan.ViewModels.Admin
         private void XongMon(BepOrderItem item)
         {
             if (item == null || item.ChiTiet == null) return;
-
-            // Xử lý logic cập nhật trạng thái (Nhanh nên có thể để ở UI Thread hoặc chuyển Async nếu muốn)
+            // (Logic XongMon giữ nguyên như cũ, chỉ cần đổi tham số đầu vào là BepOrderItem)
+            // ... Bạn copy lại phần logic trừ kho đã sửa ở câu trả lời trước vào đây ...
             Task.Run(() =>
             {
                 try
@@ -96,11 +136,11 @@ namespace OrMan.ViewModels.Admin
                     using (var context = new MenuContext())
                     {
                         var ct = context.ChiTietHoaDons.Find(item.ChiTiet.Id);
-                        if (ct != null)
+                        if (ct != null && ct.TrangThaiCheBien == 0)
                         {
                             ct.TrangThaiCheBien = 1;
 
-                            // Trừ kho
+                            // --- LOGIC TRỪ KHO ---
                             var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
                             foreach (var congThuc in congThucs)
                             {
@@ -111,35 +151,28 @@ namespace OrMan.ViewModels.Admin
                                     nguyenLieu.SoLuongTon -= soLuongTru;
                                 }
                             }
+                            // ---------------------
+
                             context.SaveChanges();
+                            Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
                         }
                     }
-
-                    // Sau khi lưu xong DB thì load lại dữ liệu
-                    Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
                 }
                 catch (Exception ex)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
-                        MessageBox.Show("Lỗi cập nhật: " + ex.Message));
+                        MessageBox.Show("Lỗi: " + ex.Message));
                 }
             });
         }
 
-        // [QUAN TRỌNG] Hàm này được gọi từ View khi Unloaded
         public void Cleanup()
         {
-            if (_timer != null)
-            {
-                _timer.Stop();
-                _timer = null;
-            }
+            if (_timer != null) { _timer.Stop(); _timer = null; }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

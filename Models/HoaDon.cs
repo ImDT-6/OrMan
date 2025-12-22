@@ -18,7 +18,7 @@ namespace OrMan.Models
         public int SoBan { get; set; }
         public bool DaThanhToan { get; set; }
 
-        protected HoaDon() { }
+        public HoaDon() { }
 
         // [SỬA LẠI DÒNG NÀY]: Thêm ", decimal giamGia = 0" vào cuối
         public HoaDon(string ma, decimal tien, string user, int ban, decimal giamGia = 0)

@@ -249,5 +249,72 @@ namespace OrMan.Services
                 }
             }
         }
+
+        // [QUAN TRỌNG] Hàm Check-in: Vừa đổi trạng thái bàn, vừa tạo Hóa đơn mới
+        public bool CheckInTable(int soBan)
+        {
+            using (var context = new MenuContext())
+            {
+                var ban = context.BanAns.Find(soBan);
+
+                // Chỉ xử lý khi bàn tồn tại và đang Trống
+                if (ban != null && ban.TrangThai == "Trống")
+                {
+                    // 1. Đổi trạng thái bàn
+                    ban.TrangThai = "Có Khách";
+
+                    // 2. Tạo hóa đơn mới ngay lập tức
+                    var hoaDonMoi = new HoaDon
+                    {
+                        // Tạo mã hóa đơn: HD + Thời gian hiện tại (Ví dụ: HD20231025093015)
+                        MaHoaDon = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                        SoBan = soBan,
+                        NgayTao = DateTime.Now,
+                        DaThanhToan = false,
+                        TongTien = 0,
+                        GiamGia = 0
+                    };
+
+                    context.HoaDons.Add(hoaDonMoi);
+
+                    // 3. Lưu tất cả thay đổi vào Database
+                    context.SaveChanges();
+
+                    return true; // Thành công
+                }
+
+                return false; // Thất bại (Bàn không tồn tại hoặc đang có khách)
+            }
+        }
+        // [MỚI] Hàm Hủy Bàn (Dùng khi bấm nhầm Dắt khách hoặc khách bỏ về mà chưa gọi món)
+        public void CancelTableSession(int soBan)
+        {
+            using (var context = new MenuContext())
+            {
+                // 1. Tìm hóa đơn đang mở của bàn này
+                var hd = context.HoaDons.FirstOrDefault(h => h.SoBan == soBan && !h.DaThanhToan);
+                if (hd != null)
+                {
+                    // Xóa luôn hóa đơn rác này
+                    // (Lưu ý: Nếu hóa đơn đã có món ăn, đoạn này cũng sẽ xóa luôn các chi tiết món
+                    // nhờ cơ chế Cascade Delete của SQL, hoặc bạn phải tự xóa chi tiết trước tùy cấu hình DB)
+                    var chiTiet = context.ChiTietHoaDons.Where(ct => ct.MaHoaDon == hd.MaHoaDon);
+                    context.ChiTietHoaDons.RemoveRange(chiTiet);
+                    context.HoaDons.Remove(hd);
+                }
+
+                // 2. Trả trạng thái bàn về Trống
+                var ban = context.BanAns.Find(soBan);
+                if (ban != null)
+                {
+                    ban.TrangThai = "Trống";
+                    ban.YeuCauThanhToan = false;
+                    ban.YeuCauHoTro = null;
+                    ban.DaInTamTinh = false;
+                }
+
+                context.SaveChanges();
+            }
+        }
     }
 }

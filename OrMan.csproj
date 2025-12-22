@@ -261,7 +261,7 @@
     <Compile Include="ViewModels\Admin\DoanhThuViewModel.cs" />
     <Compile Include="ViewModels\Admin\QuanLyBanViewModel.cs" />
     <Compile Include="ViewModels\Admin\ThucDonViewModel.cs" />
-    <Compile Include="ViewModels\KhachHangViewModel.cs" />
+    <Compile Include="ViewModels\Admin\KhachHangViewModel.cs" />
     <Compile Include="ViewModels\User\UserViewModel.cs" />
     <Compile Include="ViewModels\ValidationBase.cs" />
     <Compile Include="Views\Admin\AdminView.xaml.cs">

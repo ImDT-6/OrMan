@@ -90,6 +90,7 @@ namespace OrMan.ViewModels.Admin
         public ICommand DeleteTableCommand { get; private set; }
         public ICommand PrintBillCommand { get; private set; }
         public ICommand SaveTableSettingsCommand { get; private set; }
+        public ICommand CancelTableCommand { get; private set; }
 
         public QuanLyBanViewModel()
         {
@@ -105,6 +106,7 @@ namespace OrMan.ViewModels.Admin
             SelectTableCommand = new RelayCommand<BanAn>(ban => SelectedBan = ban);
             AssignTableCommand = new RelayCommand<object>(AssignTable);
             ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
+            CancelTableCommand = new RelayCommand<object>(CancelTable);
 
             AddTableCommand = new RelayCommand<object>(p =>
             {
@@ -222,14 +224,32 @@ namespace OrMan.ViewModels.Admin
             if (SelectedBan == null) return;
             if (SelectedBan.TrangThai == "Trống")
             {
-                Task.Run(() =>
+                // Chạy bất đồng bộ để UI mượt mà
+                Task.Run(async () =>
                 {
-                    _repository.UpdateStatus(SelectedBan.SoBan, "Có Khách");
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // Gọi hàm mới vừa viết bên Repository
+                    bool thanhCong = _repository.CheckInTable(SelectedBan.SoBan);
+
+                    if (thanhCong)
                     {
-                        SelectedBan.TrangThai = "Có Khách";
-                        MessageBox.Show($"Đã xếp bàn {SelectedBan.SoBan} cho khách!", "Thành công");
-                    });
+                        await Application.Current.Dispatcher.InvokeAsync(async () =>
+                        {
+                            // Cập nhật giao diện
+                            SelectedBan.TrangThai = "Có Khách";
+
+                            // QUAN TRỌNG: Load lại dữ liệu để lấy được MaHoaDon vừa tạo
+                            // Nếu không có dòng này, bạn thêm món sẽ bị lỗi vì chưa nhận diện được hóa đơn mới
+                            await LoadTableDetailsAsync();
+
+                            // (Tùy chọn) Thông báo nhỏ
+                            // MessageBox.Show($"Đã mở bàn {SelectedBan.TenBan}!", "Thành công");
+                        });
+                    }
+                    else
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            MessageBox.Show("Không thể mở bàn. Có thể bàn đang có khách hoặc lỗi kết nối.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error));
+                    }
                 });
             }
             else
@@ -322,6 +342,46 @@ namespace OrMan.ViewModels.Admin
             {
                 _timer.Stop();
                 _timer = null;
+            }
+        }
+
+
+        private void CancelTable(object obj)
+        {
+            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách") return;
+
+            // Cảnh báo trước khi hủy
+            var result = MessageBox.Show($"Bạn có chắc muốn HỦY phục vụ bàn {SelectedBan.TenBan}?\n(Hóa đơn hiện tại sẽ bị xóa hoàn toàn)",
+                                         "Xác nhận hủy",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        // Gọi hàm Repository vừa viết
+                        _repository.CancelTableSession(SelectedBan.SoBan);
+
+                        await Application.Current.Dispatcher.InvokeAsync(async () =>
+                        {
+                            // Cập nhật UI
+                            SelectedBan.TrangThai = "Trống";
+
+                            // Load lại để xóa sạch thông tin hiển thị bên phải
+                            await LoadTableDetailsAsync();
+
+                            MessageBox.Show("Đã hủy bàn thành công. Trạng thái về Trống.", "Thông báo");
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            MessageBox.Show("Lỗi hủy bàn: " + ex.Message));
+                    }
+                });
             }
         }
 
