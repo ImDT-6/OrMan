@@ -576,7 +576,7 @@
                         <DataGridTextColumn Header="Tiền hàng" Binding="{Binding TongTien, StringFormat=N0}" Width="110">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Setter Property="Padding" Value="0,0,10,0"/>
@@ -586,7 +586,7 @@
                         <DataGridTextColumn Header="Giảm giá" Binding="{Binding GiamGia, StringFormat=N0}" Width="100">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="Foreground" Value="#EF4444"/>
                                     <Setter Property="Padding" Value="0,0,10,0"/>
@@ -596,7 +596,7 @@
                         <DataGridTextColumn Header="THỰC THU" Binding="{Binding ThanhTien, StringFormat=N0}" Width="130">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                     <Setter Property="FontSize" Value="14"/>
