@@ -18,7 +18,7 @@
             <helpers:IndexConverter x:Key="IndexConverter"/>
             <helpers:RankToColorConverter x:Key="RankToColorConverter"/>
 
-            <!-- Style cho RadioButton trong thanh trượt (Không có nền, chỉ đổi màu chữ) -->
+            <!-- Style cho RadioButton trong thanh trượt (giữ nguyên) -->
             <Style x:Key="SlidingFilterRadioButtonStyle" TargetType="RadioButton">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
@@ -45,7 +45,31 @@
                 </Setter>
             </Style>
 
-            <!-- Style cho TabControl có thanh trượt -->
+            <!-- [MỚI] Style cho Tooltip Chart: Nhìn hiện đại, nền tối mờ -->
+            <Style x:Key="ChartToolTipStyle" TargetType="ToolTip">
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="HasDropShadow" Value="True"/>
+                <Setter Property="Placement" Value="MousePoint"/>
+                <Setter Property="VerticalOffset" Value="-10"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToolTip">
+                            <Border Background="#E61E293B" CornerRadius="8" BorderBrush="#3B82F6" BorderThickness="1" Padding="10,8">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="Doanh Thu" Foreground="{StaticResource TextSecondary}" FontSize="10" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" 
+                                               Foreground="White" FontWeight="Bold" FontSize="14"/>
+                                </StackPanel>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Style cho TabControl (giữ nguyên) -->
             <Style x:Key="SlidingTabControlStyle" TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Template">
@@ -76,7 +100,7 @@
                 </Setter>
             </Style>
 
-            <!-- Style TabItem -->
+            <!-- Style TabItem (giữ nguyên) -->
             <Style x:Key="DashboardTabItemStyle" TargetType="TabItem">
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -117,7 +141,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 4 Thẻ Summary -->
+            <!-- 4 Thẻ Summary (Giữ nguyên) -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -181,7 +205,7 @@
                 </Border>
             </Grid>
 
-            <!-- Biểu Đồ -->
+            <!-- Biểu Đồ [ĐÃ CHỈNH SỬA] -->
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -267,6 +291,7 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
+                            <!-- Các đường kẻ ngang -->
                             <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -279,6 +304,8 @@
                                 <Border Grid.Row="2" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,0"/>
                                 <Border Grid.Row="3" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,1"/>
                             </Grid>
+
+                            <!-- BIỂU ĐỒ CỘT -->
                             <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Stretch">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -287,17 +314,21 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid VerticalAlignment="Stretch">
+                                        <Grid VerticalAlignment="Stretch" Background="Transparent">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="{Binding EmptyStar}"/>
                                                 <RowDefinition Height="{Binding BarStar}"/>
                                             </Grid.RowDefinitions>
-                                            <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,-20,0,0" Panel.ZIndex="1">
-                                                <Border Background="#20303030" CornerRadius="5" Padding="5,2" HorizontalAlignment="Center" Visibility="{Binding Value, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock Text="{Binding Value, StringFormat='{}{0:N0}'}" FontSize="10" Foreground="White"/>
-                                                </Border>
-                                            </StackPanel>
-                                            <Border Grid.Row="1" CornerRadius="4,4,0,0" ToolTip="{Binding TooltipText}" MinHeight="2" VerticalAlignment="Stretch">
+
+                                            <!-- [CẬP NHẬT] Cột Bar chính -->
+                                            <!-- ĐÃ THÊM: ToolTipService.InitialShowDelay="10" để hiện nhanh hơn -->
+                                            <!-- ĐÃ THÊM: ToolTipService.ShowDuration="10000" để hiện lâu hơn -->
+                                            <Border x:Name="BarColumn" Grid.Row="1" CornerRadius="4,4,0,0" MinHeight="2" VerticalAlignment="Stretch"
+                                                    ToolTipService.InitialShowDelay="10"
+                                                    ToolTipService.ShowDuration="10000">
+                                                <Border.ToolTip>
+                                                    <ToolTip Content="{Binding TooltipText}" Style="{StaticResource ChartToolTipStyle}"/>
+                                                </Border.ToolTip>
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
                                                         <GradientStop Color="#3B82F6" Offset="0"/>
@@ -306,9 +337,30 @@
                                                 </Border.Background>
                                             </Border>
                                         </Grid>
+
+                                        <!-- Hiệu ứng khi rê chuột vào cột: Cột sáng lên -->
+                                        <DataTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="BarColumn" Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                            <GradientStop Color="#60A5FA" Offset="0"/>
+                                                            <GradientStop Color="#93C5FD" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter TargetName="BarColumn" Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect Color="#60A5FA" BlurRadius="15" ShadowDepth="0" Opacity="0.6"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
+                            <!-- Nhãn trục hoành -->
                             <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -327,7 +379,7 @@
             </Border>
         </Grid>
 
-        <!-- CỘT PHẢI (Cần xử lý & Tab Góp ý/Top món) -->
+        <!-- CỘT PHẢI (Cần xử lý & Tab Góp ý/Top món) - Giữ nguyên -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -449,7 +501,7 @@
                 </Grid>
             </Border>
 
-            <!-- TABCONTROL -->
+            <!-- TABCONTROL (Giữ nguyên) -->
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="15">
                 <TabControl x:Name="FeedbackTabControl" 
                             Style="{StaticResource SlidingTabControlStyle}"
