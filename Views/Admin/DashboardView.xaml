@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:OrMan.ViewModels"
              xmlns:helpers="clr-namespace:OrMan.Helpers"
+             xmlns:local="clr-namespace:OrMan.Views.Admin"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100"
              FontFamily="Segoe UI">
@@ -17,6 +18,11 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <helpers:IndexConverter x:Key="IndexConverter"/>
             <helpers:RankToColorConverter x:Key="RankToColorConverter"/>
+
+            <!-- [ĐÃ CẬP NHẬT] Các Converter mới -->
+            <local:RequestTypeToBrushConverter x:Key="RequestTypeToBrushConverter"/>
+            <local:RequestCollectionToStatusConverter x:Key="RequestCollectionToStatusConverter"/>
+            <local:BanAnToDisplayStringConverter x:Key="BanAnToDisplayStringConverter"/>
 
             <!-- Style cho RadioButton trong thanh trượt (giữ nguyên) -->
             <Style x:Key="SlidingFilterRadioButtonStyle" TargetType="RadioButton">
@@ -45,7 +51,7 @@
                 </Setter>
             </Style>
 
-            <!-- [MỚI] Style cho Tooltip Chart: Nhìn hiện đại, nền tối mờ -->
+            <!-- Style cho Tooltip Chart -->
             <Style x:Key="ChartToolTipStyle" TargetType="ToolTip">
                 <Setter Property="OverridesDefaultStyle" Value="True"/>
                 <Setter Property="HasDropShadow" Value="True"/>
@@ -83,14 +89,12 @@
 
                                 <Grid Grid.Row="0">
                                     <TabPanel IsItemsHost="True" Background="Transparent" ZIndex="1"/>
-                                    <!-- Thanh trượt indicator (Vẫn giữ màu Vàng) -->
                                     <Border x:Name="PART_Indicator" Height="3" VerticalAlignment="Bottom" HorizontalAlignment="Left"
                                             Background="{StaticResource WarningYellow}" CornerRadius="1.5" Width="0">
                                         <Border.RenderTransform>
                                             <TranslateTransform x:Name="IndicatorTransform" X="0"/>
                                         </Border.RenderTransform>
                                     </Border>
-                                    <!-- Đường kẻ mờ bên dưới -->
                                     <Border BorderBrush="#30FFFFFF" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
                                 </Grid>
                                 <ContentPresenter ContentSource="SelectedContent" Grid.Row="1"/>
@@ -141,7 +145,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 4 Thẻ Summary (Giữ nguyên) -->
+            <!-- 4 Thẻ Summary -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -153,7 +157,6 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Doanh Thu -->
                 <Border Grid.Column="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
@@ -165,7 +168,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Đơn Hàng -->
                 <Border Grid.Column="2" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
@@ -177,7 +179,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Bàn Hoạt Động -->
                 <Border Grid.Column="4" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
@@ -189,7 +190,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Thẻ Đánh Giá -->
                 <Border Grid.Column="6" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="15" Padding="15">
                     <StackPanel VerticalAlignment="Center">
                         <Grid Margin="0,0,0,5">
@@ -205,7 +205,7 @@
                 </Border>
             </Grid>
 
-            <!-- Biểu Đồ [ĐÃ CHỈNH SỬA] -->
+            <!-- Biểu Đồ -->
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="25">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -219,14 +219,11 @@
                             <TextBlock Text="Theo dõi biến động doanh thu theo thời gian thực" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0"/>
                         </StackPanel>
 
-                        <!-- [ĐÃ CẬP NHẬT] Thanh lọc thời gian với hiệu ứng trượt (Sliding Pill) -->
                         <Border HorizontalAlignment="Right" VerticalAlignment="Top" 
                                 Background="#10FFFFFF" CornerRadius="16" Padding="4">
                             <Grid x:Name="FilterGrid">
-                                <!-- Lớp nền trượt (Indicator) -->
                                 <Border x:Name="FilterIndicator" HorizontalAlignment="Left" VerticalAlignment="Stretch"
                                         CornerRadius="12" Width="0" Opacity="0">
-                                    <!-- Mặc định ẩn, hiện lên khi load -->
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                             <GradientStop Color="#3B82F6" Offset="0"/>
@@ -241,7 +238,6 @@
                                     </Border.RenderTransform>
                                 </Border>
 
-                                <!-- Các nút RadioButton (Nằm đè lên trên Indicator) -->
                                 <StackPanel Orientation="Horizontal">
                                     <RadioButton Content="Hôm nay" IsChecked="True" 
                                                  Style="{StaticResource SlidingFilterRadioButtonStyle}" 
@@ -291,7 +287,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-                            <!-- Các đường kẻ ngang -->
                             <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -305,7 +300,6 @@
                                 <Border Grid.Row="3" BorderBrush="#10FFFFFF" BorderThickness="0,1,0,1"/>
                             </Grid>
 
-                            <!-- BIỂU ĐỒ CỘT -->
                             <ItemsControl Grid.Row="0" ItemsSource="{Binding DoanhThuTheoGio}" VerticalAlignment="Stretch">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -320,9 +314,6 @@
                                                 <RowDefinition Height="{Binding BarStar}"/>
                                             </Grid.RowDefinitions>
 
-                                            <!-- [CẬP NHẬT] Cột Bar chính -->
-                                            <!-- ĐÃ THÊM: ToolTipService.InitialShowDelay="10" để hiện nhanh hơn -->
-                                            <!-- ĐÃ THÊM: ToolTipService.ShowDuration="10000" để hiện lâu hơn -->
                                             <Border x:Name="BarColumn" Grid.Row="1" CornerRadius="4,4,0,0" MinHeight="2" VerticalAlignment="Stretch"
                                                     ToolTipService.InitialShowDelay="10"
                                                     ToolTipService.ShowDuration="10000">
@@ -337,8 +328,6 @@
                                                 </Border.Background>
                                             </Border>
                                         </Grid>
-
-                                        <!-- Hiệu ứng khi rê chuột vào cột: Cột sáng lên -->
                                         <DataTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="BarColumn" Property="Background">
@@ -360,7 +349,6 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!-- Nhãn trục hoành -->
                             <ItemsControl Grid.Row="1" ItemsSource="{Binding DoanhThuTheoGio}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -379,15 +367,23 @@
             </Border>
         </Grid>
 
-        <!-- CỘT PHẢI (Cần xử lý & Tab Góp ý/Top món) - Giữ nguyên -->
+        <!-- CỘT PHẢI -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Cần Xử Lý -->
-            <Border Grid.Row="0" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource DangerRed}" BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
+            <!-- Cần Xử Lý [ĐÃ CẬP NHẬT HEADER DÙNG MULTIBINDING] -->
+            <!-- Viền Header cập nhật tức thì -->
+            <Border Grid.Row="0" Background="{StaticResource GlassBackground}" 
+                    BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
+                <Border.BorderBrush>
+                    <MultiBinding Converter="{StaticResource RequestCollectionToStatusConverter}" ConverterParameter="Brush">
+                        <Binding Path="BanCanXuLy"/>
+                        <Binding Path="BanCanXuLy.Count"/>
+                    </MultiBinding>
+                </Border.BorderBrush>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -395,9 +391,38 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                        <TextBlock Text="⚠️ CẦN XỬ LÝ GẤP" FontSize="16" FontWeight="Bold" Foreground="{StaticResource DangerRed}" VerticalAlignment="Center"/>
-                        <Border Background="#20EF4444" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding BanCanXuLy.Count}" Foreground="{StaticResource DangerRed}" FontWeight="Bold" FontSize="12"/>
+                        <!-- Text Header cập nhật tức thì -->
+                        <TextBlock FontSize="16" FontWeight="Bold" VerticalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{StaticResource RequestCollectionToStatusConverter}" ConverterParameter="Text">
+                                    <Binding Path="BanCanXuLy"/>
+                                    <Binding Path="BanCanXuLy.Count"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                            <TextBlock.Foreground>
+                                <MultiBinding Converter="{StaticResource RequestCollectionToStatusConverter}" ConverterParameter="Brush">
+                                    <Binding Path="BanCanXuLy"/>
+                                    <Binding Path="BanCanXuLy.Count"/>
+                                </MultiBinding>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+
+                        <!-- Badge số lượng cập nhật màu nền tức thì -->
+                        <Border CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource RequestCollectionToStatusConverter}" ConverterParameter="BrushLight">
+                                    <Binding Path="BanCanXuLy"/>
+                                    <Binding Path="BanCanXuLy.Count"/>
+                                </MultiBinding>
+                            </Border.Background>
+                            <TextBlock Text="{Binding BanCanXuLy.Count}" FontWeight="Bold" FontSize="12">
+                                <TextBlock.Foreground>
+                                    <MultiBinding Converter="{StaticResource RequestCollectionToStatusConverter}" ConverterParameter="Brush">
+                                        <Binding Path="BanCanXuLy"/>
+                                        <Binding Path="BanCanXuLy.Count"/>
+                                    </MultiBinding>
+                                </TextBlock.Foreground>
+                            </TextBlock>
                         </Border>
                     </StackPanel>
 
@@ -409,16 +434,18 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
-                                            <Border x:Name="ItemBorder" CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="1">
+                                            <!-- BORDER CHÍNH: Bind vào 'toàn bộ object' (.) để converter tự check loại -->
+                                            <Border x:Name="ItemBorder" CornerRadius="12" 
+                                                    Background="{Binding ., Converter={StaticResource RequestTypeToBrushConverter}, ConverterParameter=Light}" 
+                                                    BorderBrush="Transparent" BorderThickness="1">
                                                 <ContentPresenter/>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="ItemBorder" Property="Background" Value="#25EF4444"/>
-                                                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#50EF4444"/>
+                                                    <Setter TargetName="ItemBorder" Property="Background" Value="{Binding ., Converter={StaticResource RequestTypeToBrushConverter}, ConverterParameter=Hover}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="ItemBorder" Property="Background" Value="#25EF4444"/>
+                                                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#50FFFFFF"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -428,26 +455,38 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#10EF4444" CornerRadius="12" Padding="10">
+                                <Border CornerRadius="12" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="45" Height="45" CornerRadius="12" Background="{StaticResource DangerRed}">
+
+                                        <!-- ICON BÀN -->
+                                        <Border Grid.Column="0" Width="45" Height="45" CornerRadius="12" 
+                                                Background="{Binding ., Converter={StaticResource RequestTypeToBrushConverter}, ConverterParameter=Solid}">
                                             <Grid>
                                                 <TextBlock Text="{Binding SoBan}" Foreground="White" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
+
                                         <StackPanel Grid.Column="1" Margin="15,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding TenBan}" Foreground="White" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,3"/>
-                                            <TextBlock Text="{Binding HienThiYeuCau}" Foreground="#FF8A80" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                            <!-- TEXT YÊU CẦU: Dùng converter mới để hiện "Thanh toán & Hỗ trợ" -->
+                                            <TextBlock Text="{Binding Converter={StaticResource BanAnToDisplayStringConverter}}" 
+                                                       Foreground="#FF8A80" FontSize="13" TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Xử lý" Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" VerticalAlignment="Center" Height="32" FontSize="13" FontWeight="SemiBold" Foreground="White" Cursor="Hand" BorderThickness="0">
+
+                                        <!-- NÚT XỬ LÝ -->
+                                        <Button Grid.Column="2" Content="Xử lý" 
+                                                Command="{Binding DataContext.ProcessRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}" 
+                                                VerticalAlignment="Center" Height="32" FontSize="13" FontWeight="SemiBold" Foreground="White" Cursor="Hand" BorderThickness="0"
+                                                Background="{Binding ., Converter={StaticResource RequestTypeToBrushConverter}, ConverterParameter=Solid}">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="BtnBorder" CornerRadius="16" Background="#EF4444" RenderTransformOrigin="0.5,0.5">
+                                                    <Border x:Name="BtnBorder" CornerRadius="16" Background="{TemplateBinding Background}" RenderTransformOrigin="0.5,0.5">
                                                         <Border.RenderTransform>
                                                             <ScaleTransform x:Name="ScaleTrans" ScaleX="1" ScaleY="1"/>
                                                         </Border.RenderTransform>
@@ -455,10 +494,10 @@
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="BtnBorder" Property="Background" Value="#FF6B6B"/>
+                                                            <Setter TargetName="BtnBorder" Property="Opacity" Value="0.85"/>
                                                         </Trigger>
                                                         <Trigger Property="IsPressed" Value="True">
-                                                            <Setter TargetName="BtnBorder" Property="Background" Value="#C62828"/>
+                                                            <Setter TargetName="BtnBorder" Property="Opacity" Value="0.7"/>
                                                             <Trigger.EnterActions>
                                                                 <BeginStoryboard>
                                                                     <Storyboard>

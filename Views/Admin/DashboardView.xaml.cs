@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation; // [QUAN TRỌNG] Thêm dòng này để chạy Animation
+using System.Windows.Media.Animation;
 using OrMan.Models;
 using OrMan.ViewModels;
+using System.Windows.Data;
+using System.Globalization;
 
 namespace OrMan.Views.Admin
 {
@@ -17,7 +21,6 @@ namespace OrMan.Views.Admin
             var vm = new DashboardViewModel();
             this.DataContext = vm;
 
-            // Lắng nghe yêu cầu chuyển trang từ ViewModel
             vm.RequestNavigationToTable += (ban) =>
             {
                 var adminView = FindParent<AdminView>(this);
@@ -38,7 +41,7 @@ namespace OrMan.Views.Admin
             }
         }
 
-        // --- [MỚI] XỬ LÝ SLIDING FILTER (THANH LỌC THỜI GIAN - VIÊN THUỐC TRƯỢT) ---
+        // --- XỬ LÝ SLIDING FILTER ---
         private void FilterOption_Click(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton btn)
@@ -47,53 +50,45 @@ namespace OrMan.Views.Admin
             }
         }
 
-        // Sự kiện Loaded của nút "Hôm nay" (hoặc nút mặc định) để khởi tạo vị trí Indicator ban đầu
         private void FilterOption_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton btn && btn.IsChecked == true)
             {
-                // Gọi ngay để set vị trí ban đầu
-                // Dùng Dispatcher để đảm bảo UI đã render xong layout mới tính toán vị trí chính xác
                 Dispatcher.BeginInvoke(new Action(() => UpdateFilterIndicator(btn)), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
 
         private void UpdateFilterIndicator(RadioButton selectedButton)
         {
-            // Kiểm tra các element có tồn tại trong XAML không (FilterIndicator & FilterGrid phải có x:Name trong XAML)
             if (FilterIndicator == null || FilterGrid == null) return;
-
-            // 1. Hiện Indicator (ban đầu Opacity=0 để tránh hiện sai vị trí lúc load)
             FilterIndicator.Opacity = 1;
 
-            try
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                // 2. Tính vị trí tương đối của nút được chọn so với container cha (FilterGrid)
-                Point relativeLocation = selectedButton.TranslatePoint(new Point(0, 0), FilterGrid);
-
-                // 3. Animation thay đổi chiều rộng (Width) của viên thuốc cho bằng chiều rộng nút
-                DoubleAnimation widthAnimation = new DoubleAnimation
+                try
                 {
-                    To = selectedButton.ActualWidth,
-                    Duration = TimeSpan.FromSeconds(0.3), // Thời gian chạy animation (0.3s)
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } // Hiệu ứng trượt mượt mà (nhanh đầu, chậm dần cuối)
-                };
-                FilterIndicator.BeginAnimation(WidthProperty, widthAnimation);
+                    Point relativeLocation = selectedButton.TranslatePoint(new Point(0, 0), FilterGrid);
+                    DoubleAnimation widthAnimation = new DoubleAnimation
+                    {
+                        To = selectedButton.ActualWidth,
+                        Duration = TimeSpan.FromSeconds(0.3),
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                    };
+                    FilterIndicator.BeginAnimation(WidthProperty, widthAnimation);
 
-                // 4. Animation di chuyển (Translate X) viên thuốc đến vị trí nút mới
-                DoubleAnimation translateAnimation = new DoubleAnimation
-                {
-                    To = relativeLocation.X,
-                    Duration = TimeSpan.FromSeconds(0.3),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                FilterIndicatorTransform.BeginAnimation(TranslateTransform.XProperty, translateAnimation);
-            }
-            catch { }
+                    DoubleAnimation translateAnimation = new DoubleAnimation
+                    {
+                        To = relativeLocation.X,
+                        Duration = TimeSpan.FromSeconds(0.3),
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                    };
+                    FilterIndicatorTransform.BeginAnimation(TranslateTransform.XProperty, translateAnimation);
+                }
+                catch { }
+            }), System.Windows.Threading.DispatcherPriority.Render);
         }
 
-        // --- XỬ LÝ SLIDING TAB (THANH TRƯỢT MÀU VÀNG Ở DƯỚI) ---
-
+        // --- XỬ LÝ SLIDING TAB ---
         private void FeedbackTabControl_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateIndicator();
@@ -101,7 +96,6 @@ namespace OrMan.Views.Admin
 
         private void FeedbackTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Chỉ chạy hiệu ứng khi sự kiện đến từ chính TabControl (tránh nhầm với sự kiện click của ListBox con bên trong)
             if (e.Source is TabControl)
             {
                 UpdateIndicator();
@@ -110,26 +104,20 @@ namespace OrMan.Views.Admin
 
         private void UpdateIndicator()
         {
-            // Tìm TabItem đang được chọn
             if (!(FeedbackTabControl.SelectedItem is TabItem selectedTab)) return;
 
-            // Tìm thanh trượt (PART_Indicator) trong template của TabControl
             var indicator = FeedbackTabControl.Template.FindName("PART_Indicator", FeedbackTabControl) as Border;
             if (indicator == null) return;
 
-            // Tìm Transform để di chuyển thanh trượt
             var transform = indicator.RenderTransform as TranslateTransform;
             if (transform == null) return;
 
-            // Dùng Dispatcher để đảm bảo UI đã render xong mới tính toán vị trí
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    // Lấy vị trí X của tab hiện tại so với TabControl cha
                     Point relativeLocation = selectedTab.TranslatePoint(new Point(0, 0), FeedbackTabControl);
 
-                    // Animation 1: Thay đổi chiều rộng (Width) cho khớp với độ rộng của tab mới
                     DoubleAnimation widthAnimation = new DoubleAnimation
                     {
                         To = selectedTab.ActualWidth,
@@ -138,7 +126,6 @@ namespace OrMan.Views.Admin
                     };
                     indicator.BeginAnimation(WidthProperty, widthAnimation);
 
-                    // Animation 2: Di chuyển (Translate X) đến vị trí mới
                     DoubleAnimation translateAnimation = new DoubleAnimation
                     {
                         To = relativeLocation.X,
@@ -150,7 +137,6 @@ namespace OrMan.Views.Admin
                 catch { }
             }), System.Windows.Threading.DispatcherPriority.Render);
         }
-        // ----------------------------------------
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
@@ -159,5 +145,162 @@ namespace OrMan.Views.Admin
             if (parentObject is T parent) return parent;
             return FindParent<T>(parentObject);
         }
+    }
+
+    // [CẬP NHẬT] Converter màu sắc: Hỗ trợ nhận cả string HOẶC đối tượng BanAn để tô màu chính xác
+    public class RequestTypeToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string type = "";
+
+            // Nếu value là BanAn -> Tự suy ra loại yêu cầu
+            if (value is BanAn ban)
+            {
+                if (ban.YeuCauThanhToan && !string.IsNullOrEmpty(ban.YeuCauHoTro)) type = "hỗn hợp";
+                else if (ban.YeuCauThanhToan) type = "thanh toán";
+                else if (!string.IsNullOrEmpty(ban.YeuCauHoTro)) type = "hỗ trợ";
+                else type = ban.HienThiYeuCau ?? "";
+            }
+            else
+            {
+                type = value as string ?? "";
+            }
+
+            string param = parameter as string ?? "Solid";
+            type = type.ToLower();
+
+            Color baseColor;
+
+            if (type.Contains("hỗn hợp"))
+                baseColor = (Color)ColorConverter.ConvertFromString("#F59E0B"); // Cam (Vừa gọi món vừa thanh toán)
+            else if (type.Contains("thanh toán") || type.Contains("payment") || type.Contains("tính tiền"))
+                baseColor = (Color)ColorConverter.ConvertFromString("#10B981"); // Green
+            else if (type.Contains("hỗ trợ") || type.Contains("menu") || type.Contains("gọi") || type.Contains("phục vụ"))
+                baseColor = (Color)ColorConverter.ConvertFromString("#3B82F6"); // Blue
+            else if (type.Contains("gấp") || type.Contains("lỗi") || type.Contains("khẩn"))
+                baseColor = (Color)ColorConverter.ConvertFromString("#EF4444"); // Red
+            else
+                baseColor = (Color)ColorConverter.ConvertFromString("#EF4444"); // Mặc định đỏ
+
+            if (param == "Light") baseColor.A = 40;
+            else if (param == "Hover") baseColor.A = 60;
+
+            return new SolidColorBrush(baseColor);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    // [CẬP NHẬT] Converter Header: Dùng MultiValueConverter để fix lỗi cập nhật chậm (Fix số 2)
+    public class RequestCollectionToStatusConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // values[0]: Danh sách (BanCanXuLy)
+            // values[1]: Số lượng (BanCanXuLy.Count) -> Binding cái này để trigger update giao diện ngay lập tức
+
+            var collection = values.FirstOrDefault() as IEnumerable<BanAn>;
+
+            // Xử lý null hoặc rỗng
+            if (collection == null || !collection.Any())
+            {
+                if (parameter as string == "Text") return "DANH SÁCH YÊU CẦU";
+                if (parameter as string == "Brush") return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8"));
+                if (parameter as string == "BrushLight") return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2094A3B8"));
+                return null;
+            }
+
+            int count = collection.Count();
+            bool hasPayment = false;
+            bool hasSupport = false;
+            bool hasExplicitUrgent = false;
+
+            foreach (var ban in collection)
+            {
+                string req = (ban.HienThiYeuCau ?? "").ToLower();
+
+                // Check kỹ cờ bool trực tiếp từ object
+                if (ban.YeuCauThanhToan) hasPayment = true;
+                if (!string.IsNullOrEmpty(ban.YeuCauHoTro)) hasSupport = true;
+
+                if (req.Contains("gấp") || req.Contains("lỗi") || req.Contains("khẩn")) hasExplicitUrgent = true;
+            }
+
+            string colorCode = "#94A3B8";
+            string text = "DANH SÁCH YÊU CẦU";
+
+            // LOGIC ƯU TIÊN:
+            if (hasExplicitUrgent)
+            {
+                colorCode = "#EF4444"; // Red
+                text = "⚠️ CẦN XỬ LÝ GẤP";
+            }
+            else if (count > 4)
+            {
+                colorCode = "#EF4444"; // Red (Quá tải)
+                text = $"⚠️ QUÁ TẢI ({count} YÊU CẦU)";
+            }
+            else if (hasPayment && hasSupport)
+            {
+                colorCode = "#F59E0B"; // Orange (Hỗn hợp)
+                text = "🔔 DANH SÁCH HỖN HỢP";
+            }
+            else if (hasPayment)
+            {
+                colorCode = "#10B981"; // Green
+                text = "🔔 YÊU CẦU THANH TOÁN";
+            }
+            else if (hasSupport)
+            {
+                colorCode = "#3B82F6"; // Blue
+                text = "ℹ️ YÊU CẦU HỖ TRỢ";
+            }
+            else
+            {
+                colorCode = "#F59E0B";
+                text = "📝 DANH SÁCH YÊU CẦU";
+            }
+
+            if (parameter as string == "Text") return text;
+
+            Color color = (Color)ColorConverter.ConvertFromString(colorCode);
+            if (parameter as string == "Brush") return new SolidColorBrush(color);
+
+            if (parameter as string == "BrushLight")
+            {
+                color.A = 40;
+                return new SolidColorBrush(color);
+            }
+
+            return null;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    // [MỚI] Converter hiển thị Text thông minh cho từng dòng (Fix lỗi 1)
+    public class BanAnToDisplayStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is BanAn ban)
+            {
+                bool hasPayment = ban.YeuCauThanhToan;
+                bool hasSupport = !string.IsNullOrEmpty(ban.YeuCauHoTro);
+
+                // Ưu tiên hiển thị cả 2 nếu có
+                if (hasPayment && hasSupport)
+                    return $"Thanh toán & {ban.YeuCauHoTro}";
+
+                if (hasPayment) return "Yêu cầu thanh toán";
+                if (hasSupport) return ban.YeuCauHoTro;
+
+                return ban.HienThiYeuCau; // Fallback
+            }
+            return "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 }
