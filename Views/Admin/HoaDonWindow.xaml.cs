@@ -100,7 +100,9 @@ namespace OrMan.Views.Admin
             {
                 FlowDocument doc = new FlowDocument();
                 doc.PagePadding = new Thickness(10);
-                doc.ColumnWidth = printDialog.PrintableAreaWidth;
+                // [MỚI] Cố định Pagewidth để khi in không bị thay đổi
+                doc.PageWidth = 400;
+                doc.ColumnWidth = 380;
                 doc.FontFamily = new FontFamily("Arial");
 
                 // 1. Tiêu đề
@@ -112,26 +114,49 @@ namespace OrMan.Views.Admin
 
                 // 2. Thông tin chung
                 Paragraph info = new Paragraph();
-                info.FontSize = 12;
+                info.FontSize = 14;
                 info.Inlines.Add(new Run($"Bàn: {_tenBan}\n"));
                 info.Inlines.Add(new Run($"{txtMaHD.Text}\n"));
                 info.Inlines.Add(new Run($"Ngày: {txtNgay.Text}"));
                 info.TextAlignment = TextAlignment.Left;
                 doc.Blocks.Add(info);
 
-                // 3. Kẻ ngang
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")) { TextAlignment = TextAlignment.Center, Margin = new Thickness(0) });
-
-                // 4. Danh sách món
+                // 3. Danh sách món
                 var listMon = ListMonAn.ItemsSource as IEnumerable<OrMan.Models.ChiTietHoaDon>;
+                Table table = new Table();
+                table.CellSpacing = 0;
+                table.Columns.Add(new TableColumn() { Width = new GridLength(3, GridUnitType.Star) });
+                table.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
+                table.Columns.Add(new TableColumn() { Width = new GridLength(1.5, GridUnitType.Star) });
+
+                // [Mới] Thêm Header với top và bottom border
+                TableRowGroup headerGroup = new TableRowGroup();
+                TableRow headerRow = new TableRow();
+                headerRow.FontWeight = FontWeights.Bold;
+
+                TableCell headerCell1 = new TableCell(new Paragraph(new Run("Tên món")) { TextAlignment = TextAlignment.Left });
+                headerCell1.Padding = new Thickness(0, 5, 0, 5);
+                headerCell1.BorderBrush = Brushes.Black;
+                headerCell1.BorderThickness = new Thickness(0, 1, 0, 1); //Tạo border trên và dưới
+                headerRow.Cells.Add(headerCell1);
+
+                TableCell headerCell2 = new TableCell(new Paragraph(new Run("SL")) { TextAlignment = TextAlignment.Center });
+                headerCell2.Padding = new Thickness(0, 5, 0, 5);
+                headerCell2.BorderBrush = Brushes.Black;
+                headerCell2.BorderThickness = new Thickness(0, 1, 0, 1);
+                headerRow.Cells.Add(headerCell2);
+
+                TableCell headerCell3 = new TableCell(new Paragraph(new Run("Thành tiền")) { TextAlignment = TextAlignment.Right });
+                headerCell3.Padding = new Thickness(0, 5, 0, 5);
+                headerCell3.BorderBrush = Brushes.Black;
+                headerCell3.BorderThickness = new Thickness(0, 1, 0, 1);
+                headerRow.Cells.Add(headerCell3);
+
+                headerGroup.Rows.Add(headerRow);
+                table.RowGroups.Add(headerGroup);
+
                 if (listMon != null)
                 {
-                    Table table = new Table();
-                    table.CellSpacing = 0;
-                    table.Columns.Add(new TableColumn() { Width = new GridLength(3, GridUnitType.Star) });
-                    table.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
-                    table.Columns.Add(new TableColumn() { Width = new GridLength(1.5, GridUnitType.Star) });
-
                     TableRowGroup group = new TableRowGroup();
                     foreach (var item in listMon)
                     {
@@ -145,11 +170,20 @@ namespace OrMan.Views.Admin
                     doc.Blocks.Add(table);
                 }
 
-                // 5. Footer tính tiền
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------")) { TextAlignment = TextAlignment.Center, Margin = new Thickness(0) });
+                // 4. Footer tính tiền
+
+                // [Mới] Đổi đường thẳng thay vì gạch nối
+                Border line1 = new Border();
+                line1.BorderBrush = Brushes.Black;
+                line1.BorderThickness = new Thickness(0, 1, 0, 0);
+                line1.Margin = new Thickness(0, 5, 0, 5);
+                line1.Width = 400;
+
+                BlockUIContainer lineContainer2 = new BlockUIContainer(line1);
+                doc.Blocks.Add(lineContainer2);
 
                 Paragraph pTong = new Paragraph();
-                pTong.Inlines.Add(new Run("Tổng tiền:   "));
+                pTong.Inlines.Add(new Run("Tổng tiền hàng:   "));
                 pTong.Inlines.Add(new Run(txtTongTienHang.Text));
                 pTong.TextAlignment = TextAlignment.Right;
                 pTong.Margin = new Thickness(0, 5, 0, 0);
@@ -158,22 +192,32 @@ namespace OrMan.Views.Admin
                 if (gridGiamGia.Visibility == Visibility.Visible)
                 {
                     Paragraph pGiam = new Paragraph();
-                    pGiam.Inlines.Add(new Run("Voucher:    "));
+                    pGiam.Inlines.Add(new Run("Voucher / Giảm giá:    "));
                     pGiam.Inlines.Add(new Run(txtGiamGia.Text) { FontStyle = FontStyles.Italic });
                     pGiam.TextAlignment = TextAlignment.Right;
                     pGiam.Margin = new Thickness(0);
                     doc.Blocks.Add(pGiam);
                 }
 
+                // [Mới] Đổi đường thẳng thay vì gạch nối
+                Border line2 = new Border();
+                line2.BorderBrush = Brushes.Black;
+                line2.BorderThickness = new Thickness(0, 1, 0, 0);
+                line2.Margin = new Thickness(0, 5, 0, 5);
+                line2.Width = 600;
+
+                BlockUIContainer lineContainer3 = new BlockUIContainer(line2);
+                doc.Blocks.Add(lineContainer3);
+
                 Paragraph pFinal = new Paragraph();
-                pFinal.FontSize = 14;
+                pFinal.FontSize = 18;
                 pFinal.FontWeight = FontWeights.Bold;
                 pFinal.Inlines.Add(new Run("THANH TOÁN: " + txtThanhToan.Text));
                 pFinal.TextAlignment = TextAlignment.Right;
                 pFinal.Margin = new Thickness(0, 5, 0, 10);
                 doc.Blocks.Add(pFinal);
 
-                // --- [MỚI] 6. IN MÃ QR CODE VÀO BILL (CHỈ KHI CHUYỂN KHOẢN) ---
+                // --- [MỚI] 5. IN MÃ QR CODE VÀO BILL (CHỈ KHI CHUYỂN KHOẢN) ---
                 if (_hinhThucThanhToan == "Chuyển khoản" && imgQR.Source != null)
                 {
                     // Kẻ ngang ngăn cách
@@ -204,7 +248,7 @@ namespace OrMan.Views.Admin
                 }
                 // -------------------------------------------------------------
 
-                // 7. Lời cảm ơn
+                // 6. Lời cảm ơn
                 Paragraph footer = new Paragraph(new Run("\nCảm ơn quý khách & Hẹn gặp lại!"));
                 footer.FontSize = 10;
                 footer.FontStyle = FontStyles.Italic;
