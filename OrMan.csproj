@@ -229,14 +229,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Helpers\LanguageHelper.cs" />
-    <Compile Include="Helpers\IndexConverter.cs" />
-    <Compile Include="Helpers\RankToColorConverter.cs" />
+    <Compile Include="Converter\LanguageHelper.cs" />
+    <Compile Include="Converter\IndexConverter.cs" />
+    <Compile Include="Converter\RankToColorConverter.cs" />
     <Compile Include="Data\MenuContext.cs" />
-    <Compile Include="Helpers\HeightConverter.cs" />
-    <Compile Include="Helpers\NullToBoolConverter.cs" />
-    <Compile Include="Helpers\PasswordBoxHelper.cs" />
-    <Compile Include="Helpers\SelectedConverter.cs" />
+    <Compile Include="Converter\HeightConverter.cs" />
+    <Compile Include="Converter\NullToBoolConverter.cs" />
+    <Compile Include="Converter\PasswordBoxHelper.cs" />
+    <Compile Include="Converter\SelectedConverter.cs" />
     <Compile Include="Models\BanAn.cs" />
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\ChiTietHoaDon.cs" />
@@ -249,10 +249,10 @@
     <Compile Include="Models\NguoiDung.cs" />
     <Compile Include="Models\NguyenLieu.cs" />
     <Compile Include="Models\VoucherCuaKhach.cs" />
-    <Compile Include="Services\BanAnRepository.cs" />
-    <Compile Include="Services\DatabaseInitializer.cs" />
-    <Compile Include="Services\DoanhThuRepository.cs" />
-    <Compile Include="Services\ThucDonRepository.cs" />
+    <Compile Include="Repository\BanAnRepository.cs" />
+    <Compile Include="Repository\DatabaseInitializer.cs" />
+    <Compile Include="Repository\DoanhThuRepository.cs" />
+    <Compile Include="Repository\ThucDonRepository.cs" />
     <Compile Include="ViewModels\Admin\AdminViewModel.cs" />
     <Compile Include="ViewModels\Admin\BepViewModel.cs" />
     <Compile Include="ViewModels\Admin\KhoViewModel.cs" />
@@ -346,7 +346,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Converter\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -480,9 +480,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="AppIcon2.ico" />
   </ItemGroup>
