@@ -93,6 +93,12 @@
     <sys:String x:Key="Str_PlsSelectStar">Vui lòng chọn số sao</sys:String>
 
     <sys:String x:Key="Str_WhatYouLike">Bạn hài lòng nhất về điều gì?</sys:String>
-    
+
+
+    <sys:String x:Key="Str_SpiceLevel">Cấp độ cay</sys:String>
+    <sys:String x:Key="Str_Notes">Ghi chú</sys:String>
+    <sys:String x:Key="Str_Quantity">Số lượng</sys:String>
+    <sys:String x:Key="Str_Btn_AddToCart">Thêm vào giỏ - {0:N0} đ</sys:String>
+
 </ResourceDictionary>
     
