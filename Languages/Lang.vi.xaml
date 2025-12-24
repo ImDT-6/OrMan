@@ -69,5 +69,30 @@
     <sys:String x:Key="Str_Msg_NewPhoneRegister">Số điện thoại mới. Nhập tên để tạo tài khoản!</sys:String>
     <sys:String x:Key="Str_Btn_Register">ĐĂNG KÝ</sys:String>
     <sys:String x:Key="Str_Msg_AskLoyalty">Bạn có muốn tích điểm cho đơn hàng này không?</sys:String>
+
+    <sys:String x:Key="Str_ReviewTitle">Đánh Giá &amp; Góp Ý</sys:String>
+    <sys:String x:Key="Str_ReviewSubtitle">Trải nghiệm hôm nay của bạn thế nào?</sys:String>
+    <sys:String x:Key="Str_ImprovementHeader">Chúng tôi cần cải thiện điều gì?</sys:String>
+    <sys:String x:Key="Str_CommentPlaceholder">Chia sẻ thêm với chúng tôi... (Tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Btn_SubmitReview">Gửi Đánh Giá</sys:String>
+
+    <sys:String x:Key="Str_Tag_Hygiene">Vệ sinh kém</sys:String>
+    <sys:String x:Key="Str_Tag_Attitude">Nhân viên thái độ</sys:String>
+    <sys:String x:Key="Str_Tag_Food">Món ăn tệ</sys:String>
+    <sys:String x:Key="Str_Tag_Wait">Chờ quá lâu</sys:String>
+    <sys:String x:Key="Str_Tag_Price">Giá đắt</sys:String>
+    <sys:String x:Key="Str_Tag_Noise">Ồn ào</sys:String>
+    <sys:String x:Key="Str_Tag_Hot">Nóng nực</sys:String>
+
+    <sys:String x:Key="Str_Rate_1">Thất vọng 😟</sys:String>
+    <sys:String x:Key="Str_Rate_2">Tệ 😐</sys:String>
+    <sys:String x:Key="Str_Rate_3">Bình thường 🙂</sys:String>
+    <sys:String x:Key="Str_Rate_4">Hài lòng 😄</sys:String>
+    <sys:String x:Key="Str_Rate_5">Tuyệt vời 😍</sys:String>
+
+    <sys:String x:Key="Str_PlsSelectStar">Vui lòng chọn số sao</sys:String>
+
+    <sys:String x:Key="Str_WhatYouLike">Bạn hài lòng nhất về điều gì?</sys:String>
+    
 </ResourceDictionary>
     

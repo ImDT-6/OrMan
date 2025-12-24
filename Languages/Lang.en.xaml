@@ -67,4 +67,36 @@
     <sys:String x:Key="Str_Msg_NewPhoneRegister">New phone number. Please enter name to register!</sys:String>
     <sys:String x:Key="Str_Btn_Register">REGISTER</sys:String>
     <sys:String x:Key="Str_Msg_AskLoyalty">Do you want to earn points for this order?</sys:String>
+
+    <sys:String x:Key="Str_ReviewTitle">Review &amp; Feedback</sys:String>
+    <sys:String x:Key="Str_ReviewSubtitle">How was your experience today?</sys:String>
+    <sys:String x:Key="Str_ImprovementHeader">What can we improve?</sys:String>
+    <sys:String x:Key="Str_CommentPlaceholder">Share more details... (Optional)</sys:String>
+    <sys:String x:Key="Str_Btn_SubmitReview">Submit Review</sys:String>
+
+   
+
+    <sys:String x:Key="Str_Rate_1">Disappointed 😟</sys:String>
+    <sys:String x:Key="Str_Rate_2">Bad 😐</sys:String>
+    <sys:String x:Key="Str_Rate_3">Normal 🙂</sys:String>
+    <sys:String x:Key="Str_Rate_4">Good 😄</sys:String>
+    <sys:String x:Key="Str_Rate_5">Excellent 😍</sys:String>
+
+    <sys:String x:Key="Str_PlsSelectStar">Please select a rating</sys:String>
+    
+    <sys:String x:Key="Str_WhatYouLike">What did you like the most?</sys:String>
+
+    <sys:String x:Key="Str_Tag_GoodFood">Delicious food</sys:String>
+    <sys:String x:Key="Str_Tag_GoodService">Good service</sys:String>
+    <sys:String x:Key="Str_Tag_Clean">Clean</sys:String>
+    <sys:String x:Key="Str_Tag_NiceView">Nice atmosphere</sys:String>
+    <sys:String x:Key="Str_Tag_GoodPrice">Good price</sys:String>
+
+    <sys:String x:Key="Str_Tag_Hygiene">Poor hygiene</sys:String>
+    <sys:String x:Key="Str_Tag_Attitude">Staff attitude</sys:String>
+    <sys:String x:Key="Str_Tag_Food">Bad food</sys:String>
+    <sys:String x:Key="Str_Tag_Wait">Long wait time</sys:String>
+    <sys:String x:Key="Str_Tag_Price">Too expensive</sys:String>
+    <sys:String x:Key="Str_Tag_Noise">Too noisy</sys:String>
+    <sys:String x:Key="Str_Tag_Hot">Too hot</sys:String>
 </ResourceDictionary>
