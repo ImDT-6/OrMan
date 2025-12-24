@@ -81,7 +81,7 @@
                                     <TextBlock x:Name="lblHang" Text="Vàng" Foreground="White" FontWeight="Bold" FontSize="12"/>
                                 </Border>
 
-                                <TextBlock Text="{DynamicResource Str_Points_Label_Short}" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Str_Points_Label}" Foreground="#A0AEC0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="lblDiem" Text="1,250" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,0,0"/>
                             </StackPanel>
                         </StackPanel>

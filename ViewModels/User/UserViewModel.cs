@@ -23,6 +23,21 @@ namespace OrMan.ViewModels.User
         private ObservableCollection<MonAn> _allMonAn;
         public decimal GiamGiaTamTinh { get; set; } = 0; // Biến này sẽ được set từ Giỏ hàng
         private bool _isNutGoiHoTroEnabled = true;
+        private int _secondsCountdown = 0; // Biến lưu số giây còn lại
+
+        // Hàm lấy chuỗi từ Resource (Nếu không tìm thấy thì trả về key)
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
+        // Hàm làm mới giao diện (Gọi từ View khi đổi ngôn ngữ)
+        public void RefreshLanguage()
+        {
+            OnPropertyChanged(nameof(TextNutHoTro));
+          
+            // Refresh thêm các property khác nếu cần
+        }
         public bool IsNutGoiHoTroEnabled
         {
             get => _isNutGoiHoTroEnabled;
@@ -34,7 +49,30 @@ namespace OrMan.ViewModels.User
             }
         }
 
-        public string TextNutHoTro => IsNutGoiHoTroEnabled ? "Gọi Nhân Viên" : "Đợi xíu nha!";
+        public string TextNutHoTro
+        {
+            get
+            {
+                if (IsNutGoiHoTroEnabled)
+                {
+                    // Trả về: "Gọi phục vụ" hoặc "Call Staff"
+                    return GetRes("Str_CallStaff");
+                }
+                else
+                {
+                    // Lấy mẫu: "Đợi {0}s..." hoặc "Wait {0}s..."
+                    string template = GetRes("Str_WaitMoment");
+                    try
+                    {
+                        return string.Format(template, _secondsCountdown);
+                    }
+                    catch
+                    {
+                        return template; // Phòng trường hợp file ngôn ngữ thiếu {0}
+                    }
+                }
+            }
+        }
 
         private KhachHang _currentCustomer;
         public KhachHang CurrentCustomer
@@ -289,9 +327,19 @@ namespace OrMan.ViewModels.User
 
                 if (daGuiThanhCong)
                 {
-                    IsNutGoiHoTroEnabled = false;
-                    await Task.Delay(10000); // Đợi 10s async không block UI
-                    IsNutGoiHoTroEnabled = true;
+                    IsNutGoiHoTroEnabled = false; // Disable nút
+
+                    // Vòng lặp đếm ngược 10 giây
+                    for (int i = 5; i > 0; i--)
+                    {
+                        _secondsCountdown = i;
+                        // Báo cho giao diện cập nhật lại chữ (ví dụ: Đợi 9s...)
+                        OnPropertyChanged(nameof(TextNutHoTro));
+                        await Task.Delay(1000); // Đợi 1 giây
+                    }
+
+                    IsNutGoiHoTroEnabled = true; // Bật lại nút
+                                                 // Tự động cập nhật về chữ "Gọi phục vụ" nhờ Setter của IsNutGoiHoTroEnabled
                 }
             }
         }

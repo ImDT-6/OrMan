@@ -65,30 +65,33 @@ namespace OrMan.Views.User
             if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Collapsed;
             if (GridNight != null) GridNight.Visibility = Visibility.Collapsed;
 
-            string greetingText = "Xin chào";
+            string resourceKey = "Str_Hello"; // Mặc định
 
             if (hour >= 5 && hour < 11)
             {
                 if (GridMorning != null) GridMorning.Visibility = Visibility.Visible;
-                greetingText = "Chào buổi sáng";
+                resourceKey = "Str_GoodMorning";
             }
             else if (hour >= 11 && hour < 14)
             {
                 if (GridNoon != null) GridNoon.Visibility = Visibility.Visible;
-                greetingText = "Chào buổi trưa";
+                resourceKey = "Str_GoodAfternoon";
             }
             else if (hour >= 14 && hour < 18)
             {
                 if (GridAfternoon != null) GridAfternoon.Visibility = Visibility.Visible;
-                greetingText = "Chào buổi chiều";
+                resourceKey = "Str_GoodEvening";
             }
             else
             {
                 if (GridNight != null) GridNight.Visibility = Visibility.Visible;
-                greetingText =  "Chào buổi tối";
+                resourceKey = "Str_GoodNight";
             }
 
-            if (txtGreeting != null) txtGreeting.Text = greetingText;
+            if (txtGreeting != null)
+            {
+                txtGreeting.SetResourceReference(TextBlock.TextProperty, resourceKey);
+            }
         }
 
         private void TestTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -304,6 +307,8 @@ namespace OrMan.Views.User
             if (txtLangFlag != null) txtLangFlag.Text = "🇻🇳";
             if (txtLangName != null) txtLangName.Text = "Tiếng Việt";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
+            _vm.RefreshLanguage();
+
         }
 
         private void MenuItem_EN_Click(object sender, RoutedEventArgs e)
@@ -312,6 +317,7 @@ namespace OrMan.Views.User
             if (txtLangFlag != null) txtLangFlag.Text = "🇺🇸";
             if (txtLangName != null) txtLangName.Text = "English";
             UpdateGreeting(); // Cập nhật lại câu chào ngay
+            _vm.RefreshLanguage();
         }
         // Tìm hàm BtnLuckyWheel_Click cũ và thay bằng đoạn này
         private void BtnLuckyWheel_Click(object sender, RoutedEventArgs e)

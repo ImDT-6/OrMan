@@ -176,7 +176,7 @@
                 <StackPanel Grid.Row="2" Margin="0,10,0,0">
                     <Rectangle Height="1" Fill="{StaticResource GlassBorder}" Margin="20,5,20,10" Opacity="0.5"/>
 
-                    <TextBlock Text="TIỆN ÍCH" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,5" Opacity="0.7"/>
+                    <TextBlock Text="{DynamicResource Str_Utilities}" Foreground="{StaticResource TextSecondary}" FontSize="12" FontWeight="Bold" Margin="20,10,0,5" Opacity="0.7"/>
 
                     <!-- Nút Tích điểm -->
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnTichDiem_Click" ToolTip="{DynamicResource Str_Points}">
@@ -199,12 +199,12 @@
                     </Button>
 
                     <!-- Nút Vòng quay -->
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnLuckyWheel_Click" ToolTip="Quay thưởng may mắn">
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnLuckyWheel_Click" ToolTip="Vòng quay may mắn">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconWheelGeo}" 
                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                   Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0"/>
-                            <TextBlock Text="Vòng quay" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Str_LuckyWheel}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -573,14 +573,12 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="{Binding TenHienThi, FallbackValue=Hôm nay của bạn thế nào?}" Foreground="White" FontSize="16" FontWeight="SemiBold">
+                                <TextBlock Text="{DynamicResource Str_HowAreYouToday}" Foreground="White" FontSize="16" FontWeight="SemiBold">
                                     <TextBlock.Effect>
                                         <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.5"/>
                                     </TextBlock.Effect>
                                 </TextBlock>
-                                <Border Background="#40FFFFFF" CornerRadius="10" Margin="10,0,0,0" Padding="10,2">
-                                    <TextBlock Text="Phục vụ" Foreground="#EEE" FontSize="11" VerticalAlignment="Center"/>
-                                </Border>
+                                
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -592,10 +590,18 @@
         Style="{StaticResource GlassButtonStyle}" 
         Width="150" Height="45" Margin="0,0,10,0" 
         Background="#20F59E0B" ToolTip="Gọi phục vụ">
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="🔔" 
+               FontSize="16" 
+               VerticalAlignment="Center" 
+               Margin="0,0,8,0" 
+               Foreground="White"/>
+
                                 <TextBlock Text="{Binding TextNutHoTro}" 
-                   FontSize="14" VerticalAlignment="Center" 
-                   FontWeight="Bold" Foreground="White"/>
+               FontSize="14" 
+               VerticalAlignment="Center" 
+               FontWeight="Bold" 
+               Foreground="White"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding ChonBanCommand}" Style="{StaticResource SocialButtonStyle}" Height="45" Width="90" Margin="0,0,10,0" Padding="15,0" Background="#20FFFFFF" ToolTip="{DynamicResource Str_Table}">

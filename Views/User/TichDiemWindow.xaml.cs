@@ -125,7 +125,7 @@ namespace OrMan.Views.User
             lblHang.Text = $"{rankLabel.Trim()} {rankName}";
 
             string pointLabel = GetRes("Str_Points_Label");
-            lblDiem.Text = $"{pointLabel.Trim()} {khach.DiemTichLuy:N0}";
+            lblDiem.Text = $" {khach.DiemTichLuy:N0}";
 
             // Cập nhật ViewModel
             _vm.CurrentCustomer = khach;
