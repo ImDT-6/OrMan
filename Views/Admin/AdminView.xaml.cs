@@ -27,43 +27,48 @@ namespace OrMan.Views.Admin
 
             _banView = new QuanLyBanView();
             ChuyenSangChucNang("Tổng Quan");
+            this.Loaded += AdminView_Loaded;
         }
-
+        private void AdminView_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Yêu cầu bàn phím tập trung vào màn hình Admin ngay lập tức
+            // Để không cần click chuột mới bấm được phím
+            this.Focus();
+            Keyboard.Focus(this);
+        }
         // --- XỬ LÝ PHÍM TẮT (KEYBOARD NAVIGATION) [MỚI] ---
+        // Trong AdminView.xaml.cs
+
         private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // 1. Nếu người dùng đang nhập liệu (TextBox, PasswordBox) -> Đừng chiếm quyền bấm phím của họ
             if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox)
                 return;
 
-            // 2. Chỉ xử lý phím Trái / Phải
             if (e.Key == Key.Left || e.Key == Key.Right)
             {
-                // Lấy danh sách các nút RadioButton trong StackPanel
                 var radioButtons = MenuStackPanel.Children.OfType<RadioButton>().ToList();
 
-                // Tìm nút đang được chọn hiện tại
+                // Tìm nút đang được check (IsChecked == true)
                 var currentBtn = radioButtons.FirstOrDefault(r => r.IsChecked == true);
                 if (currentBtn == null) return;
 
                 int index = radioButtons.IndexOf(currentBtn);
 
-                // Tính toán vị trí mới
                 if (e.Key == Key.Right) index++;
                 else index--;
 
-                // Logic vòng lặp (Đang ở cuối bấm phải -> Về đầu)
                 if (index >= radioButtons.Count) index = 0;
                 if (index < 0) index = radioButtons.Count - 1;
 
-                // 3. Kích hoạt nút mới
                 var nextBtn = radioButtons[index];
                 nextBtn.IsChecked = true;
 
-                // Gọi lại hàm xử lý click để chạy hiệu ứng trượt & chuyển trang
+                // Gọi hàm xử lý click để chuyển trang
                 MenuButton_Click(nextBtn, null);
 
-                // Đánh dấu là đã xử lý xong để không bị conflict với các control khác
+                // --- QUAN TRỌNG: Giữ lại Focus cho AdminView sau khi chuyển trang ---
+                this.Focus();
+
                 e.Handled = true;
             }
         }

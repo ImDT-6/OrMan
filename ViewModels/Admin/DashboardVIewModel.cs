@@ -13,7 +13,7 @@ using System.Windows;
 using System.Globalization;
 using System.Windows.Media;
 using System.Threading.Tasks;
-using OrMan.Data; // Thêm namespace để gọi MenuContext
+using OrMan.Data;
 
 namespace OrMan.ViewModels
 {
@@ -30,9 +30,13 @@ namespace OrMan.ViewModels
         public string TimeLabel { get; set; }
         public double Value { get; set; }
         public double EmptyValue { get; set; }
+        
+        // [NÂNG CẤP TOOLTIP]
+        public string TooltipHeader { get; set; } // Ví dụ: "Thứ Hai - 20/10"
+        public string TooltipRevenue { get; set; } // Ví dụ: "1.500.000 đ"
+
         public string BarStar => $"{Value.ToString(CultureInfo.InvariantCulture)}*";
         public string EmptyStar => $"{EmptyValue.ToString(CultureInfo.InvariantCulture)}*";
-        public string TooltipText => $"{Value:N0} VNĐ";
     }
 
     public class DashboardViewModel : INotifyPropertyChanged
@@ -105,7 +109,6 @@ namespace OrMan.ViewModels
             set { _banCanXuLy = value; OnPropertyChanged(); }
         }
 
-        // --- MỚI: Properties cho phần Đánh Giá ---
         private ObservableCollection<DanhGia> _danhSachDanhGia;
         public ObservableCollection<DanhGia> DanhSachDanhGia
         {
@@ -128,7 +131,6 @@ namespace OrMan.ViewModels
         }
 
         public bool IsNoReviews => DanhSachDanhGia == null || DanhSachDanhGia.Count == 0;
-        // ----------------------------------------
 
         private string _doanhThuNgay;
         public string DoanhThuNgay { get => _doanhThuNgay; set { _doanhThuNgay = value; OnPropertyChanged(); } }
@@ -156,10 +158,8 @@ namespace OrMan.ViewModels
             ProcessRequestCommand = new RelayCommand<BanAn>(ProcessRequest);
             ChangeFilterCommand = new RelayCommand<string>(ChangeFilter);
 
-            // Load dữ liệu lần đầu
             Task.Run(() => LoadDashboardDataAsync());
 
-            // Đăng ký sự kiện cập nhật
             BanAnRepository.OnPaymentSuccess += () => Task.Run(() => LoadDashboardDataAsync());
             BanAnRepository.OnTableChanged += () => Task.Run(() => LoadDashboardDataAsync());
 
@@ -214,7 +214,6 @@ namespace OrMan.ViewModels
         {
             try
             {
-                // [BACKGROUND THREAD]
                 decimal totalToday = _doanhThuRepo.GetTodayRevenue();
                 decimal totalYesterday = _doanhThuRepo.GetYesterdayRevenue();
                 int ordersToday = _doanhThuRepo.GetTodayOrderCount();
@@ -229,28 +228,24 @@ namespace OrMan.ViewModels
                 var topDict = _thucDonRepo.GetTopSellingFoods(5);
                 var topList = topDict.Select(x => new TopFoodItem { MonAn = x.Key, SoLuongBan = x.Value }).ToList();
 
-                // --- LOGIC MỚI: Lấy dữ liệu Đánh Giá ---
                 List<DanhGia> recentReviews = new List<DanhGia>();
                 double avgRating = 0;
                 int countRating = 0;
 
                 using (var db = new MenuContext())
                 {
-                    // Lấy tất cả để tính trung bình
-                    var allReviews = db.DanhGias.ToList(); // Lưu ý: Nếu data lớn nên optimize query
+                    var allReviews = db.DanhGias.ToList();
                     if (allReviews.Any())
                     {
                         avgRating = allReviews.Average(x => x.SoSao);
                         countRating = allReviews.Count;
                     }
 
-                    // Lấy 10 đánh giá gần nhất
                     recentReviews = db.DanhGias
                                       .OrderByDescending(x => x.NgayTao)
                                       .Take(10)
                                       .ToList();
                 }
-                // ---------------------------------------
 
                 Dictionary<int, decimal> chartData = new Dictionary<int, decimal>();
                 int start = 0, end = 0;
@@ -266,7 +261,6 @@ namespace OrMan.ViewModels
                         chartData = _doanhThuRepo.GetRevenueByYear(); start = 1; end = 12; break;
                 }
 
-                // [UI THREAD] Cập nhật giao diện
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     DoanhThuNgay = FormatCurrencyShort(totalToday);
@@ -313,7 +307,6 @@ namespace OrMan.ViewModels
                     BanCanXuLy = new ObservableCollection<BanAn>(urgentTables);
                     TopMonAn = new ObservableCollection<TopFoodItem>(topList);
 
-                    // Update UI Đánh Giá
                     DiemDanhGiaTB = avgRating;
                     SoLuotDanhGia = countRating;
                     DanhSachDanhGia = new ObservableCollection<DanhGia>(recentReviews);
@@ -362,6 +355,8 @@ namespace OrMan.ViewModels
             AxisMid = FormatCurrencyShort((decimal)(axisTop * 0.5));
             AxisMidLow = FormatCurrencyShort((decimal)(axisTop * 0.25));
 
+            DateTime now = DateTime.Now;
+
             for (int i = start; i <= end; i++)
             {
                 decimal revenue = data.ContainsKey(i) ? data[i] : 0;
@@ -370,16 +365,49 @@ namespace OrMan.ViewModels
                 if (empty < 0) empty = 0;
 
                 string label = "";
-                if (_currentFilter == ChartFilterType.Day) label = (i % 2 == 0) ? $"{i}h" : "";
-                else if (_currentFilter == ChartFilterType.Week) label = i == 8 ? "CN" : $"T{i}";
-                else if (_currentFilter == ChartFilterType.Month) label = (i % 2 != 0 || i == end) ? $"{i}" : "";
-                else if (_currentFilter == ChartFilterType.Year) label = $"T{i}";
+                string tooltipHeader = "";
+
+                // [NÂNG CẤP TOOLTIP] - Logic sinh text hiển thị
+                if (_currentFilter == ChartFilterType.Day)
+                {
+                    label = (i % 2 == 0) ? $"{i}h" : "";
+                    tooltipHeader = $"{i:00}:00 - {i + 1:00}:00 Hôm nay";
+                }
+                else if (_currentFilter == ChartFilterType.Week)
+                {
+                    // Tính ngày cụ thể trong tuần
+                    int currentDayOfWeek = (int)now.DayOfWeek;
+                    if (currentDayOfWeek == 0) currentDayOfWeek = 7;
+                    int diff = i - currentDayOfWeek;
+                    DateTime targetDate = now.AddDays(diff);
+
+                    label = i == 8 ? "CN" : $"T{i}";
+                    string thu = i == 8 ? "Chủ Nhật" : $"Thứ {i}";
+                    tooltipHeader = $"{thu} - {targetDate:dd/MM}";
+                }
+                else if (_currentFilter == ChartFilterType.Month)
+                {
+                    label = (i % 2 != 0 || i == end) ? $"{i}" : "";
+                    try
+                    {
+                        DateTime targetDate = new DateTime(now.Year, now.Month, i);
+                        tooltipHeader = $"Ngày {targetDate:dd/MM/yyyy}";
+                    }
+                    catch { tooltipHeader = $"Ngày {i}"; }
+                }
+                else if (_currentFilter == ChartFilterType.Year)
+                {
+                    label = $"T{i}";
+                    tooltipHeader = $"Tháng {i:00}/{now.Year}";
+                }
 
                 DoanhThuTheoGio.Add(new ChartBarItem
                 {
                     TimeLabel = label,
                     Value = val,
-                    EmptyValue = empty
+                    EmptyValue = empty,
+                    TooltipHeader = tooltipHeader,
+                    TooltipRevenue = String.Format(new CultureInfo("vi-VN"), "{0:N0} đ", revenue)
                 });
             }
         }

@@ -51,7 +51,7 @@
                 </Setter>
             </Style>
 
-            <!-- Style cho Tooltip Chart -->
+            <!-- [ĐÃ NÂNG CẤP] Style cho Tooltip Chart (2 Dòng) -->
             <Style x:Key="ChartToolTipStyle" TargetType="ToolTip">
                 <Setter Property="OverridesDefaultStyle" Value="True"/>
                 <Setter Property="HasDropShadow" Value="True"/>
@@ -60,14 +60,21 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToolTip">
-                            <Border Background="#E61E293B" CornerRadius="8" BorderBrush="#3B82F6" BorderThickness="1" Padding="10,8">
+                            <Border Background="#E61E293B" CornerRadius="8" BorderBrush="#3B82F6" BorderThickness="1" Padding="12,8">
                                 <Border.Effect>
                                     <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
                                 </Border.Effect>
                                 <StackPanel>
-                                    <TextBlock Text="Doanh Thu" Foreground="{StaticResource TextSecondary}" FontSize="10" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" 
-                                               Foreground="White" FontWeight="Bold" FontSize="14"/>
+                                    <!-- Dòng 1: Thời gian -->
+                                    <TextBlock Text="{Binding Content.TooltipHeader, RelativeSource={RelativeSource TemplatedParent}}" 
+                                               Foreground="{StaticResource TextSecondary}" 
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <!-- Dòng 2: Số tiền -->
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Doanh thu:" Foreground="{StaticResource TextSecondary}" FontSize="10" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Content.TooltipRevenue, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                   Foreground="White" FontWeight="Bold" FontSize="14"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
                         </ControlTemplate>
@@ -314,11 +321,12 @@
                                                 <RowDefinition Height="{Binding BarStar}"/>
                                             </Grid.RowDefinitions>
 
+                                            <!-- [ĐÃ BINDING TOOLTIP MỚI] Dùng Binding . để lấy cả object -->
                                             <Border x:Name="BarColumn" Grid.Row="1" CornerRadius="4,4,0,0" MinHeight="2" VerticalAlignment="Stretch"
                                                     ToolTipService.InitialShowDelay="10"
                                                     ToolTipService.ShowDuration="10000">
                                                 <Border.ToolTip>
-                                                    <ToolTip Content="{Binding TooltipText}" Style="{StaticResource ChartToolTipStyle}"/>
+                                                    <ToolTip Content="{Binding .}" Style="{StaticResource ChartToolTipStyle}"/>
                                                 </Border.ToolTip>
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
