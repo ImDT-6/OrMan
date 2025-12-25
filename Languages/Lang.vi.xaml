@@ -51,7 +51,6 @@
     <sys:String x:Key="Str_Loyalty_Title">TÍCH ĐIỂM KHÁCH HÀNG</sys:String>
     <sys:String x:Key="Str_Loyalty_Subtitle">Nhập số điện thoại để tích điểm &amp; nhận ưu đãi</sys:String>
     <sys:String x:Key="Str_Btn_CheckRegister">TRA CỨU / ĐĂNG KÝ</sys:String>
-    <sys:String x:Key="Str_Msg_InvalidPhone">Vui lòng nhập số điện thoại hợp lệ!</sys:String>
     <sys:String x:Key="Str_Hello_Prefix">Xin chào:</sys:String>
     <sys:String x:Key="Str_Points_Suffix"> điểm</sys:String>
     <sys:String x:Key="Str_Btn_Done">HOÀN TẤT</sys:String>
@@ -99,6 +98,32 @@
     <sys:String x:Key="Str_Notes">Ghi chú</sys:String>
     <sys:String x:Key="Str_Quantity">Số lượng</sys:String>
     <sys:String x:Key="Str_Btn_AddToCart">Thêm vào giỏ - {0:N0} đ</sys:String>
+    <sys:String x:Key="Str_Close">Đóng</sys:String>
+    <sys:String x:Key="Str_Level">Cấp</sys:String>
+    <sys:String x:Key="Str_Msg_InvalidPhone">Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (VD: 09xx...)!</sys:String>
+    <sys:String x:Key="Str_YourCart">GIỎ HÀNG CỦA BẠN</sys:String>
+    <sys:String x:Key="Str_Voucher">Mã giảm giá:</sys:String>
+    <sys:String x:Key="Str_Use">Dùng</sys:String>
+    <sys:String x:Key="Str_Discount">Giảm giá:</sys:String>
+    <sys:String x:Key="Str_TotalAmount">THÀNH TIỀN:</sys:String>
+    <sys:String x:Key="Str_SendOrder">GỬI ĐƠN ĐẾN BẾP</sys:String>
+    <sys:String x:Key="Str_Gift">Quà tặng có thể đổi (Miễn phí)</sys:String>
 
+   
+
+    <sys:String x:Key="Str_SelectVoucher_Placeholder">--- Chọn mã giảm giá ---</sys:String>
+    <sys:String x:Key="Str_Discount_Money">Giảm {0:N0}đ</sys:String>
+    <sys:String x:Key="Str_Discount_Percent">Giảm {0}%</sys:String>
+    <sys:String x:Key="Str_Err_LoadVoucher">Lỗi tải voucher: {0}</sys:String>
+    <sys:String x:Key="Str_Err_AddGift">Lỗi thêm quà: {0}</sys:String>
+    <sys:String x:Key="Str_Gift_Note">(Quà tặng)</sys:String>
+  
+    <sys:String x:Key="Str_Msg_ConfirmRemoveItem">Bỏ món '{0}'?</sys:String>
+  
+    <sys:String x:Key="Str_Currency_Suffix">VNĐ</sys:String>
+
+    <sys:String x:Key="Str_Remaining">Còn lại:</sys:String>
+    <sys:String x:Key="Str_Turns">lượt</sys:String>
+    <sys:String x:Key="Str_Tooltip_Remove">Xóa món này</sys:String>
 </ResourceDictionary>
     

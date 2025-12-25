@@ -151,7 +151,7 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <TextBlock Grid.Row="0" Text="GIỎ HÀNG CỦA BẠN" FontSize="24" FontWeight="Bold" Foreground="White" 
+            <TextBlock Grid.Row="0" Text="{DynamicResource Str_YourCart}" FontSize="24" FontWeight="Bold" Foreground="White" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,15"/>
 
             <Button Grid.Row="0" Click="BtnClose_Click" HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -208,7 +208,7 @@
                                         </StackPanel>
 
                                         <Button Grid.Column="3" Click="BtnDelete_Click" Width="30" Height="30"
-                                                Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Xóa món này">
+                                                Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="{DynamicResource Str_Tooltip_Remove}">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border x:Name="bdr" Background="Transparent" CornerRadius="5">
@@ -241,7 +241,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Mã giảm giá:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="{DynamicResource Str_Voucher}" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <ComboBox Grid.Column="1" x:Name="cboVoucher" Height="35"
                               DisplayMemberPath="TenHienThi" SelectionChanged="CboVoucher_SelectionChanged"
                               Style="{StaticResource VoucherComboBoxStyle}" Padding="10,0" VerticalContentAlignment="Center">
@@ -254,7 +254,7 @@
                 </Grid>
 
                 <!-- 2. Danh sách Quà tặng (UI MỚI) -->
-                <Expander Header="Quà tặng có thể đổi (Miễn phí)" Foreground="#FFD700" Margin="0,0,0,10" IsExpanded="True">
+                <Expander Header="{DynamicResource Str_Gift}" Foreground="#FFD700" Margin="0,0,0,10" IsExpanded="True">
                     <Border Background="#15FFFFFF" CornerRadius="10" Padding="5">
                         <ItemsControl x:Name="icGifts" MaxHeight="100">
                             <ItemsControl.ItemTemplate>
@@ -268,7 +268,13 @@
 
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding TenHienThi}" Foreground="White" FontWeight="Bold" FontSize="13"/>
-                                                <TextBlock Text="{Binding SoLuongConLai, StringFormat='Còn lại: {0} lượt'}" Foreground="#AAA" FontSize="11"/>
+                                                <TextBlock Foreground="#AAA" FontSize="11">
+                                                <Run Text="{DynamicResource Str_Remaining}"/>
+    
+                                                <Run Text=""/> <Run Text="{Binding SoLuongConLai}" FontWeight="Bold"/>
+    
+                                                <Run Text=""/> <Run Text="{DynamicResource Str_Turns}"/>
+                                                </TextBlock>
                                             </StackPanel>
 
                                             <!-- NÚT BẤM "THÊM" KIỂU MỚI -->
@@ -278,7 +284,7 @@
                                                     Height="32" Width="80" Cursor="Hand">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                    
-                                                    <TextBlock Text="Dùng" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{DynamicResource Str_Use}" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </Button>
                                         </Grid>
@@ -297,19 +303,19 @@
                 </Expander>
 
                 <Grid Margin="0,0,0,5">
-                    <TextBlock Text="Giảm giá:" Foreground="#10B981" FontSize="14"/>
-                    <TextBlock x:Name="txtGiamGia" Text="0 VNĐ" Foreground="#10B981" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                    <TextBlock Text="{DynamicResource Str_Discount}" Foreground="#FF5555" FontSize="14"/>
+                    <TextBlock x:Name="txtGiamGia" Text="0 VNĐ" Foreground="#FF5555" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid Margin="0,0,0,5">
-                    <TextBlock Text="Tạm tính:" Foreground="White" FontSize="14"/>
+                    <TextBlock Text="{DynamicResource Str_Subtotal}" Foreground="White" FontSize="14"/>
                     <TextBlock Text="{Binding TongTienCart, StringFormat='{}{0:N0} VNĐ'}" Foreground="White" FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid Margin="0,0,0,15">
-                    <TextBlock Text="THÀNH TIỀN:" Foreground="{StaticResource SuccessGreen}" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="{DynamicResource Str_TotalAmount}" Foreground="{StaticResource SuccessGreen}" FontSize="18" FontWeight="Bold"/>
                     <TextBlock x:Name="txtThanhTien" Text="0 VNĐ" Foreground="{StaticResource SuccessGreen}" FontWeight="Bold" FontSize="22" HorizontalAlignment="Right"/>
                 </Grid>
 
-                <Button Content="GỬI ĐƠN ĐẾN BẾP" Click="BtnSubmit_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource SuccessGreen}" Height="50" FontSize="16" FontWeight="Bold"/>
+                <Button Content="{DynamicResource Str_SendOrder}" Click="BtnSubmit_Click" Style="{StaticResource GlassButtonStyle}" Background="{StaticResource SuccessGreen}" Height="50" FontSize="16" FontWeight="Bold"/>
             </StackPanel>
         </Grid>
     </Border>

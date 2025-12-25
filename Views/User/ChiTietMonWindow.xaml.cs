@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using OrMan.Models;
-
+using System.Text.RegularExpressions;
 namespace OrMan.Views.User
 {
     public partial class ChiTietMonWindow : Window
@@ -30,7 +30,16 @@ namespace OrMan.Views.User
             if (monAn is MonMiCay)
             {
                 var levels = new List<string>();
-                for (int i = 0; i <= 7; i++) levels.Add($"Cấp {i}");
+
+                // 1. Lấy chữ "Cấp" hoặc "Level" từ Resource
+                string levelPrefix = Application.Current.TryFindResource("Str_Level") as string ?? "Cấp";
+
+                for (int i = 0; i <= 7; i++)
+                {
+                    // 2. Ghép chuỗi: "Level 1" hoặc "Cấp 1"
+                    levels.Add($"{levelPrefix} {i}");
+                }
+
                 LevelItemsControl.ItemsSource = levels;
             }
             else
@@ -119,7 +128,16 @@ namespace OrMan.Views.User
             if (sender is RadioButton rb && rb.Content != null)
             {
                 string content = rb.Content.ToString();
-                int.TryParse(content.Replace("Cấp ", ""), out _capDoCay);
+
+                // Dùng Regex để tìm dãy số đầu tiên trong chuỗi
+                // \d+ nghĩa là tìm các chữ số liền nhau (ví dụ: tìm thấy "1" trong "Level 1")
+                var match = Regex.Match(content, @"\d+");
+
+                if (match.Success)
+                {
+                    // Lấy con số tìm được và gán vào biến
+                    int.TryParse(match.Value, out _capDoCay);
+                }
             }
         }
 
