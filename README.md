@@ -1,5 +1,6 @@
 # 🌶️ OrMan - Hệ Thống Quản Lý Quán Mỳ Cay 🍜
 
+[![Language](https://img.shields.io/badge/Language-C%23-239120)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.7.2-purple)](https://dotnet.microsoft.com/download/dotnet-framework)
 [![WPF](https://img.shields.io/badge/WPF-Windows%20Presentation%20Foundation-blue)](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![SQL Server](https://img.shields.io/badge/Database-SQL%20Server-red)](https://www.microsoft.com/en-us/sql-server)
