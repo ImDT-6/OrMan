@@ -11,6 +11,7 @@ namespace OrMan.Services
     public class BanAnRepository
     {
         public static event Action OnTableChanged;
+        public static event Action OnPaymentSuccess; // Khôi phục event này
 
         private readonly MenuContext _context;
 
@@ -25,39 +26,48 @@ namespace OrMan.Services
             using (var freshContext = new MenuContext())
             {
                 var list = freshContext.BanAns.OrderBy(b => b.SoBan).ToList();
-
                 return new ObservableCollection<BanAn>(list);
             }
         }
 
         public void InitTables()
         {
-            if (!_context.BanAns.Any())
+            using (var context = new MenuContext())
             {
-                for (int i = 1; i <= 20; i++)
+                if (!context.BanAns.Any())
                 {
-                    _context.BanAns.Add(new BanAn(i, "Trống"));
+                    for (int i = 1; i <= 20; i++)
+                    {
+                        context.BanAns.Add(new BanAn(i, "Trống"));
+                    }
+                    context.SaveChanges();
                 }
-                _context.SaveChanges();
             }
         }
 
-        // [MỚI] Thêm bàn mới
-        public void AddTable()
+        // [ĐÃ SỬA] Hàm thêm bàn nhận vào ID cụ thể để lấp chỗ trống
+        public bool AddTable(int specificId)
         {
             using (var context = new MenuContext())
             {
-                int maxSoBan = context.BanAns.Any() ? context.BanAns.Max(b => b.SoBan) : 0;
-                var newBan = new BanAn(maxSoBan + 1, "Trống");
-                context.BanAns.Add(newBan);
-                context.SaveChanges();
+                if (context.BanAns.Any(b => b.SoBan == specificId)) return false;
 
-                // [MỚI] 2. Bắn tín hiệu cập nhật
-                OnTableChanged?.Invoke();
+                try
+                {
+                    var newBan = new BanAn(specificId, "Trống");
+                    context.BanAns.Add(newBan);
+                    context.SaveChanges();
+                    OnTableChanged?.Invoke();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Lỗi thêm bàn: " + ex.Message);
+                    return false;
+                }
             }
         }
 
-        // [MỚI] Xóa bàn
         public bool DeleteTable(int soBan)
         {
             using (var context = new MenuContext())
@@ -67,8 +77,6 @@ namespace OrMan.Services
                 {
                     context.BanAns.Remove(ban);
                     context.SaveChanges();
-
-                    // [MỚI] 3. Bắn tín hiệu cập nhật
                     OnTableChanged?.Invoke();
                     return true;
                 }
@@ -76,6 +84,7 @@ namespace OrMan.Services
             }
         }
 
+        // [KHÔI PHỤC] Hàm cập nhật trạng thái đơn giản
         public void UpdateStatus(int soBan, string status)
         {
             using (var context = new MenuContext())
@@ -89,8 +98,20 @@ namespace OrMan.Services
             }
         }
 
-        // File: BanAnRepository.cs
-        // Sửa hàm RequestPayment cũ thành:
+        public void UpdateTableInfo(int soBan, string tenGoi)
+        {
+            using (var context = new MenuContext())
+            {
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.TenGoi = tenGoi;
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        // [KHÔI PHỤC] Khách yêu cầu thanh toán
         public void RequestPayment(int soBan, string method = "Tiền mặt")
         {
             using (var context = new MenuContext())
@@ -99,13 +120,14 @@ namespace OrMan.Services
                 if (item != null)
                 {
                     item.YeuCauThanhToan = true;
-                    item.HinhThucThanhToan = method; // [MỚI] Lưu phương thức
+                    item.HinhThucThanhToan = method;
                     item.YeuCauHoTro = null;
                     context.SaveChanges();
                 }
             }
         }
 
+        // [KHÔI PHỤC] Khách gọi hỗ trợ (kèm logic nối chuỗi tin nhắn)
         public void SendSupportRequest(int soBan, string message)
         {
             using (var context = new MenuContext())
@@ -113,115 +135,26 @@ namespace OrMan.Services
                 var item = context.BanAns.Find(soBan);
                 if (item != null)
                 {
-                    string yeuCauHienTai = item.YeuCauHoTro ?? ""; // Lấy chuỗi hiện tại, nếu null thì là rỗng
+                    string yeuCauHienTai = item.YeuCauHoTro ?? "";
                     string yeuCauMoi = ", " + message;
 
-                    // [LỚP BẢO VỆ]: Kiểm tra độ dài
-                    // Nếu độ dài hiện tại + độ dài mới > 250 (giới hạn an toàn của cột NVARCHAR 255)
                     if (yeuCauHienTai.Length + yeuCauMoi.Length > 250)
                     {
-                        // QUÁ DÀI -> Reset lại, chỉ lưu yêu cầu mới nhất để tránh lỗi DB
-                        item.YeuCauHoTro = message;
+                        item.YeuCauHoTro = message; // Quá dài thì reset
                     }
                     else
                     {
-                        // CÒN CHỖ -> Nối thêm vào
                         if (string.IsNullOrEmpty(yeuCauHienTai))
-                        {
                             item.YeuCauHoTro = message;
-                        }
                         else
-                        {
                             item.YeuCauHoTro = yeuCauHienTai + yeuCauMoi;
-                        }
                     }
-
                     context.SaveChanges();
                 }
             }
         }
 
-        public HoaDon GetActiveOrder(int soBan)
-        {
-            // Cần context mới để lấy dữ liệu mới nhất
-            using (var context = new MenuContext())
-            {
-                return context.HoaDons
-                           .Where(h => h.SoBan == soBan && !h.DaThanhToan)
-                           .OrderByDescending(h => h.NgayTao)
-                           .FirstOrDefault();
-            }
-        }
-
-        public List<ChiTietHoaDon> GetOrderDetails(string maHoaDon)
-        {
-            using (var context = new MenuContext())
-            {
-                // 1. Lấy toàn bộ dữ liệu thô từ SQL lên trước
-                var rawList = context.ChiTietHoaDons
-                           .Include(ct => ct.MonAn)
-                           .Where(ct => ct.MaHoaDon == maHoaDon)
-                           .ToList();
-
-                // 2. Dùng C# để GỘP các món giống hệt nhau
-                var groupedList = rawList
-                    .GroupBy(x => new { x.MaMon, x.CapDoCay, x.GhiChu, x.DonGia }) // Nhóm các món có cùng Mã, Cấp độ, Ghi chú, Giá
-                    .Select(g => new ChiTietHoaDon
-                    {
-                        MaHoaDon = maHoaDon,
-                        MaMon = g.Key.MaMon,
-
-                        // Lấy thông tin hiển thị từ dòng đầu tiên trong nhóm
-                        TenMonHienThi = g.First().TenMonHienThi,
-                        MonAn = g.First().MonAn,
-                        CapDoCay = g.Key.CapDoCay,
-                        GhiChu = g.Key.GhiChu,
-                        DonGia = g.Key.DonGia,
-
-                        // [QUAN TRỌNG] Cộng dồn số lượng
-                        SoLuong = g.Sum(x => x.SoLuong),
-
-                        // (Tùy chọn) Có thể lấy trạng thái chế biến
-                        TrangThaiCheBien = g.Min(x => x.TrangThaiCheBien)
-                    })
-                    .ToList();
-
-                return groupedList;
-            }
-        }
-
-        public static event Action OnPaymentSuccess;
-
-        public void CheckoutTable(int soBan, string maHoaDon)
-        {
-            using (var context = new MenuContext())
-            {
-                var hd = context.HoaDons.Find(maHoaDon);
-                if (hd != null)
-                {
-                    hd.DaThanhToan = true;
-
-                    // [MỚI] --- LOGIC TRỪ KHO ---
-                    // 1. Lấy tất cả món đã ăn trong hóa đơn này
-                    var chiTietHD = context.ChiTietHoaDons.Where(x => x.MaHoaDon == maHoaDon).ToList();
-
-                    
-                    // ---------------------------
-                }
-
-                var ban = context.BanAns.Find(soBan);
-                if (ban != null)
-                {
-                    ban.TrangThai = "Trống";
-                    ban.YeuCauThanhToan = false;
-                    ban.YeuCauHoTro = null;
-                    ban.DaInTamTinh = false;
-                }
-                context.SaveChanges();
-                OnPaymentSuccess?.Invoke();
-            }
-        }
-
+        // [KHÔI PHỤC] Nhân viên đã xử lý yêu cầu thanh toán (nhưng chưa checkout)
         public void ResolvePaymentRequest(int soBan)
         {
             using (var context = new MenuContext())
@@ -236,37 +169,17 @@ namespace OrMan.Services
             }
         }
 
-        // [MỚI] Hàm cập nhật thông tin bàn (Tên gọi,...)
-        public void UpdateTableInfo(int soBan, string tenGoi)
-        {
-            using (var context = new MenuContext())
-            {
-                var item = context.BanAns.Find(soBan);
-                if (item != null)
-                {
-                    item.TenGoi = tenGoi;
-                    context.SaveChanges();
-                }
-            }
-        }
-
-        // [QUAN TRỌNG] Hàm Check-in: Vừa đổi trạng thái bàn, vừa tạo Hóa đơn mới
         public bool CheckInTable(int soBan)
         {
             using (var context = new MenuContext())
             {
                 var ban = context.BanAns.Find(soBan);
-
-                // Chỉ xử lý khi bàn tồn tại và đang Trống
                 if (ban != null && ban.TrangThai == "Trống")
                 {
-                    // 1. Đổi trạng thái bàn
                     ban.TrangThai = "Có Khách";
 
-                    // 2. Tạo hóa đơn mới ngay lập tức
                     var hoaDonMoi = new HoaDon
                     {
-                        // Tạo mã hóa đơn: HD + Thời gian hiện tại (Ví dụ: HD20231025093015)
                         MaHoaDon = "HD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                         SoBan = soBan,
                         NgayTao = DateTime.Now,
@@ -276,34 +189,92 @@ namespace OrMan.Services
                     };
 
                     context.HoaDons.Add(hoaDonMoi);
-
-                    // 3. Lưu tất cả thay đổi vào Database
                     context.SaveChanges();
-
-                    return true; // Thành công
+                    return true;
                 }
-
-                return false; // Thất bại (Bàn không tồn tại hoặc đang có khách)
+                return false;
             }
         }
-        // [MỚI] Hàm Hủy Bàn (Dùng khi bấm nhầm Dắt khách hoặc khách bỏ về mà chưa gọi món)
+
+        public HoaDon GetActiveOrder(int soBan)
+        {
+            using (var context = new MenuContext())
+            {
+                return context.HoaDons
+                           .Where(h => h.SoBan == soBan && !h.DaThanhToan)
+                           .OrderByDescending(h => h.NgayTao)
+                           .FirstOrDefault();
+            }
+        }
+
+        public List<ChiTietHoaDon> GetOrderDetails(string maHoaDon)
+        {
+            using (var context = new MenuContext())
+            {
+                var rawList = context.ChiTietHoaDons
+                           .Include(ct => ct.MonAn)
+                           .Where(ct => ct.MaHoaDon == maHoaDon)
+                           .ToList();
+
+                var groupedList = rawList
+                    .GroupBy(x => new { x.MaMon, x.CapDoCay, x.GhiChu, x.DonGia })
+                    .Select(g => new ChiTietHoaDon
+                    {
+                        MaHoaDon = maHoaDon,
+                        MaMon = g.Key.MaMon,
+                        TenMonHienThi = g.First().TenMonHienThi,
+                        MonAn = g.First().MonAn,
+                        CapDoCay = g.Key.CapDoCay,
+                        GhiChu = g.Key.GhiChu,
+                        DonGia = g.Key.DonGia,
+                        SoLuong = g.Sum(x => x.SoLuong),
+                        TrangThaiCheBien = g.Min(x => x.TrangThaiCheBien)
+                    })
+                    .ToList();
+
+                return groupedList;
+            }
+        }
+
+        public void CheckoutTable(int soBan, string maHoaDon)
+        {
+            using (var context = new MenuContext())
+            {
+                var hd = context.HoaDons.Find(maHoaDon);
+                if (hd != null)
+                {
+                    hd.DaThanhToan = true;
+
+                    // Logic trừ kho (nếu có) để ở đây
+                    // var chiTietHD = context.ChiTietHoaDons.Where(x => x.MaHoaDon == maHoaDon).ToList();
+                }
+
+                var ban = context.BanAns.Find(soBan);
+                if (ban != null)
+                {
+                    ban.TrangThai = "Trống";
+                    ban.YeuCauThanhToan = false;
+                    ban.YeuCauHoTro = null;
+                    ban.DaInTamTinh = false;
+                    ban.HinhThucThanhToan = null;
+                }
+                context.SaveChanges();
+                OnPaymentSuccess?.Invoke(); // Gọi event
+            }
+        }
+
         public void CancelTableSession(int soBan)
         {
             using (var context = new MenuContext())
             {
-                // 1. Tìm hóa đơn đang mở của bàn này
                 var hd = context.HoaDons.FirstOrDefault(h => h.SoBan == soBan && !h.DaThanhToan);
                 if (hd != null)
                 {
-                    // Xóa luôn hóa đơn rác này
-                    // (Lưu ý: Nếu hóa đơn đã có món ăn, đoạn này cũng sẽ xóa luôn các chi tiết món
-                    // nhờ cơ chế Cascade Delete của SQL, hoặc bạn phải tự xóa chi tiết trước tùy cấu hình DB)
                     var chiTiet = context.ChiTietHoaDons.Where(ct => ct.MaHoaDon == hd.MaHoaDon);
                     context.ChiTietHoaDons.RemoveRange(chiTiet);
                     context.HoaDons.Remove(hd);
                 }
 
-                // 2. Trả trạng thái bàn về Trống
                 var ban = context.BanAns.Find(soBan);
                 if (ban != null)
                 {
@@ -312,7 +283,6 @@ namespace OrMan.Services
                     ban.YeuCauHoTro = null;
                     ban.DaInTamTinh = false;
                 }
-
                 context.SaveChanges();
             }
         }

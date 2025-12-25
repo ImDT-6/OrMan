@@ -424,64 +424,153 @@
                             </Style>
                         </Grid.Style>
 
-                        <StackPanel VerticalAlignment="Center" Margin="10">
-                            <StackPanel>
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedBan}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedBan}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
 
-                                <TextBlock Text="CÀI ĐẶT BÀN" FontSize="20" FontWeight="Bold" Foreground="#3B82F6" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                                <TextBlock Text="Đang chọn:" Foreground="#94A3B8" Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding SelectedBan.SoBan, StringFormat='Bàn số {0}'}" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
-
-                                <TextBlock Text="Tên hiển thị (Tùy chọn):" Foreground="White" Margin="0,0,0,5"/>
-                                <TextBox Text="{Binding SelectedBan.TenGoi, UpdateSourceTrigger=PropertyChanged}" 
-                                         Height="40" Padding="10,0" FontSize="14" VerticalContentAlignment="Center"
-                                         Background="#334155" Foreground="White" BorderBrush="#475569"
-                                         CaretBrush="White">
-                                    <TextBox.Resources>
-                                        <Style TargetType="{x:Type Border}">
-                                            <Setter Property="CornerRadius" Value="5" />
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
-                                <TextBlock Text="Ví dụ: VIP 1, Ngoài trời,..." Foreground="#64748B" FontSize="12" Margin="0,5,0,20" FontStyle="Italic"/>
-
-                                <Button Content="💾 Lưu Thay Đổi" 
-                                        Command="{Binding SaveTableSettingsCommand}"
-                                        Height="45" Background="#3B82F6" Foreground="White" FontWeight="Bold"
-                                        Style="{StaticResource GlassDismissButtonStyle}"/>
-
-                                <Button Content="🗑️ Xóa Bàn Này" 
-                                        Command="{Binding DeleteTableCommand}"
-                                        CommandParameter="{Binding SelectedBan}"
-                                        Margin="0,15,0,0"
-                                        Height="45" Background="#EF4444" Foreground="White" FontWeight="Bold"
-                                        Style="{StaticResource GlassDismissButtonStyle}"/>
+                            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                                <TextBlock Text="CẤU HÌNH BÀN" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="Chỉnh sửa thông tin hoặc xóa" Foreground="{StaticResource TextSecondary}" FontSize="14" Margin="0,5,0,0"/>
+                                <Border Height="1" Background="{StaticResource GlassBorder}" Margin="0,15,0,0"/>
                             </StackPanel>
 
-                            <TextBlock Text="Vui lòng chọn một bàn bên trái để sửa" 
-                                       Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" FontSize="16">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedBan}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
+                            <Border Grid.Row="1" Background="#203B82F6" BorderBrush="#3B82F6" BorderThickness="1" 
+                CornerRadius="15" Padding="20" Margin="0,0,0,25" HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="BÀN SỐ" Foreground="#3B82F6" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" Opacity="0.8"/>
+                                    <TextBlock Text="{Binding SelectedBan.SoBan}" FontSize="48" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" LineHeight="48"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Grid.Row="2">
+                                <TextBlock Text="Tên hiển thị (Tùy chọn)" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <TextBox Text="{Binding SelectedBan.TenGoi, UpdateSourceTrigger=PropertyChanged}" MaxLength="50"
+         Height="45" FontSize="14" Foreground="White" CaretBrush="#3B82F6"
+         Background="Transparent" BorderThickness="0">
+
+                                    <TextBox.Template>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Border x:Name="border"
+                    Background="#151E293B"
+                    BorderBrush="#475569"
+                    BorderThickness="1"
+                    CornerRadius="8">
+
+                                                <ScrollViewer x:Name="PART_ContentHost" 
+                              Focusable="False"
+                              HorizontalScrollBarVisibility="Hidden"
+                              VerticalScrollBarVisibility="Hidden"
+                              VerticalAlignment="Center"
+                              Margin="15,0"/>
+                                            </Border>
+
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="#64748B"/>
+                                                </Trigger>
+                                                <Trigger Property="IsFocused" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="#3B82F6"/>
+                                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </TextBox.Template>
+                                </TextBox>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <TextBlock Text="💡 Gợi ý:" Foreground="#64748B" FontSize="12" FontStyle="Italic" Margin="0,0,5,0"/>
+                                    <TextBlock Text="VIP 1, Ngoài trời, Cửa sổ..." Foreground="#64748B" FontSize="12" FontStyle="Italic"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Margin="0,20,0,0">
+                                <Button Command="{Binding SaveTableSettingsCommand}"
+            Height="50" Background="{DynamicResource AccentGradient}" 
+            Style="{StaticResource GlassButtonStyle}" Margin="0,0,0,15">
+                                    <Button.Effect>
+                                        <DropShadowEffect Color="#3B82F6" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/>
+                                    </Button.Effect>
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Path Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                      Fill="White" Height="14" Width="14" Stretch="Uniform" Margin="0,1,10,0"/>
+
+                                            <TextBlock Text="Lưu Thay Đổi" Foreground="White" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Button>
+
+                                <Button Command="{Binding DeleteTableCommand}"
+            CommandParameter="{Binding SelectedBan}"
+            Height="45" Background="Transparent" 
+            BorderBrush="#30EF4444" BorderThickness="1">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource GlassDismissButtonStyle}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#15EF4444"/>
+                                                                <Setter Property="BorderBrush" Value="#EF4444"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
+                  Fill="#EF4444" Height="14" Width="14" Stretch="Uniform" Margin="0,0,8,0"/>
+
+                                        <TextBlock Text="Xóa Bàn Này" Foreground="#EF4444" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedBan}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.5">
+                                <TextBlock Text="👆" FontSize="50" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <TextBlock Text="Chọn một bàn" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                <TextBlock Text="để chỉnh sửa thông tin" FontSize="14" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>

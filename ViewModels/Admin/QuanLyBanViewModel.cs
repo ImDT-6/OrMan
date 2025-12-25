@@ -20,12 +20,9 @@ namespace OrMan.ViewModels.Admin
         private readonly BanAnRepository _repository;
         private DispatcherTimer _timer;
 
-        private ObservableCollection<BanAn> _danhSachBan;
-        public ObservableCollection<BanAn> DanhSachBan
-        {
-            get => _danhSachBan;
-            set { _danhSachBan = value; OnPropertyChanged(); }
-        }
+        // Dùng ObservableCollection nhưng KHÔNG set lại new instance để tránh mất cuộn
+        public ObservableCollection<BanAn> DanhSachBan { get; set; } = new ObservableCollection<BanAn>();
+
         private decimal _tienGiamGia;
         public decimal TienGiamGia
         {
@@ -34,23 +31,28 @@ namespace OrMan.ViewModels.Admin
         }
 
         public decimal TongTienThanhToan => TongTienCanThu - TienGiamGia;
+
         private BanAn _selectedBan;
         public BanAn SelectedBan
         {
             get => _selectedBan;
             set
             {
-                _selectedBan = value;
-                OnPropertyChanged();
+                if (_selectedBan != value)
+                {
+                    _selectedBan = value;
+                    OnPropertyChanged();
 
-                if (_selectedBan != null && !IsEditMode)
-                {
-                    LoadTableDetailsAsync(); // [TỐI ƯU] Async
-                }
-                else
-                {
-                    ChiTietDonHang = null;
-                    TongTienCanThu = 0;
+                    if (_selectedBan != null && !IsEditMode)
+                    {
+                        LoadTableDetailsAsync();
+                    }
+                    else
+                    {
+                        ChiTietDonHang = null;
+                        TongTienCanThu = 0;
+                        TienGiamGia = 0;
+                    }
                 }
             }
         }
@@ -82,6 +84,7 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
+        // Commands
         public ICommand SelectTableCommand { get; private set; }
         public ICommand CheckoutCommand { get; private set; }
         public ICommand AssignTableCommand { get; private set; }
@@ -95,73 +98,87 @@ namespace OrMan.ViewModels.Admin
         public QuanLyBanViewModel()
         {
             _repository = new BanAnRepository();
+            InitializeCommands();
 
-            // [TỐI ƯU] Chạy ngầm việc khởi tạo và load bàn
             Task.Run(async () =>
             {
                 if (_repository.GetAll().Count == 0) _repository.InitTables();
-                await LoadTablesAsync();
+                await RefreshTableListAsync();
             });
 
-            SelectTableCommand = new RelayCommand<BanAn>(ban => SelectedBan = ban);
-            AssignTableCommand = new RelayCommand<object>(AssignTable);
-            ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
-            CancelTableCommand = new RelayCommand<object>(CancelTable);
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromSeconds(5);
+            _timer.Tick += async (s, e) => await RefreshTableListAsync();
+            _timer.Start();
+        }
 
+        private void InitializeCommands()
+        {
+            SelectTableCommand = new RelayCommand<BanAn>(ban => SelectedBan = ban);
+            ToggleEditModeCommand = new RelayCommand<object>(p => IsEditMode = !IsEditMode);
+            AssignTableCommand = new RelayCommand<object>(AssignTable);
+            CancelTableCommand = new RelayCommand<object>(CancelTable);
+            CheckoutCommand = new RelayCommand<object>(Checkout);
+
+            // [FIX] Thêm bàn thông minh: Tìm số nhỏ nhất còn thiếu
             AddTableCommand = new RelayCommand<object>(p =>
             {
                 Task.Run(async () =>
                 {
-                    _repository.AddTable();
-                    await LoadTablesAsync();
-                    Application.Current.Dispatcher.Invoke(() =>
+                    var allTables = _repository.GetAll();
+                    var currentIds = allTables.Select(b => b.SoBan).OrderBy(x => x).ToList();
+
+                    int nextId = 1;
+                    foreach (var id in currentIds)
                     {
-                        var banMoi = DanhSachBan.OrderByDescending(b => b.SoBan).FirstOrDefault();
-                        if (banMoi != null)
+                        if (id == nextId) nextId++;
+                        else break; // Tìm thấy khe hở (ví dụ 1, 3 -> thiếu 2)
+                    }
+
+                    // Gọi hàm AddTable mới có tham số ID
+                    bool success = _repository.AddTable(nextId);
+
+                    if (success)
+                    {
+                        await RefreshTableListAsync();
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            SelectedBan = banMoi;
-                            MessageBox.Show($"Đã thêm {banMoi.TenBan} thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    });
+                            var banMoi = DanhSachBan.FirstOrDefault(b => b.SoBan == nextId);
+                            if (banMoi != null) SelectedBan = banMoi;
+                            MessageBox.Show($"Đã thêm lại bàn số {nextId} thành công!", "Thông báo");
+                        });
+                    }
+                    else
+                    {
+                        Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Lỗi thêm bàn. Kiểm tra lại Database.", "Lỗi"));
+                    }
                 });
             });
 
             DeleteTableCommand = new RelayCommand<BanAn>(ban =>
             {
                 if (ban == null) return;
-                var confirm = MessageBox.Show($"Bạn có chắc muốn xóa {ban.TenBan}?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (confirm == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Bạn có chắc muốn xóa bàn số {ban.SoBan} ({ban.TenGoi})?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     Task.Run(async () =>
                     {
                         bool success = _repository.DeleteTable(ban.SoBan);
                         if (success)
                         {
-                            await LoadTablesAsync();
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                if (SelectedBan != null && SelectedBan.SoBan == ban.SoBan) SelectedBan = null;
-                                MessageBox.Show($"Đã xóa {ban.TenBan}.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                            });
+                            await RefreshTableListAsync();
+                            Application.Current.Dispatcher.Invoke(() => SelectedBan = null);
                         }
                         else
                         {
-                            Application.Current.Dispatcher.Invoke(() =>
-                                MessageBox.Show("Không thể xóa bàn đang có khách!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error));
+                            Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Không thể xóa bàn đang có khách!", "Lỗi"));
                         }
                     });
                 }
             });
 
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(5);
-            _timer.Tick += async (s, e) => await RefreshTableStatusAsync();
-            _timer.Start();
-
             PrintBillCommand = new RelayCommand<object>(p =>
             {
                 if (SelectedBan == null || _currentHoaDon == null) return;
-                // In ấn vẫn phải chạy trên UI Thread để hiện Window
                 var printWindow = new HoaDonWindow(SelectedBan.TenBan, _currentHoaDon, ChiTietDonHang, SelectedBan.HinhThucThanhToan ?? "Tiền mặt");
                 if (printWindow.ShowDialog() == true)
                 {
@@ -175,214 +192,131 @@ namespace OrMan.ViewModels.Admin
                 Task.Run(() =>
                 {
                     _repository.UpdateTableInfo(SelectedBan.SoBan, SelectedBan.TenGoi);
-                    Application.Current.Dispatcher.Invoke(() =>
-                        MessageBox.Show($"Đã lưu thông tin {SelectedBan.TenBan} thành công!", "Đã Lưu", MessageBoxButton.OK, MessageBoxImage.Information));
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Đã lưu tên bàn thành công!", "Thông báo"));
                 });
             });
-
-            CheckoutCommand = new RelayCommand<object>(Checkout);
         }
 
-        private async Task LoadTablesAsync()
-        {
-            var data = await Task.Run(() => _repository.GetAll());
-            Application.Current.Dispatcher.Invoke(() => DanhSachBan = data);
-        }
-
-        private async Task RefreshTableStatusAsync()
+        // [FIX] Đồng bộ thông minh: Chỉ cập nhật item thay đổi, không load lại cả list
+        private async Task RefreshTableListAsync()
         {
             try
             {
                 var newData = await Task.Run(() => _repository.GetAll());
 
-                foreach (var banMoi in newData)
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var banCu = DanhSachBan.FirstOrDefault(b => b.SoBan == banMoi.SoBan);
-                    if (banCu != null)
+                    // 1. Xóa bàn không còn trong DB
+                    var itemsToRemove = DanhSachBan.Where(x => !newData.Any(n => n.SoBan == x.SoBan)).ToList();
+                    foreach (var item in itemsToRemove) DanhSachBan.Remove(item);
+
+                    // 2. Cập nhật hoặc Thêm mới
+                    foreach (var newBan in newData)
                     {
-                        if (banCu.TrangThai != banMoi.TrangThai) banCu.TrangThai = banMoi.TrangThai;
-                        if (banCu.YeuCauThanhToan != banMoi.YeuCauThanhToan) banCu.YeuCauThanhToan = banMoi.YeuCauThanhToan;
-                        if (banCu.HinhThucThanhToan != banMoi.HinhThucThanhToan) banCu.HinhThucThanhToan = banMoi.HinhThucThanhToan;
-                        if (banCu.YeuCauHoTro != banMoi.YeuCauHoTro) banCu.YeuCauHoTro = banMoi.YeuCauHoTro;
+                        var existingBan = DanhSachBan.FirstOrDefault(b => b.SoBan == newBan.SoBan);
+                        if (existingBan != null)
+                        {
+                            // Cập nhật các trường thay đổi
+                            if (existingBan.TrangThai != newBan.TrangThai) existingBan.TrangThai = newBan.TrangThai;
+                            if (existingBan.YeuCauThanhToan != newBan.YeuCauThanhToan) existingBan.YeuCauThanhToan = newBan.YeuCauThanhToan;
+                            if (existingBan.HinhThucThanhToan != newBan.HinhThucThanhToan) existingBan.HinhThucThanhToan = newBan.HinhThucThanhToan;
+                            if (existingBan.TenGoi != newBan.TenGoi) existingBan.TenGoi = newBan.TenGoi;
+                            if (existingBan.DaInTamTinh != newBan.DaInTamTinh) existingBan.DaInTamTinh = newBan.DaInTamTinh;
+                        }
+                        else
+                        {
+                            // Chèn đúng vị trí số thứ tự
+                            int insertIndex = 0;
+                            while (insertIndex < DanhSachBan.Count && DanhSachBan[insertIndex].SoBan < newBan.SoBan)
+                            {
+                                insertIndex++;
+                            }
+                            DanhSachBan.Insert(insertIndex, newBan);
+                        }
                     }
-                }
+                });
 
                 if (SelectedBan != null && SelectedBan.TrangThai == "Có Khách")
                 {
-                    // Refresh chi tiết đơn nếu bàn đang mở
                     await LoadTableDetailsAsync();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Refresh Error: " + ex.Message);
-            }
-        }
-
-        private void AssignTable(object obj)
-        {
-            if (SelectedBan == null) return;
-            if (SelectedBan.TrangThai == "Trống")
-            {
-                // Chạy bất đồng bộ để UI mượt mà
-                Task.Run(async () =>
-                {
-                    // Gọi hàm mới vừa viết bên Repository
-                    bool thanhCong = _repository.CheckInTable(SelectedBan.SoBan);
-
-                    if (thanhCong)
-                    {
-                        await Application.Current.Dispatcher.InvokeAsync(async () =>
-                        {
-                            // Cập nhật giao diện
-                            SelectedBan.TrangThai = "Có Khách";
-
-                            // QUAN TRỌNG: Load lại dữ liệu để lấy được MaHoaDon vừa tạo
-                            // Nếu không có dòng này, bạn thêm món sẽ bị lỗi vì chưa nhận diện được hóa đơn mới
-                            await LoadTableDetailsAsync();
-
-                            // (Tùy chọn) Thông báo nhỏ
-                            // MessageBox.Show($"Đã mở bàn {SelectedBan.TenBan}!", "Thành công");
-                        });
-                    }
-                    else
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                            MessageBox.Show("Không thể mở bàn. Có thể bàn đang có khách hoặc lỗi kết nối.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error));
-                    }
-                });
-            }
-            else
-            {
-                MessageBox.Show("Bàn này đang có khách!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Diagnostics.Debug.WriteLine("Sync Error: " + ex.Message);
             }
         }
 
         private async Task LoadTableDetailsAsync()
         {
-            if (SelectedBan == null) return;
+            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách") return;
 
-            if (SelectedBan.TrangThai == "Có Khách")
+            var details = await Task.Run(() =>
             {
-                var details = await Task.Run(() =>
-                {
-                    // Lấy hóa đơn đang hoạt động
-                    var hd = _repository.GetActiveOrder(SelectedBan.SoBan);
-                    // Lấy chi tiết món
-                    var list = hd != null ? _repository.GetOrderDetails(hd.MaHoaDon) : new List<ChiTietHoaDon>();
+                var hd = _repository.GetActiveOrder(SelectedBan.SoBan);
+                var list = hd != null ? _repository.GetOrderDetails(hd.MaHoaDon) : new List<ChiTietHoaDon>();
+                return new { HoaDon = hd, List = list };
+            });
 
-                    return new { HoaDon = hd, List = list };
-                });
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _currentHoaDon = details.HoaDon;
-
-                    // Nếu ChiTietDonHang là ObservableCollection thì cần bọc lại, nếu là List thì giữ nguyên
-                    // (Tùy theo khai báo của bạn, đoạn này mình giữ theo code gốc của bạn)
-                    ChiTietDonHang = details.List;
-
-                    TongTienCanThu = _currentHoaDon?.TongTien ?? 0;
-
-                    // [THÊM DÒNG NÀY] Lấy tiền giảm giá từ Hóa đơn lên giao diện
-                    TienGiamGia = _currentHoaDon?.GiamGia ?? 0;
-                });
-            }
-            else
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                ChiTietDonHang = null;
-                TongTienCanThu = 0;
-                // [THÊM DÒNG NÀY] Reset về 0 khi bàn trống
-                TienGiamGia = 0;
-            }
+                _currentHoaDon = details.HoaDon;
+                ChiTietDonHang = details.List;
+                TongTienCanThu = _currentHoaDon?.TongTien ?? 0;
+                TienGiamGia = _currentHoaDon?.GiamGia ?? 0;
+            });
+        }
+
+        private void AssignTable(object obj)
+        {
+            if (SelectedBan == null || SelectedBan.TrangThai != "Trống") return;
+
+            Task.Run(async () =>
+            {
+                if (_repository.CheckInTable(SelectedBan.SoBan))
+                {
+                    await RefreshTableListAsync();
+                }
+                else
+                {
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Lỗi mở bàn."));
+                }
+            });
         }
 
         private void Checkout(object obj)
         {
             if (SelectedBan == null || _currentHoaDon == null) return;
 
-            string thongBao = $"Bạn có chắc chắn muốn kết thúc đơn hàng bàn {SelectedBan.TenBan}?\n" +
-                              $"Tổng tiền thu: {TongTienThanhToan:N0} VNĐ";
-
-            if (MessageBox.Show(thongBao, "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show($"Thanh toán bàn {SelectedBan.TenBan}?\nTổng: {TongTienThanhToan:N0} đ", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 Task.Run(async () =>
                 {
-                    try
-                    {
-                        _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
+                    _repository.CheckoutTable(SelectedBan.SoBan, _currentHoaDon.MaHoaDon);
+                    await RefreshTableListAsync();
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Đã thanh toán!"));
+                });
+            }
+        }
 
-                        // Sau khi DB xong, cập nhật UI
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            SelectedBan.TrangThai = "Trống";
-                            SelectedBan.YeuCauThanhToan = false;
-                            SelectedBan.HinhThucThanhToan = null;
-                            SelectedBan.DaInTamTinh = false;
-                            SelectedBan.YeuCauHoTro = null;
-                        });
+        private void CancelTable(object obj)
+        {
+            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách") return;
 
-                        await LoadTableDetailsAsync();
-
-                        Application.Current.Dispatcher.Invoke(() =>
-                            MessageBox.Show("Thanh toán thành công! Đã trả bàn.", "Hoàn tất", MessageBoxButton.OK, MessageBoxImage.Information));
-                    }
-                    catch (Exception ex)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                            MessageBox.Show("Lỗi thanh toán: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error));
-                    }
+            if (MessageBox.Show($"HỦY bàn {SelectedBan.TenBan}? Dữ liệu sẽ mất.", "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                Task.Run(async () =>
+                {
+                    _repository.CancelTableSession(SelectedBan.SoBan);
+                    await RefreshTableListAsync();
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Đã hủy bàn."));
                 });
             }
         }
 
         public void Cleanup()
         {
-            if (_timer != null)
-            {
-                _timer.Stop();
-                _timer = null;
-            }
-        }
-
-
-        private void CancelTable(object obj)
-        {
-            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách") return;
-
-            // Cảnh báo trước khi hủy
-            var result = MessageBox.Show($"Bạn có chắc muốn HỦY phục vụ bàn {SelectedBan.TenBan}?\n(Hóa đơn hiện tại sẽ bị xóa hoàn toàn)",
-                                         "Xác nhận hủy",
-                                         MessageBoxButton.YesNo,
-                                         MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        // Gọi hàm Repository vừa viết
-                        _repository.CancelTableSession(SelectedBan.SoBan);
-
-                        await Application.Current.Dispatcher.InvokeAsync(async () =>
-                        {
-                            // Cập nhật UI
-                            SelectedBan.TrangThai = "Trống";
-
-                            // Load lại để xóa sạch thông tin hiển thị bên phải
-                            await LoadTableDetailsAsync();
-
-                            MessageBox.Show("Đã hủy bàn thành công. Trạng thái về Trống.", "Thông báo");
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                            MessageBox.Show("Lỗi hủy bàn: " + ex.Message));
-                    }
-                });
-            }
+            _timer?.Stop();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
