@@ -1,8 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System; // Thêm
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows; // Thêm cái này để dùng MessageBox
+using System.Windows;
 using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
@@ -12,15 +13,24 @@ namespace OrMan.ViewModels
 {
     public class KhachHangViewModel : INotifyPropertyChanged
     {
-        // --- 1. KHAI BÁO BIẾN & PROPERTY ---
         private ObservableCollection<KhachHang> _allKhachHang;
         private ObservableCollection<KhachHang> _danhSachKhachHang;
         private string _searchKeyword;
+
+        // [MỚI] Biến chứa số lượng thành viên mới
+        private int _soLuongThanhVienMoi;
 
         public ObservableCollection<KhachHang> DanhSachKhachHang
         {
             get => _danhSachKhachHang;
             set { _danhSachKhachHang = value; OnPropertyChanged(); }
+        }
+
+        // [MỚI] Property binding ra giao diện
+        public int SoLuongThanhVienMoi
+        {
+            get => _soLuongThanhVienMoi;
+            set { _soLuongThanhVienMoi = value; OnPropertyChanged(); }
         }
 
         public string SearchKeyword
@@ -34,21 +44,17 @@ namespace OrMan.ViewModels
             }
         }
 
-        // [QUAN TRỌNG] Phải khai báo Command ở đây thì bên dưới mới dùng được
         public RelayCommand<KhachHang> EditCommand { get; set; }
         public RelayCommand<KhachHang> DeleteCommand { get; set; }
 
-        // --- 2. CONSTRUCTOR (HÀM KHỞI TẠO) ---
         public KhachHangViewModel()
         {
             LoadData();
 
-            // --- LOGIC SỬA (Edit) ---
+            // --- Logic Edit (Giữ nguyên của bạn) ---
             EditCommand = new RelayCommand<KhachHang>((k) =>
             {
                 if (k == null) return;
-
-                // Mở cửa sổ sửa
                 var wd = new ThemKhachHangWindow(k);
                 if (wd.ShowDialog() == true)
                 {
@@ -57,71 +63,58 @@ namespace OrMan.ViewModels
                         var itemToUpdate = db.KhachHangs.Find(k.KhachHangID);
                         if (itemToUpdate != null)
                         {
-                            // Kiểm tra nếu Số điện thoại thay đổi
                             if (itemToUpdate.SoDienThoai != wd.Result.SoDienThoai)
                             {
-                                // Kiểm tra trùng SĐT
                                 bool daTonTai = db.KhachHangs.Any(x => x.SoDienThoai == wd.Result.SoDienThoai);
                                 if (daTonTai)
                                 {
-                                    MessageBox.Show($"Số điện thoại '{wd.Result.SoDienThoai}' đã tồn tại!",
-                                        "Lỗi trùng lặp", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    MessageBox.Show($"SĐT '{wd.Result.SoDienThoai}' đã tồn tại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                                     return;
                                 }
                                 itemToUpdate.SoDienThoai = wd.Result.SoDienThoai;
                             }
-
-                            // Cập nhật tên
                             itemToUpdate.HoTen = wd.Result.HoTen;
                             db.SaveChanges();
                         }
                     }
-                    LoadData(); // Tải lại danh sách
+                    LoadData();
                     MessageBox.Show("Cập nhật thành công!", "Thông báo");
                 }
             });
 
-            // --- LOGIC XÓA (Delete) ---
+            // --- Logic Delete (Giữ nguyên của bạn) ---
             DeleteCommand = new RelayCommand<KhachHang>((k) =>
             {
                 if (k == null) return;
-
-                var confirm = MessageBox.Show($"Bạn có chắc muốn xóa khách hàng '{k.HoTen}'?\nĐiểm tích lũy sẽ bị mất vĩnh viễn.",
-                                              "Xác nhận xóa",
-                                              MessageBoxButton.YesNo,
-                                              MessageBoxImage.Warning);
-
+                var confirm = MessageBox.Show($"Xóa khách hàng '{k.HoTen}'?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (confirm == MessageBoxResult.Yes)
                 {
                     try
                     {
                         using (var db = new MenuContext())
                         {
-                            var itemToDelete = db.KhachHangs.Find(k.KhachHangID);
-                            if (itemToDelete != null)
-                            {
-                                db.KhachHangs.Remove(itemToDelete);
-                                db.SaveChanges();
-                            }
+                            var item = db.KhachHangs.Find(k.KhachHangID);
+                            if (item != null) { db.KhachHangs.Remove(item); db.SaveChanges(); }
                         }
-                        LoadData(); // Tải lại danh sách
+                        LoadData();
                     }
-                    catch (System.Exception ex)
-                    {
-                        MessageBox.Show("Lỗi khi xóa: " + ex.Message);
-                    }
+                    catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
                 }
             });
         }
 
-        // --- 3. CÁC HÀM HỖ TRỢ (LOAD, FILTER) ---
         private void LoadData()
         {
             using (var db = new MenuContext())
             {
-                // Load dữ liệu mới nhất từ DB
                 var list = db.KhachHangs.OrderByDescending(k => k.DiemTichLuy).ToList();
                 _allKhachHang = new ObservableCollection<KhachHang>(list);
+
+                // --- [MỚI] LOGIC TÍNH TOÁN THÀNH VIÊN MỚI ---
+                // Tính những người tham gia trong 7 ngày gần nhất
+                var bayNgayTruoc = DateTime.Now.Date.AddDays(-7);
+                SoLuongThanhVienMoi = list.Count(x => x.NgayThamGia >= bayNgayTruoc);
+
                 FilterData();
             }
         }
@@ -143,7 +136,6 @@ namespace OrMan.ViewModels
             }
         }
 
-        // --- 4. INotifyPropertyChanged ---
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

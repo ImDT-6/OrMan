@@ -240,6 +240,17 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sqlGiamGia);
                 }
                 catch { }
+                // [MỚI] Thêm cột NgayThamGia cho bảng KhachHang (Cập nhật cho Model mới)
+                try
+                {
+                    string sqlNgayThamGia = @"
+        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'NgayThamGia' AND Object_ID = Object_ID(N'KhachHang'))
+        BEGIN
+            ALTER TABLE KhachHang ADD NgayThamGia DATETIME NOT NULL DEFAULT GETDATE();
+        END";
+                    context.Database.ExecuteSqlRaw(sqlNgayThamGia);
+                }
+                catch { }
             }
         }
     }
