@@ -2,25 +2,26 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="Str_Menu_Noodles">🔥 Spicy Noodles</sys:String>
-    <sys:String x:Key="Str_Menu_Snacks">🥟 Snacks</sys:String>
-    <sys:String x:Key="Str_Menu_Drinks">🥤 Drinks</sys:String>
-    <sys:String x:Key="Str_Points">💎 Loyalty Points</sys:String>
-    <sys:String x:Key="Str_Review">⭐ Review</sys:String>
+    <sys:String x:Key="Str_Menu_Noodles">Spicy Noodles</sys:String>
+    <sys:String x:Key="Str_Menu_Snacks">Snacks</sys:String>
+    <sys:String x:Key="Str_Menu_Drinks">Drinks</sys:String>
+    <sys:String x:Key="Str_Points">Loyalty Points</sys:String>
+    <sys:String x:Key="Str_Review">Review</sys:String>
+    <sys:String x:Key="Str_LuckyWheel">Lucky Wheel</sys:String>
 
     <sys:String x:Key="Str_Search_Placeholder">Search food...</sys:String>
-    <sys:String x:Key="Str_Call_Staff">🔔 Call Staff</sys:String>
+    <sys:String x:Key="Str_CallStaff">Call Staff</sys:String>
     <sys:String x:Key="Str_Table">Table</sys:String>
     <sys:String x:Key="Str_Exit">Exit</sys:String>
-
+    <sys:String x:Key="Str_Utilities">UTILITIES</sys:String>
     <sys:String x:Key="Str_GoodMorning">Good Morning</sys:String>
     <sys:String x:Key="Str_GoodAfternoon">Good Afternoon</sys:String>
     <sys:String x:Key="Str_GoodEvening">Good Evening</sys:String>
-    <sys:String x:Key="Str_GoodNight">Good Evening</sys:String>
+    <sys:String x:Key="Str_GoodNight">Good Night</sys:String>
     <sys:String x:Key="Str_Guest">Guest</sys:String>
-
+    <sys:String x:Key="Str_HowAreYouToday" >How are you today?</sys:String>
     <sys:String x:Key="Str_SelectTable_Header">PLEASE SELECT YOUR TABLE</sys:String>
-
+    <sys:String x:Key="Str_WaitMoment" >Wait a moment!</sys:String>
     <sys:String x:Key="Str_Btn_ViewCart">VIEW CART &amp; ORDER</sys:String>
 
     <sys:String x:Key="Str_Title_Notice">Notice</sys:String>
@@ -62,8 +63,45 @@
     <sys:String x:Key="Str_PhoneNumber_Label">Phone Number</sys:String>
     <sys:String x:Key="Str_Name_Input_Label">Customer Name (New Register)</sys:String>
     <sys:String x:Key="Str_Name_Placeholder">Enter your name</sys:String>
-    <sys:String x:Key="Str_Points_Label_Short">Points:</sys:String>
+    
     <sys:String x:Key="Str_Msg_NewPhoneRegister">New phone number. Please enter name to register!</sys:String>
     <sys:String x:Key="Str_Btn_Register">REGISTER</sys:String>
     <sys:String x:Key="Str_Msg_AskLoyalty">Do you want to earn points for this order?</sys:String>
+
+    <sys:String x:Key="Str_ReviewTitle">Review &amp; Feedback</sys:String>
+    <sys:String x:Key="Str_ReviewSubtitle">How was your experience today?</sys:String>
+    <sys:String x:Key="Str_ImprovementHeader">What can we improve?</sys:String>
+    <sys:String x:Key="Str_CommentPlaceholder">Share more details... (Optional)</sys:String>
+    <sys:String x:Key="Str_Btn_SubmitReview">Submit Review</sys:String>
+
+   
+
+    <sys:String x:Key="Str_Rate_1">Disappointed 😟</sys:String>
+    <sys:String x:Key="Str_Rate_2">Bad 😐</sys:String>
+    <sys:String x:Key="Str_Rate_3">Normal 🙂</sys:String>
+    <sys:String x:Key="Str_Rate_4">Good 😄</sys:String>
+    <sys:String x:Key="Str_Rate_5">Excellent 😍</sys:String>
+
+    <sys:String x:Key="Str_PlsSelectStar">Please select a rating</sys:String>
+    
+    <sys:String x:Key="Str_WhatYouLike">What did you like the most?</sys:String>
+
+    <sys:String x:Key="Str_Tag_GoodFood">Delicious food</sys:String>
+    <sys:String x:Key="Str_Tag_GoodService">Good service</sys:String>
+    <sys:String x:Key="Str_Tag_Clean">Clean</sys:String>
+    <sys:String x:Key="Str_Tag_NiceView">Nice atmosphere</sys:String>
+    <sys:String x:Key="Str_Tag_GoodPrice">Good price</sys:String>
+
+    <sys:String x:Key="Str_Tag_Hygiene">Poor hygiene</sys:String>
+    <sys:String x:Key="Str_Tag_Attitude">Staff attitude</sys:String>
+    <sys:String x:Key="Str_Tag_Food">Bad food</sys:String>
+    <sys:String x:Key="Str_Tag_Wait">Long wait time</sys:String>
+    <sys:String x:Key="Str_Tag_Price">Too expensive</sys:String>
+    <sys:String x:Key="Str_Tag_Noise">Too noisy</sys:String>
+    <sys:String x:Key="Str_Tag_Hot">Too hot</sys:String>
+
+    <sys:String x:Key="Str_SpiceLevel">Spice Level</sys:String>
+    <sys:String x:Key="Str_Notes">Notes</sys:String>
+    <sys:String x:Key="Str_Quantity">Quantity</sys:String>
+    <sys:String x:Key="Str_Btn_AddToCart">Add to Cart - {0:N0} đ</sys:String>
 </ResourceDictionary>

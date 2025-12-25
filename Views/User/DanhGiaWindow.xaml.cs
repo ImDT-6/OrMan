@@ -14,17 +14,18 @@ namespace OrMan.Views.User
         private int _currentRating = 0; // Số sao ĐÃ CHỐT
         private UserViewModel _vm;
 
-        private readonly List<string> _tagsPositive = new List<string>
-        {
-            "Món ăn ngon", "Giá hợp lý", "Nhân viên thân thiện",
-            "Không gian đẹp", "Lên món nhanh", "Sạch sẽ"
-        };
-
         private readonly List<string> _tagsNegative = new List<string>
-        {
-            "Vệ sinh kém", "Nhân viên thái độ", "Món ăn tệ",
-            "Chờ quá lâu", "Giá đắt", "Ồn ào", "Nóng nực"
-        };
+{
+    "Str_Tag_Hygiene", "Str_Tag_Attitude", "Str_Tag_Food",
+    "Str_Tag_Wait", "Str_Tag_Price", "Str_Tag_Noise", "Str_Tag_Hot"
+};
+
+        
+        private readonly List<string> _tagsPositive = new List<string>
+{
+    "Str_Tag_GoodFood", "Str_Tag_GoodService", "Str_Tag_Clean",
+    "Str_Tag_NiceView", "Str_Tag_GoodPrice"
+};
 
         public DanhGiaWindow(UserViewModel vm)
         {
@@ -109,54 +110,87 @@ namespace OrMan.Views.User
         // Hàm cập nhật toàn bộ UI
         private void UpdateStarUI(int rating)
         {
-            HighlightStars(rating); // Tô màu
+            HighlightStars(rating); // Hàm tô màu sao (Giữ nguyên)
 
             var brushActive = (Brush)new BrushConverter().ConvertFrom("#F59E0B");
             var brushGrey = (Brush)new BrushConverter().ConvertFrom("#A0AEC0");
 
+            // Trường hợp chưa chọn sao (0 sao)
             if (rating == 0)
             {
-                txtRatingStatus.Text = "Chạm vào sao để đánh giá";
+                // "Vui lòng chọn số sao" (Hoặc "Chạm vào sao...")
+                txtRatingStatus.SetResourceReference(TextBlock.TextProperty, "Str_PlsSelectStar");
                 txtRatingStatus.Foreground = brushGrey;
                 return;
             }
 
+            // Trường hợp đã chọn sao
             txtRatingStatus.Foreground = brushActive;
+            string resourceKey = "";
+
             switch (rating)
             {
-                case 1: txtRatingStatus.Text = "Rất thất vọng 😞"; break;
-                case 2: txtRatingStatus.Text = "Thất vọng 😕"; break;
-                case 3: txtRatingStatus.Text = "Bình thường 😐"; break;
-                case 4: txtRatingStatus.Text = "Hài lòng 😊"; break;
-                case 5: txtRatingStatus.Text = "Tuyệt vời! 😍"; break;
+                case 1: resourceKey = "Str_Rate_1"; break; // Thất vọng
+                case 2: resourceKey = "Str_Rate_2"; break; // Tệ
+                case 3: resourceKey = "Str_Rate_3"; break; // Bình thường
+                case 4: resourceKey = "Str_Rate_4"; break; // Hài lòng
+                case 5: resourceKey = "Str_Rate_5"; break; // Tuyệt vời
+            }
+
+            // Gán Key Resource để TextBlock tự động dịch ngôn ngữ
+            if (!string.IsNullOrEmpty(resourceKey))
+            {
+                txtRatingStatus.SetResourceReference(TextBlock.TextProperty, resourceKey);
             }
         }
 
         private void UpdateTagsUI(int rating)
         {
+            // 1. Xóa các tag cũ
             wrapPanelTags.Children.Clear();
-            List<string> tagsToShow;
 
+            List<string> currentTagKeys;
+
+            // 2. Cập nhật câu hỏi và chọn danh sách Tag tương ứng
             if (rating >= 4)
             {
-                txtQuestion.Text = "Bạn hài lòng nhất về điều gì?";
-                tagsToShow = _tagsPositive;
+                // Câu hỏi: "Bạn hài lòng nhất về điều gì?"
+                txtQuestion.SetResourceReference(TextBlock.TextProperty, "Str_WhatYouLike");
+                currentTagKeys = _tagsPositive;
             }
             else
             {
-                txtQuestion.Text = "Chúng tôi cần cải thiện điều gì?";
-                tagsToShow = _tagsNegative;
+                // Câu hỏi: "Chúng tôi cần cải thiện điều gì?"
+                txtQuestion.SetResourceReference(TextBlock.TextProperty, "Str_ImprovementHeader");
+                currentTagKeys = _tagsNegative;
             }
 
-            foreach (var tagContent in tagsToShow)
+            // 3. Tạo các nút Tag động
+            foreach (string resourceKey in currentTagKeys)
             {
-                var checkBox = new CheckBox
-                {
-                    Content = tagContent,
-                    Style = (Style)FindResource("GlassTagStyle")
-                };
-                wrapPanelTags.Children.Add(checkBox);
+                // [LƯU Ý] Nên dùng CheckBox để khớp với Style "GlassTagStyle" bạn đã định nghĩa
+                CheckBox btn = new CheckBox();
+
+                // Gán Style (để nút bo tròn, có hiệu ứng kính)
+                btn.Style = (Style)FindResource("GlassTagStyle");
+
+                // [QUAN TRỌNG] Dùng lệnh này để tự động dịch ngôn ngữ
+                // (Nếu dùng btn.Content = resourceKey thì nó sẽ hiện tên Key như lỗi bạn gặp)
+                btn.SetResourceReference(ContentControl.ContentProperty, resourceKey);
+
+                // Gán Tag là key để sau này lấy dữ liệu gửi về server
+                btn.Tag = resourceKey;
+
+                // Thêm vào giao diện
+                wrapPanelTags.Children.Add(btn);
             }
+
+            // Hiện panel tags lên với hiệu ứng
+            pnlDetails.Visibility = Visibility.Visible;
+
+            // Animation hiện dần (Optional)
+            DoubleAnimation fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.3));
+            pnlDetails.BeginAnimation(OpacityProperty, fadeIn);
         }
 
         private void SetStarColor(Button btn, Brush color)

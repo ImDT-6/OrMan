@@ -1,19 +1,17 @@
 ﻿<Window x:Class="OrMan.Views.User.DanhGiaWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Đánh Giá" Height="650" Width="480"
+        Title="{DynamicResource Str_ReviewTitle}" Height="650" Width="480"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True" WindowStyle="None" Background="Transparent"
         FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Import tài nguyên InputStyles -->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Style Tag chọn nhanh -->
             <Style x:Key="GlassTagStyle" TargetType="CheckBox">
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                 <Setter Property="Background" Value="Transparent"/>
@@ -47,7 +45,6 @@
                 </Setter>
             </Style>
 
-            <!-- [ĐÃ SỬA] Style cho TextArea (Nhập nhiều dòng) -->
             <Style x:Key="GlassTextAreaStyle" TargetType="{x:Type TextBox}">
                 <Setter Property="Background" Value="{StaticResource GlassBackground}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}"/>
@@ -60,48 +57,30 @@
                 <Setter Property="VerticalContentAlignment" Value="Top"/>
                 <Setter Property="AcceptsReturn" Value="True"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
-
-                <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
-                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
-
-                <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
-                <Setter Property="ScrollViewer.PanningMode" Value="VerticalOnly"/>
-
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type TextBox}">
                             <Grid>
                                 <Border x:Name="border" CornerRadius="15"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"/>
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"/>
 
                                 <TextBlock x:Name="Placeholder" 
-                               Text="{TemplateBinding Tag}" 
-                               Foreground="{StaticResource TextSecondary}" 
-                               Margin="{TemplateBinding Padding}"
-                               VerticalAlignment="Top" 
-                               HorizontalAlignment="Left"
-                               IsHitTestVisible="False"
-                               Opacity="0.7"
-                               Visibility="Collapsed"/>
+                                       Text="{TemplateBinding Tag}" 
+                                       Foreground="{StaticResource TextSecondary}" 
+                                       Margin="{TemplateBinding Padding}"
+                                       VerticalAlignment="Top" 
+                                       HorizontalAlignment="Left"
+                                       IsHitTestVisible="False"
+                                       Opacity="0.7"
+                                       Visibility="Collapsed"/>
 
-                                <ScrollViewer x:Name="PART_ContentHost" 
-                                  Margin="{TemplateBinding Padding}" 
-                                  VerticalAlignment="Stretch"
-                                  PanningMode="{TemplateBinding ScrollViewer.PanningMode}"
-                                  CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}"
-                                  HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
-                                  VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
                             </Grid>
-
                             <ControlTemplate.Triggers>
                                 <Trigger Property="Text" Value="">
                                     <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
-                                </Trigger>
-                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentGradient}"/>
-                                    <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -109,12 +88,7 @@
                 </Setter>
             </Style>
 
-            <!-- Style Nút Sao -->
             <Style x:Key="StarBtnStyle" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Margin" Value="5"/>
-                <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
@@ -155,7 +129,6 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -163,9 +136,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Đánh Giá &amp; Góp Ý" 
+                    <TextBlock Text="{DynamicResource Str_ReviewTitle}" 
                                FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Trải nghiệm hôm nay của bạn thế nào?" 
+                    <TextBlock Text="{DynamicResource Str_ReviewSubtitle}" 
                                FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,0"/>
                 </StackPanel>
 
@@ -176,7 +149,6 @@
                 </Button>
             </Grid>
 
-            <!-- Rating Stars -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,25">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MouseLeave="StackPanel_MouseLeave">
                     <Button x:Name="Star1" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="1" Style="{StaticResource StarBtnStyle}"/>
@@ -185,31 +157,29 @@
                     <Button x:Name="Star4" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="4" Style="{StaticResource StarBtnStyle}"/>
                     <Button x:Name="Star5" Click="Star_Click" MouseEnter="Star_MouseEnter" Tag="5" Style="{StaticResource StarBtnStyle}"/>
                 </StackPanel>
-                <TextBlock x:Name="txtRatingStatus" Text="Vui lòng chọn số sao" 
+
+                <TextBlock x:Name="txtRatingStatus" Text="{DynamicResource Str_PlsSelectStar}" 
                            HorizontalAlignment="Center" Margin="0,10,0,0" 
                            Foreground="{StaticResource WarningYellow}" FontWeight="Bold" FontSize="16"/>
             </StackPanel>
 
-            <!-- Tags -->
             <StackPanel x:Name="pnlDetails" Grid.Row="2" Margin="0,0,0,25" Opacity="0" Visibility="Collapsed">
                 <TextBlock x:Name="txtQuestion" 
-                           Text="Bạn hài lòng nhất về điều gì?" 
+                           Text="{DynamicResource Str_ImprovementHeader}" 
                            Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
                 <WrapPanel x:Name="wrapPanelTags"/>
             </StackPanel>
 
-            <!-- Text Area (Đã bật Scroll & Panning) -->
             <StackPanel Grid.Row="3">
                 <TextBox x:Name="txtGopY" 
                          Style="{StaticResource GlassTextAreaStyle}"
-                         Tag="Chia sẻ thêm với chúng tôi... (Tùy chọn)"
+                         Tag="{DynamicResource Str_CommentPlaceholder}"
                          PreviewMouseWheel="TxtGopY_PreviewMouseWheel"/>
             </StackPanel>
 
-            <!-- Submit Button -->
             <Button Grid.Row="4" Click="BtnGui_Click" 
-                    Content="Gửi Đánh Giá"
+                    Content="{DynamicResource Str_Btn_SubmitReview}"
                     Style="{StaticResource GlassButtonStyle}"
                     Margin="0,20,0,0"/>
         </Grid>

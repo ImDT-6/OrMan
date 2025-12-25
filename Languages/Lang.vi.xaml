@@ -7,13 +7,20 @@
     <sys:String x:Key="Str_Menu_Drinks">Nước Uống</sys:String>
     <sys:String x:Key="Str_Points">Tích điểm</sys:String>
     <sys:String x:Key="Str_Review">Đánh giá</sys:String>
+    <sys:String x:Key="Str_LuckyWheel">Vòng quay may mắn</sys:String>
 
     <sys:String x:Key="Str_Search_Placeholder">Tìm món ăn...</sys:String>
-    <sys:String x:Key="Str_Call_Staff">🔔 Gọi Phục Vụ</sys:String>
+    
     <sys:String x:Key="Str_Table">Bàn</sys:String>
     <sys:String x:Key="Str_Exit">Thoát</sys:String>
 
-   
+    <sys:String x:Key="Str_Utilities">TIỆN ÍCH</sys:String>
+
+
+    <sys:String x:Key="Str_HowAreYouToday" >Bạn hôm nay thế nào?</sys:String>
+    <sys:String x:Key="Str_CallStaff">Gọi phục vụ</sys:String>
+    <sys:String x:Key="Str_WaitMoment" >Đợi xíu nha!</sys:String>
+
     <sys:String x:Key="Str_GoodMorning">Chào buổi sáng</sys:String>
     <sys:String x:Key="Str_GoodAfternoon">Chào buổi trưa</sys:String>
     <sys:String x:Key="Str_GoodEvening">Chào buổi chiều</sys:String>
@@ -58,9 +65,40 @@
     <sys:String x:Key="Str_PhoneNumber_Label">Số điện thoại</sys:String>
     <sys:String x:Key="Str_Name_Input_Label">Tên khách hàng (Đăng ký mới)</sys:String>
     <sys:String x:Key="Str_Name_Placeholder">Nhập tên của bạn</sys:String>
-    <sys:String x:Key="Str_Points_Label_Short">Điểm:</sys:String>
+   
     <sys:String x:Key="Str_Msg_NewPhoneRegister">Số điện thoại mới. Nhập tên để tạo tài khoản!</sys:String>
     <sys:String x:Key="Str_Btn_Register">ĐĂNG KÝ</sys:String>
     <sys:String x:Key="Str_Msg_AskLoyalty">Bạn có muốn tích điểm cho đơn hàng này không?</sys:String>
+
+    <sys:String x:Key="Str_ReviewTitle">Đánh Giá &amp; Góp Ý</sys:String>
+    <sys:String x:Key="Str_ReviewSubtitle">Trải nghiệm hôm nay của bạn thế nào?</sys:String>
+    <sys:String x:Key="Str_ImprovementHeader">Chúng tôi cần cải thiện điều gì?</sys:String>
+    <sys:String x:Key="Str_CommentPlaceholder">Chia sẻ thêm với chúng tôi... (Tùy chọn)</sys:String>
+    <sys:String x:Key="Str_Btn_SubmitReview">Gửi Đánh Giá</sys:String>
+
+    <sys:String x:Key="Str_Tag_Hygiene">Vệ sinh kém</sys:String>
+    <sys:String x:Key="Str_Tag_Attitude">Nhân viên thái độ</sys:String>
+    <sys:String x:Key="Str_Tag_Food">Món ăn tệ</sys:String>
+    <sys:String x:Key="Str_Tag_Wait">Chờ quá lâu</sys:String>
+    <sys:String x:Key="Str_Tag_Price">Giá đắt</sys:String>
+    <sys:String x:Key="Str_Tag_Noise">Ồn ào</sys:String>
+    <sys:String x:Key="Str_Tag_Hot">Nóng nực</sys:String>
+
+    <sys:String x:Key="Str_Rate_1">Thất vọng 😟</sys:String>
+    <sys:String x:Key="Str_Rate_2">Tệ 😐</sys:String>
+    <sys:String x:Key="Str_Rate_3">Bình thường 🙂</sys:String>
+    <sys:String x:Key="Str_Rate_4">Hài lòng 😄</sys:String>
+    <sys:String x:Key="Str_Rate_5">Tuyệt vời 😍</sys:String>
+
+    <sys:String x:Key="Str_PlsSelectStar">Vui lòng chọn số sao</sys:String>
+
+    <sys:String x:Key="Str_WhatYouLike">Bạn hài lòng nhất về điều gì?</sys:String>
+
+
+    <sys:String x:Key="Str_SpiceLevel">Cấp độ cay</sys:String>
+    <sys:String x:Key="Str_Notes">Ghi chú</sys:String>
+    <sys:String x:Key="Str_Quantity">Số lượng</sys:String>
+    <sys:String x:Key="Str_Btn_AddToCart">Thêm vào giỏ - {0:N0} đ</sys:String>
+
 </ResourceDictionary>
     

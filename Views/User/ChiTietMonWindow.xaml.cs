@@ -100,11 +100,13 @@ namespace OrMan.Views.User
             if (_monAn == null) return;
 
             decimal total = _monAn.GiaBan * (_soLuong > 0 ? _soLuong : 0);
-            btnConfirm.Content = $"Thêm vào giỏ - {total:N0} đ";
+            string template = Application.Current.TryFindResource("Str_Btn_AddToCart") as string
+                       ?? "Thêm vào giỏ - {0:N0} đ";
 
             // Disable nút thêm nếu số lượng = 0
             if (btnConfirm != null) // Kiểm tra null cho an toàn
             {
+                btnConfirm.Content = string.Format(template, total);
                 btnConfirm.IsEnabled = _soLuong > 0;
                 btnConfirm.Opacity = _soLuong > 0 ? 1 : 0.5;
             }
