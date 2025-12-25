@@ -11,6 +11,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- [ĐÃ SỬA] Để Auto để không bị chiếm chỗ khi hóa đơn ngắn -->
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <Border x:Name="BillArea" Background="White" Margin="10,10,10,0" Padding="15,20,15,20">
                 <Border.Effect>
@@ -41,6 +42,7 @@
                         </StackPanel>
                     </Grid>
 
+                    <!-- Header List Món -->
                     <Border BorderBrush="Black" BorderThickness="0,1,0,1" Margin="0,0,0,5" Padding="0,5">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -56,6 +58,7 @@
                         </Grid>
                     </Border>
 
+                    <!-- Danh sách món -->
                     <ItemsControl x:Name="ListMonAn">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -77,6 +80,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <!-- Kẻ ngang nét đứt -->
                     <Rectangle Height="1" Stroke="Black" StrokeThickness="1" StrokeDashArray="4 2" SnapsToDevicePixels="True" Margin="0,10"/>
 
                     <Grid Margin="0,0,0,5">
@@ -96,6 +100,7 @@
                         <TextBlock x:Name="txtThanhToan" Text="0 đ" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"/>
                     </Grid>
 
+                    <!-- Phần QR Code -->
                     <StackPanel x:Name="pnlQR" Margin="0,10,0,0" Visibility="Collapsed">
                         <Rectangle Height="1" Stroke="Black" StrokeThickness="1" StrokeDashArray="4 2" SnapsToDevicePixels="True" Margin="0,0,0,10"/>
 
@@ -120,6 +125,7 @@
                         <TextBlock Text="(Quét mã để thanh toán)" HorizontalAlignment="Center" FontSize="10" FontStyle="Italic" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </StackPanel>
 
+                    <!-- Footer -->
                     <StackPanel Margin="0,20,0,0">
                         <TextBlock Text="I LOVE UIT" FontWeight="Bold" HorizontalAlignment="Center" FontSize="12"/>
                         <TextBlock Text="Địa chỉ: P5.02 Tòa B, UIT" HorizontalAlignment="Center" FontSize="11"/>
@@ -131,6 +137,7 @@
             </Border>
         </ScrollViewer>
 
+        <!-- FOOTER BUTTONS -->
         <Border Grid.Row="1" Background="#F3F4F6" Padding="15" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>

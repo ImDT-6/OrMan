@@ -49,9 +49,8 @@ namespace OrMan.ViewModels.Admin
                     }
                     else
                     {
-                        ChiTietDonHang = null;
-                        TongTienCanThu = 0;
-                        TienGiamGia = 0;
+                        // [FIX] Nếu bỏ chọn hoặc vào chế độ sửa thì xóa thông tin ngay
+                        ClearOrderDetails();
                     }
                 }
             }
@@ -120,7 +119,6 @@ namespace OrMan.ViewModels.Admin
             CancelTableCommand = new RelayCommand<object>(CancelTable);
             CheckoutCommand = new RelayCommand<object>(Checkout);
 
-            // [FIX] Thêm bàn thông minh: Tìm số nhỏ nhất còn thiếu
             AddTableCommand = new RelayCommand<object>(p =>
             {
                 Task.Run(async () =>
@@ -132,10 +130,9 @@ namespace OrMan.ViewModels.Admin
                     foreach (var id in currentIds)
                     {
                         if (id == nextId) nextId++;
-                        else break; // Tìm thấy khe hở (ví dụ 1, 3 -> thiếu 2)
+                        else break;
                     }
 
-                    // Gọi hàm AddTable mới có tham số ID
                     bool success = _repository.AddTable(nextId);
 
                     if (success)
@@ -180,9 +177,22 @@ namespace OrMan.ViewModels.Admin
             {
                 if (SelectedBan == null || _currentHoaDon == null) return;
                 var printWindow = new HoaDonWindow(SelectedBan.TenBan, _currentHoaDon, ChiTietDonHang, SelectedBan.HinhThucThanhToan ?? "Tiền mặt");
+
                 if (printWindow.ShowDialog() == true)
                 {
+                    // 1. Cập nhật UI ngay lập tức
                     SelectedBan.DaInTamTinh = true;
+                    OnPropertyChanged(nameof(SelectedBan));
+
+                    // 2. Lưu xuống DB
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            _repository.UpdateTablePrintStatus(SelectedBan.SoBan, true);
+                        }
+                        catch { }
+                    });
                 }
             });
 
@@ -197,7 +207,6 @@ namespace OrMan.ViewModels.Admin
             });
         }
 
-        // [FIX] Đồng bộ thông minh: Chỉ cập nhật item thay đổi, không load lại cả list
         private async Task RefreshTableListAsync()
         {
             try
@@ -206,26 +215,50 @@ namespace OrMan.ViewModels.Admin
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 1. Xóa bàn không còn trong DB
                     var itemsToRemove = DanhSachBan.Where(x => !newData.Any(n => n.SoBan == x.SoBan)).ToList();
                     foreach (var item in itemsToRemove) DanhSachBan.Remove(item);
 
-                    // 2. Cập nhật hoặc Thêm mới
                     foreach (var newBan in newData)
                     {
                         var existingBan = DanhSachBan.FirstOrDefault(b => b.SoBan == newBan.SoBan);
                         if (existingBan != null)
                         {
-                            // Cập nhật các trường thay đổi
-                            if (existingBan.TrangThai != newBan.TrangThai) existingBan.TrangThai = newBan.TrangThai;
-                            if (existingBan.YeuCauThanhToan != newBan.YeuCauThanhToan) existingBan.YeuCauThanhToan = newBan.YeuCauThanhToan;
-                            if (existingBan.HinhThucThanhToan != newBan.HinhThucThanhToan) existingBan.HinhThucThanhToan = newBan.HinhThucThanhToan;
-                            if (existingBan.TenGoi != newBan.TenGoi) existingBan.TenGoi = newBan.TenGoi;
-                            if (existingBan.DaInTamTinh != newBan.DaInTamTinh) existingBan.DaInTamTinh = newBan.DaInTamTinh;
+                            bool dataChanged = false;
+
+                            if (existingBan.TrangThai != newBan.TrangThai) { existingBan.TrangThai = newBan.TrangThai; dataChanged = true; }
+                            if (existingBan.YeuCauThanhToan != newBan.YeuCauThanhToan) { existingBan.YeuCauThanhToan = newBan.YeuCauThanhToan; dataChanged = true; }
+                            if (existingBan.HinhThucThanhToan != newBan.HinhThucThanhToan) { existingBan.HinhThucThanhToan = newBan.HinhThucThanhToan; dataChanged = true; }
+                            if (existingBan.TenGoi != newBan.TenGoi) { existingBan.TenGoi = newBan.TenGoi; dataChanged = true; }
+
+                            // [FIX QUAN TRỌNG] Chỉ cập nhật trạng thái In nếu nó LÀ FALSE
+                            // Nghĩa là: Nếu trên UI đang là TRUE (đã in), thì giữ nguyên, không để DB (có thể là false) ghi đè lên
+                            // Trừ khi bàn này đã thanh toán (TrangThai == Trống) thì mới cho phép reset về false
+                            if (existingBan.TrangThai == "Trống")
+                            {
+                                if (existingBan.DaInTamTinh != newBan.DaInTamTinh)
+                                {
+                                    existingBan.DaInTamTinh = newBan.DaInTamTinh;
+                                    dataChanged = true;
+                                }
+                            }
+                            else
+                            {
+                                // Nếu bàn đang có khách, chỉ cập nhật nếu DB báo là true (ưu tiên trạng thái True)
+                                // Nếu DB báo false mà UI đang true (do vừa bấm in), thì giữ UI
+                                if (newBan.DaInTamTinh && !existingBan.DaInTamTinh)
+                                {
+                                    existingBan.DaInTamTinh = true;
+                                    dataChanged = true;
+                                }
+                            }
+
+                            if (dataChanged && SelectedBan == existingBan)
+                            {
+                                OnPropertyChanged(nameof(SelectedBan));
+                            }
                         }
                         else
                         {
-                            // Chèn đúng vị trí số thứ tự
                             int insertIndex = 0;
                             while (insertIndex < DanhSachBan.Count && DanhSachBan[insertIndex].SoBan < newBan.SoBan)
                             {
@@ -236,7 +269,7 @@ namespace OrMan.ViewModels.Admin
                     }
                 });
 
-                if (SelectedBan != null && SelectedBan.TrangThai == "Có Khách")
+                if (SelectedBan != null)
                 {
                     await LoadTableDetailsAsync();
                 }
@@ -247,9 +280,23 @@ namespace OrMan.ViewModels.Admin
             }
         }
 
+        // [HÀM MỚI] Xóa sạch thông tin đơn hàng trên UI
+        private void ClearOrderDetails()
+        {
+            _currentHoaDon = null;
+            ChiTietDonHang = null;
+            TongTienCanThu = 0;
+            TienGiamGia = 0;
+        }
+
         private async Task LoadTableDetailsAsync()
         {
-            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách") return;
+            // [FIX QUAN TRỌNG] Nếu bàn không có khách (Trống), phải xóa sạch dữ liệu cũ
+            if (SelectedBan == null || SelectedBan.TrangThai != "Có Khách")
+            {
+                Application.Current.Dispatcher.Invoke(() => ClearOrderDetails());
+                return;
+            }
 
             var details = await Task.Run(() =>
             {

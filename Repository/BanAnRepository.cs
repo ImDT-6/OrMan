@@ -111,6 +111,20 @@ namespace OrMan.Services
             }
         }
 
+        // [MỚI - QUAN TRỌNG] Hàm cập nhật trạng thái đã in tạm tính
+        public void UpdateTablePrintStatus(int soBan, bool status)
+        {
+            using (var context = new MenuContext())
+            {
+                var item = context.BanAns.Find(soBan);
+                if (item != null)
+                {
+                    item.DaInTamTinh = status;
+                    context.SaveChanges();
+                }
+            }
+        }
+
         // [KHÔI PHỤC] Khách yêu cầu thanh toán
         public void RequestPayment(int soBan, string method = "Tiền mặt")
         {
