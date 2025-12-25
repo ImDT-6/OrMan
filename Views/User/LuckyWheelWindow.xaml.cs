@@ -4,6 +4,7 @@ using OrMan.Models; // Namespace chứa KhachHang và MenuContext
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -46,7 +47,10 @@ namespace OrMan.Views.User
         {
             if (_khachHang != null)
             {
-                txtDiem.Text = $"Điểm tích lũy: {_khachHang.DiemTichLuy:N0}";
+                string template = GetRes("Str_CurrentPoints_Format");
+                txtDiem.Text = string.Format(template, _khachHang.DiemTichLuy);
+                string btnTemplate = GetRes("Str_Btn_SpinNow_Format");
+                btnSpin.Content = string.Format(btnTemplate, _costPerSpin);
                 btnSpin.IsEnabled = _khachHang.DiemTichLuy >= _costPerSpin;
                 btnSpin.Opacity = btnSpin.IsEnabled ? 1 : 0.5;
             }
@@ -86,6 +90,10 @@ namespace OrMan.Views.User
                 db.SaveChanges();
             }
         }
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
         // Cập nhật sự kiện Click
         private void BtnSpin_Click(object sender, RoutedEventArgs e)
         {
@@ -94,12 +102,15 @@ namespace OrMan.Views.User
             // 1. Kiểm tra điểm local trước cho nhanh
             if (_khachHang.DiemTichLuy < _costPerSpin)
             {
-                MessageBox.Show("Bạn không đủ điểm để quay!", "Thông báo");
+                MessageBox.Show(GetRes("Str_Msg_NotEnoughPoints"),
+                         GetRes("Str_Title_Notice"),
+                         MessageBoxButton.OK,
+                         MessageBoxImage.Warning);
                 return;
             }
 
             _isSpinning = true;
-            btnSpin.Content = "Đang quay...";
+            btnSpin.SetResourceReference(ContentControl.ContentProperty, "Str_Btn_Spinning");
 
             // 2. Tính toán kết quả TRƯỚC khi quay (Backend Logic)
             int selectedIndex = GetRandomPrizeIndex();
@@ -146,16 +157,26 @@ namespace OrMan.Views.User
             rotateAnim.Completed += (s, _) =>
             {
                 _isSpinning = false;
-                btnSpin.Content = $"QUAY NGAY ({_costPerSpin} điểm)";
+                string btnTemplate = GetRes("Str_Btn_SpinNow_Format");
+                btnSpin.Content = string.Format(btnTemplate, _costPerSpin);
                 WheelRotation.Angle = targetAngle; // Giữ nguyên vị trí kim
 
                 if (wonPrize.Ten.Contains("Chúc may mắn"))
                 {
-                    MessageBox.Show("Rất tiếc! Chúc bạn may mắn lần sau.", "Kết quả");
+                    MessageBox.Show(GetRes("Str_Msg_SpinLost"),
+                        GetRes("Str_Title_Result"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"CHÚC MỪNG! Bạn trúng: {wonPrize.Ten}\n\nVoucher đã được lưu vào Kho quà của bạn.", "TRÚNG THƯỞNG");
+                    string msgTemplate = GetRes("Str_Msg_SpinWon_Format");
+                    string message = string.Format(msgTemplate, wonPrize.Ten);
+
+                    MessageBox.Show(message,
+                                    GetRes("Str_Title_Win"),
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Exclamation);
                 }
             };
 

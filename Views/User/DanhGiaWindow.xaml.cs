@@ -37,7 +37,8 @@ namespace OrMan.Views.User
         private void SetDefaultState()
         {
             _currentRating = 0;
-            txtRatingStatus.Text = "Chạm vào sao để đánh giá";
+            txtRatingStatus.SetResourceReference(TextBlock.TextProperty, "Str_Msg_TouchToRate");
+
             txtRatingStatus.Foreground = (Brush)new BrushConverter().ConvertFrom("#A0AEC0");
 
             if (pnlDetails != null)
@@ -46,7 +47,7 @@ namespace OrMan.Views.User
                 pnlDetails.Visibility = Visibility.Collapsed;
             }
 
-            UpdateStarUI(0); // Tắt hết sao lúc đầu
+            UpdateStarUI(0);
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
@@ -205,7 +206,10 @@ namespace OrMan.Views.User
         {
             if (_currentRating == 0)
             {
-                MessageBox.Show("Vui lòng chọn số sao trước khi gửi!", "Chưa đánh giá", MessageBoxButton.OK, MessageBoxImage.Warning);
+                
+                MessageBox.Show(GetRes("Str_Msg_RateFirst"),
+                                GetRes("Str_Title_NotRated"),
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -224,12 +228,15 @@ namespace OrMan.Views.User
             try
             {
                 _vm.GuiDanhGia(_currentRating, tags, gopY);
-                MessageBox.Show("Cảm ơn quý khách đã đóng góp ý kiến!", "Đã gửi", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(GetRes("Str_Msg_ThankYouReview"),
+                                GetRes("Str_Title_Sent"),
+                                MessageBoxButton.OK, MessageBoxImage.Information);
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi: " + ex.Message);
+                string errPrefix = GetRes("Str_Error_Prefix");
+                MessageBox.Show(errPrefix + ex.Message);
             }
         }
         private void TxtGopY_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -255,6 +262,10 @@ namespace OrMan.Views.User
 
             // Quan trọng: Đánh dấu sự kiện đã được xử lý để tránh xung đột với control cha
             e.Handled = true;
+        }
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
         }
     }
 }

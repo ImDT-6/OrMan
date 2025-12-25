@@ -149,13 +149,24 @@ namespace OrMan.Views.User
 
                 if (!isConMon)
                 {
-                    MessageBox.Show($"Món '{monAn.TenMon}' vừa mới HẾT HÀNG!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    string msg = string.Format(GetRes("Str_Msg_JustSoldOut"), monAn.TenMon);
+
+                    MessageBox.Show(msg,
+                                    GetRes("Str_Title_Notice"),
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+
                     _vm.FilterMenu(_vm.CurrentCategoryTag);
                     return;
                 }
                 if (monAn.IsSoldOut)
                 {
-                    MessageBox.Show($"Món {monAn.TenMon} đã hết hàng!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string msg = string.Format(GetRes("Str_Msg_ItemSoldOut"), monAn.TenMon);
+
+                    MessageBox.Show(msg,
+                                    GetRes("Str_Title_Notice"),
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Information);
                     return;
                 }
 
@@ -188,7 +199,10 @@ namespace OrMan.Views.User
         {
             if (_vm.GioHang.Count == 0)
             {
-                MessageBox.Show("Giỏ hàng đang trống!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(GetRes("Str_Msg_CartEmpty"),
+                        GetRes("Str_Title_Notice"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
                 return;
             }
 
@@ -207,7 +221,10 @@ namespace OrMan.Views.User
 
                 if (isGuest)
                 {
-                    var result = MessageBox.Show("Quý khách có muốn tích điểm không?", "Khách hàng thân thiết", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    var result = MessageBox.Show(GetRes("Str_Msg_AskLoyalty"),
+                                         GetRes("Str_Title_Loyalty"),
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes)
                     {
                         var tichDiemWin = new TichDiemWindow(_vm);
@@ -224,7 +241,10 @@ namespace OrMan.Views.User
 
                 if (_vm.SubmitOrder())
                 {
-                    MessageBox.Show("Đặt món thành công! Vui lòng đợi trong giây lát.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(GetRes("Str_Msg_OrderSuccess"),
+                            GetRes("Str_Title_Success"),
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                 }
             }
         }
@@ -232,7 +252,10 @@ namespace OrMan.Views.User
         // Xử lý Đăng xuất
         private async void BtnDangXuat_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(GetRes("Str_Msg_ConfirmLogout"),
+                                 GetRes("Str_Title_Confirm"),
+                                 MessageBoxButton.YesNo,
+                                 MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -249,10 +272,10 @@ namespace OrMan.Views.User
 
             if (vm.CurrentTable <= 0)
             {
-                MessageBox.Show("Vui lòng chọn bàn trước khi tích điểm!",
-                        "Yêu cầu chọn bàn",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                MessageBox.Show(GetRes("Str_Msg_ReqTable_Points"),
+                         GetRes("Str_Title_ReqTable"),
+                         MessageBoxButton.OK,
+                         MessageBoxImage.Warning);
                 return;
             }
             var popup = new TichDiemWindow(_vm);
@@ -270,10 +293,10 @@ namespace OrMan.Views.User
             
             if (vm.CurrentTable <= 0)
             {
-                MessageBox.Show("Vui lòng chọn bàn trước khi đánh giá!",
-                        "Yêu cầu chọn bàn",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                MessageBox.Show(GetRes("Str_Msg_ReqTable_Review"),
+                         GetRes("Str_Title_ReqTable"),
+                         MessageBoxButton.OK,
+                         MessageBoxImage.Warning);
                 return;
             }
             var reviewWindow = new DanhGiaWindow(_vm);
@@ -327,19 +350,28 @@ namespace OrMan.Views.User
             // --- TRƯỜNG HỢP 1: Chưa có ai đăng nhập ---
             if (vm.CurrentCustomer == null || vm.CurrentCustomer.KhachHangID == 0)
             {
-                MessageBox.Show("Vui lòng nhập số điện thoại tích điểm trước khi tham gia quay thưởng!",
-                        "Yêu cầu thành viên",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                MessageBox.Show(GetRes("Str_Msg_LuckyWheel_ReqMember"),
+             GetRes("Str_Title_MemberReq"),
+             MessageBoxButton.OK,
+             MessageBoxImage.Warning);
                 return;
 
             }
 
             // --- TRƯỜNG HỢP 2: Đã có khách đăng nhập (Có thể là khách cũ quên thoát) ---
             // Hiện tên khách để xác nhận
+            string template = GetRes("Str_Msg_ConfirmUser_Format");
 
-            var confirm = MessageBox.Show($"Xin chào: {vm.CurrentCustomer.HoTen}\nĐiểm hiện tại: {vm.CurrentCustomer.DiemTichLuy:N0}\n\nĐây có phải là bạn không?",
-                                          "Xác nhận tài khoản", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            // 2. Điền thông tin vào mẫu câu
+            string message = string.Format(template,
+                                           vm.CurrentCustomer.HoTen,
+                                           vm.CurrentCustomer.DiemTichLuy);
+
+            var confirm = MessageBox.Show(message,
+                                          GetRes("Str_Title_ConfirmAccount"),
+                                          MessageBoxButton.YesNoCancel,
+                                          MessageBoxImage.Question);
+           
 
             if (confirm == MessageBoxResult.Yes)
             {

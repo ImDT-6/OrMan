@@ -32,7 +32,7 @@
 
     <sys:String x:Key="Str_Msg_CartEmpty">Your cart is empty! Please select items first.</sys:String>
     <sys:String x:Key="Str_Msg_OrderSuccess">Order sent to kitchen successfully!&#x0a;Please wait a moment.</sys:String>
-    <sys:String x:Key="Str_Msg_ConfirmLogout">Do you want to end this session?</sys:String>
+    
     <sys:String x:Key="Str_Msg_SelectTable">Please select your table number before ordering!</sys:String>
     <sys:String x:Key="Str_Msg_ProductSoldOut">Item '{0}' is currently sold out.&#x0a;Please choose another item!</sys:String>
 
@@ -128,4 +128,39 @@
     <sys:String x:Key="Str_Remaining">Remaining:</sys:String>
     <sys:String x:Key="Str_Turns">left</sys:String>
     <sys:String x:Key="Str_Tooltip_Remove">Remove this item</sys:String>
+
+    
+
+    <sys:String x:Key="Str_Msg_TouchToRate">Tap the stars to rate</sys:String>
+    <sys:String x:Key="Str_Msg_RateFirst">Please select a rating before submitting!</sys:String>
+    <sys:String x:Key="Str_Title_NotRated">Rating required</sys:String>
+    <sys:String x:Key="Str_Msg_ThankYouReview">Thank you for your feedback!</sys:String>
+    <sys:String x:Key="Str_Title_Sent">Sent</sys:String>
+    <sys:String x:Key="Str_Error_Prefix">Error:</sys:String>
+
+    <sys:String x:Key="Str_Title_ReqTable">Table Selection Required</sys:String>
+    <sys:String x:Key="Str_Msg_ReqTable_Points">Please select a table before earning points!</sys:String>
+    <sys:String x:Key="Str_Msg_ReqTable_Review">Please select a table before writing a review!</sys:String>
+    <sys:String x:Key="Str_Title_MemberReq">Member Required</sys:String>
+    <sys:String x:Key="Str_Msg_LuckyWheel_ReqMember">Please enter your loyalty phone number before playing Lucky Wheel!</sys:String>
+
+    <sys:String x:Key="Str_Title_ConfirmAccount">Confirm Account</sys:String>
+    <sys:String x:Key="Str_Msg_ConfirmUser_Format">Hello: {0}&#x0a;Current points: {1:N0}&#x0a;&#x0a;Is this you?</sys:String>
+    
+    <sys:String x:Key="Str_Title_Loyalty">Loyalty Program</sys:String>
+
+    <sys:String x:Key="Str_Msg_ConfirmLogout">Are you sure you want to log out?</sys:String>
+
+    <sys:String x:Key="Str_Msg_JustSoldOut">Item '{0}' just went OUT OF STOCK!</sys:String>
+    <sys:String x:Key="Str_Msg_ItemSoldOut">Item {0} is sold out!</sys:String>
+    <sys:String x:Key="Str_Msg_NotEnoughPoints">Not enough points to spin!</sys:String>
+    <sys:String x:Key="Str_Btn_Spinning">Spinning...</sys:String>
+
+    <sys:String x:Key="Str_Btn_SpinNow_Format">SPIN NOW ({0} pts)</sys:String>
+
+    <sys:String x:Key="Str_Title_Result">Result</sys:String>
+    <sys:String x:Key="Str_Title_Win">BIG WIN</sys:String>
+    <sys:String x:Key="Str_Msg_SpinLost">Better luck next time!</sys:String>
+    <sys:String x:Key="Str_Msg_SpinWon_Format">CONGRATULATIONS! You won: {0}&#x0a;&#x0a;Voucher has been saved to your inventory.</sys:String>
+    <sys:String x:Key="Str_CurrentPoints_Format">Current Points: {0:N0}</sys:String>
 </ResourceDictionary>
