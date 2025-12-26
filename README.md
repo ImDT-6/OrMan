@@ -1,4 +1,4 @@
-<img width="942" height="319" alt="image" src="https://github.com/user-attachments/assets/7c93dda0-b599-498c-8d57-ecba4a577156" /># 🌶️ OrMan - Hệ Thống Quản Lý Quán Mỳ Cay 🍜
+🌶️ OrMan - Hệ Thống Quản Lý Quán Mỳ Cay 🍜
 
 [![Language](https://img.shields.io/badge/Language-C%23-239120)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.7.2-purple)](https://dotnet.microsoft.com/download/dotnet-framework)
