@@ -1,4 +1,4 @@
-# 🌶️ OrMan - Hệ Thống Quản Lý Quán Mỳ Cay 🍜
+<img width="942" height="319" alt="image" src="https://github.com/user-attachments/assets/7c93dda0-b599-498c-8d57-ecba4a577156" /># 🌶️ OrMan - Hệ Thống Quản Lý Quán Mỳ Cay 🍜
 
 [![Language](https://img.shields.io/badge/Language-C%23-239120)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.7.2-purple)](https://dotnet.microsoft.com/download/dotnet-framework)
@@ -61,12 +61,18 @@ Hệ thống phân quyền rõ ràng cho **Admin 👮** và **Staff 🧑‍💼*
 Muốn chạy thử **OrMan** trên máy của bạn? Làm theo mấy bước đơn giản này nhé:
 
 ### Yêu cầu (Prerequisites)
+
 * ✅ Visual Studio 2019/2022 (có workload *.NET desktop development*).
 * ✅ SQL Server (hoặc LocalDB).
-
+* ✅ Visual C++ Redistributable 2015-2022
+  
 ### Các bước thực hiện
-(Sắp có)
 
+- Tải Visual C++ Redistributable 2015-2022
+- Tải file setup
+- Chạy file setup, sau đó sẽ xuất hiện shortcut ở màn hình chính
+- Click chuột phải 2 cái vào shortcut và nhìn thấy cửa số đăng nhập hiện lên là thành công
+- 
 ## 👥 Tác giả (Authors)
 
 Đồ án được thực hiện bởi:
