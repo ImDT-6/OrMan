@@ -23,7 +23,7 @@ namespace OrMan.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Cấu hình chuỗi kết nối tới SQL Server
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=MiCayDB_Final_V2;Integrated Security=True;")
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=MiCayDB_Final_V2;Integrated Security=True;TrustServerCertificate=True;")
                           .UseLazyLoadingProxies();
         }
 
