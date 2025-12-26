@@ -3,20 +3,41 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks; // Cần thiết cho Task.Run
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading; // Cần thiết cho Timer
+using System.Windows.Threading;
 using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
 using OrMan.Views.Admin;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrMan.ViewModels.Admin
 {
     public class KhoViewModel : INotifyPropertyChanged
     {
-        private DispatcherTimer _timer; // Timer để tự động cập nhật kho
+        private DispatcherTimer _timer;
+        private bool _isLoading;
+        private string _searchText;
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set { _isLoading = value; OnPropertyChanged(); }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                OnPropertyChanged();
+                // Tự động tìm kiếm khi gõ phím
+                _ = LoadDataAsync();
+            }
+        }
 
         private ObservableCollection<NguyenLieu> _danhSachNguyenLieu;
         public ObservableCollection<NguyenLieu> DanhSachNguyenLieu
@@ -28,29 +49,27 @@ namespace OrMan.ViewModels.Admin
         public ICommand AddCommand { get; private set; }
         public ICommand EditCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand RefreshCommand { get; private set; }
 
         public KhoViewModel()
         {
-            // [TỐI ƯU] Không gọi LoadData() trực tiếp, chạy ngầm
-            Task.Run(() => LoadDataAsync());
+            _ = LoadDataAsync();
 
-            AddCommand = new RelayCommand<object>((p) =>
+            AddCommand = new RelayCommand<object>(async (p) =>
             {
                 var wd = new ThemNguyenLieuWindow();
                 if (wd.ShowDialog() == true && wd.Result != null)
                 {
-                    // Thao tác ghi DB này nhanh nên có thể để sync, hoặc chuyển async nếu muốn
                     using (var db = new MenuContext())
                     {
                         db.NguyenLieus.Add(wd.Result);
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
-                    // Load lại danh sách (Async)
-                    Task.Run(() => LoadDataAsync());
+                    await LoadDataAsync();
                 }
             });
 
-            EditCommand = new RelayCommand<NguyenLieu>((nl) =>
+            EditCommand = new RelayCommand<NguyenLieu>(async (nl) =>
             {
                 if (nl == null) return;
                 var wd = new ThemNguyenLieuWindow(nl);
@@ -58,7 +77,7 @@ namespace OrMan.ViewModels.Admin
                 {
                     using (var db = new MenuContext())
                     {
-                        var item = db.NguyenLieus.Find(nl.Id);
+                        var item = await db.NguyenLieus.FindAsync(nl.Id);
                         if (item != null)
                         {
                             item.TenNguyenLieu = wd.Result.TenNguyenLieu;
@@ -66,61 +85,71 @@ namespace OrMan.ViewModels.Admin
                             item.GiaVon = wd.Result.GiaVon;
                             item.SoLuongTon = wd.Result.SoLuongTon;
                             item.DinhMucToiThieu = wd.Result.DinhMucToiThieu;
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                         }
                     }
-                    Task.Run(() => LoadDataAsync());
+                    await LoadDataAsync();
                 }
             });
 
-            DeleteCommand = new RelayCommand<NguyenLieu>((nl) =>
+            DeleteCommand = new RelayCommand<NguyenLieu>(async (nl) =>
             {
-                if (MessageBox.Show($"Xóa nguyên liệu '{nl.TenNguyenLieu}'?", "Xác nhận", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Xác nhận xóa nguyên liệu '{nl.TenNguyenLieu}'?", "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     using (var db = new MenuContext())
                     {
-                        var item = db.NguyenLieus.Find(nl.Id);
+                        var item = await db.NguyenLieus.FindAsync(nl.Id);
                         if (item != null) db.NguyenLieus.Remove(item);
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
-                    Task.Run(() => LoadDataAsync());
+                    await LoadDataAsync();
                 }
             });
 
-            // [TỐI ƯU] Tự động cập nhật kho mỗi 30s (để đồng bộ khi Bếp trừ kho)
+            RefreshCommand = new RelayCommand<object>(async (p) => await LoadDataAsync());
+
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(30);
-            _timer.Tick += (s, e) => Task.Run(() => LoadDataAsync());
+            _timer.Tick += async (s, e) => await LoadDataAsync();
             _timer.Start();
         }
 
-        // [QUAN TRỌNG] Hàm load dữ liệu chạy ngầm
-        private async void LoadDataAsync()
+        public async Task LoadDataAsync()
         {
+            if (IsLoading) return;
+
+            IsLoading = true;
             try
             {
-                // 1. Lấy dữ liệu ở Background Thread
-                var list = await Task.Run(() =>
+                using (var db = new MenuContext())
                 {
-                    using (var db = new MenuContext())
-                    {
-                        return db.NguyenLieus.OrderBy(x => x.TenNguyenLieu).ToList();
-                    }
-                });
+                    var query = db.NguyenLieus.AsNoTracking().AsQueryable();
 
-                // 2. Cập nhật UI ở Main Thread
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    DanhSachNguyenLieu = new ObservableCollection<NguyenLieu>(list);
-                });
+                    if (!string.IsNullOrWhiteSpace(SearchText))
+                    {
+                        string search = SearchText.ToLower();
+                        query = query.Where(x => x.TenNguyenLieu.ToLower().Contains(search) ||
+                                               x.Id.ToString().Contains(search));
+                    }
+
+                    var list = await query.OrderBy(x => x.TenNguyenLieu).ToListAsync();
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        DanhSachNguyenLieu = new ObservableCollection<NguyenLieu>(list);
+                    });
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Lỗi Load Kho: " + ex.Message);
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
-        // [QUAN TRỌNG] Hàm dọn dẹp Timer
         public void Cleanup()
         {
             if (_timer != null)

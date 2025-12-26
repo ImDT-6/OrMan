@@ -1,7 +1,9 @@
-﻿using OrMan.Data;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System;
-
+using OrMan.Data;
+using OrMan.Models;
+using System.Linq;
 namespace OrMan.Services
 {
     public static class DatabaseInitializer
@@ -237,7 +239,42 @@ namespace OrMan.Services
                     context.Database.ExecuteSqlRaw(sqlNgayThamGia);
                 }
                 catch { }
+
+                SeedNguyenLieu(context);
+
             }
         }
+        private static void SeedNguyenLieu(MenuContext db)
+        {
+            // SỬA LỖI: Sử dụng Enumerable.Any hoặc kiểm tra Count để đảm bảo trình biên dịch nhận diện được
+            // Nếu bảng NguyenLieus đã có bất kỳ bản ghi nào thì thoát ra, không seed nữa
+            if (db.NguyenLieus.Any()) return;
+
+            var danhSachMau = new List<NguyenLieu>
+            {
+                new NguyenLieu { TenNguyenLieu = "Mì Ramen Hàn Quốc (Koreno)", DonViTinh = "Gói", GiaVon = 6500, SoLuongTon = 120, DinhMucToiThieu = 50 },
+                new NguyenLieu { TenNguyenLieu = "Kim chi cải thảo", DonViTinh = "Kg", GiaVon = 45000, SoLuongTon = 2.5, DinhMucToiThieu = 10 },
+                new NguyenLieu { TenNguyenLieu = "Mực ống cắt khoanh", DonViTinh = "Kg", GiaVon = 220000, SoLuongTon = 1.2, DinhMucToiThieu = 5.0 },
+                new NguyenLieu { TenNguyenLieu = "Thịt bò Mỹ thái lát", DonViTinh = "Kg", GiaVon = 320000, SoLuongTon = 8.5, DinhMucToiThieu = 5.0 },
+                new NguyenLieu { TenNguyenLieu = "Cá viên thập cẩm", DonViTinh = "Kg", GiaVon = 75000, SoLuongTon = 0, DinhMucToiThieu = 4.0 },
+                new NguyenLieu { TenNguyenLieu = "Ớt bột Hàn Quốc", DonViTinh = "Kg", GiaVon = 150000, SoLuongTon = 0.8, DinhMucToiThieu = 2.0 }
+            };
+
+            db.NguyenLieus.AddRange(danhSachMau);
+            db.SaveChanges();
+        }
+
+        private static void ExecuteRawSql(MenuContext context, string sql)
+        {
+            try
+            {
+                context.Database.ExecuteSqlRaw(sql);
+            }
+            catch
+            {
+                // Bỏ qua lỗi nếu lệnh SQL không thực hiện được (ví dụ cột đã tồn tại)
+            }
+        }
+
     }
 }

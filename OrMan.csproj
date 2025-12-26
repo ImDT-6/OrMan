@@ -231,11 +231,12 @@
     </ApplicationDefinition>
     <Compile Include="Converter\LanguageHelper.cs" />
     <Compile Include="Converter\IndexConverter.cs" />
+    <Compile Include="Converter\LessThanOrEqualConverter.cs" />
     <Compile Include="Converter\RankToColorConverter.cs" />
     <Compile Include="Data\MenuContext.cs" />
     <Compile Include="Converter\HeightConverter.cs" />
     <Compile Include="Converter\NullToBoolConverter.cs" />
-    <Compile Include="Converter\PasswordBoxHelper.cs" />
+    <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Converter\SelectedConverter.cs" />
     <Compile Include="Models\BanAn.cs" />
     <Compile Include="Models\CartItem.cs" />
@@ -305,6 +306,9 @@
     </Compile>
     <Compile Include="Views\Admin\ThucDonView.xaml.cs">
       <DependentUpon>ThucDonView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoadingOverlay.xaml.cs">
+      <DependentUpon>LoadingOverlay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\User\ChiTietMonWindow.xaml.cs">
       <DependentUpon>ChiTietMonWindow.xaml</DependentUpon>
@@ -412,6 +416,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Admin\ThucDonView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoadingOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

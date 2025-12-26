@@ -156,7 +156,7 @@
                                     <TextBlock Text="{Binding SoLuongThanhVienMoi, StringFormat='N0', FallbackValue='0'}" 
                                                Foreground="White" FontSize="24" FontWeight="Bold"/>
 
-                                    <TextBlock Text="hôm nay" Foreground="#F59E0B" FontSize="12" FontWeight="Bold" Margin="6,0,0,4" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="tuần này" Foreground="#F59E0B" FontSize="12" FontWeight="Bold" Margin="6,0,0,4" VerticalAlignment="Bottom"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

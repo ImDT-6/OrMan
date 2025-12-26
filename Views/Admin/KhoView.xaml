@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <!-- Style cho DataGrid đồng bộ với hệ thống -->
             <Style TargetType="{x:Type DataGrid}">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
@@ -83,6 +84,9 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <!-- Converter để so sánh tồn kho -->
+            <local:LessThanOrEqualConverter x:Key="LessThanOrEqualConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -94,96 +98,130 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- Tiêu đề -->
             <StackPanel Grid.Row="0" Margin="0,0,0,25">
                 <TextBlock Text="QUẢN LÝ KHO HÀNG" FontSize="28" FontWeight="Bold" Foreground="White"/>
                 <TextBlock Text="Theo dõi tồn kho, định mức và giá vốn nguyên liệu" Foreground="{StaticResource TextSecondary}" FontSize="14" Margin="0,5,0,0"/>
             </StackPanel>
 
+            <!-- Thanh công cụ -->
             <Grid Grid.Row="1" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" 
-                         Style="{StaticResource SearchTextBoxStyle}" 
-                         Tag="{StaticResource IconSearch}"
-                         ToolTip="Tìm kiếm nguyên liệu..."
-                         Height="45" Width="300" 
-                         HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Style="{StaticResource SearchTextBoxStyle}" 
+                             Tag="{StaticResource IconSearch}"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Tìm kiếm theo tên hoặc mã..."
+                             Height="45" Width="300" 
+                             HorizontalAlignment="Left"/>
+
+                    <Button Command="{Binding RefreshCommand}" 
+                            Style="{StaticResource GlassDismissButtonStyle}"
+                            Width="45" Height="45" Margin="10,0" ToolTip="Làm mới">
+                        <TextBlock Text="↻" FontSize="20" FontWeight="Bold"/>
+                    </Button>
+                </StackPanel>
 
                 <Button Grid.Column="1" 
                         Command="{Binding AddCommand}" 
                         Content="+ Nhập Nguyên Liệu" 
                         Style="{StaticResource GlassDismissButtonStyle}" 
                         Background="{DynamicResource AccentGradient}"
-                        Height="45" Width="160" Padding="25,0">
+                        Height="45" Width="180" Padding="20,0">
                     <Button.Effect>
                         <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
                     </Button.Effect>
                 </Button>
             </Grid>
 
-            <Border Grid.Row="2" Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20" Margin="0,0,0,20">
-                <DataGrid ItemsSource="{Binding DanhSachNguyenLieu}">
-                    <DataGrid.Columns>
-
-                        <DataGridTemplateColumn Header="TÊN NGUYÊN LIỆU" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Width="36" Height="36" CornerRadius="10" Background="#20FFFFFF" Margin="0,0,12,0">
-                                            <TextBlock Text="📦" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
-                                        </Border>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding TenNguyenLieu}" FontWeight="Bold" Foreground="White" FontSize="14"/>
-                                            <TextBlock Text="{Binding Id, StringFormat='Mã: {0}'}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+            <!-- Bảng dữ liệu -->
+            <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Border Background="{StaticResource GlassBackground}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="20" Padding="20">
+                    <DataGrid ItemsSource="{Binding DanhSachNguyenLieu}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="TÊN NGUYÊN LIỆU" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="36" Height="36" CornerRadius="10" Background="#20FFFFFF" Margin="0,0,12,0">
+                                                <TextBlock Text="📦" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding TenNguyenLieu}" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                                                <TextBlock Text="{Binding Id, StringFormat='Mã: {0}'}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="120" Foreground="#CBD5E1"/>
+                            <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="100" Foreground="#CBD5E1"/>
 
-                        <DataGridTemplateColumn Header="TỒN KHO" Width="150">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Background="#15FFFFFF" CornerRadius="8" Padding="12,5" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding SoLuongTon}" FontWeight="Bold" Foreground="{StaticResource WarningYellow}" HorizontalAlignment="Center"/>
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                            <!-- Tồn Kho với cảnh báo màu sắc -->
+                            <DataGridTemplateColumn Header="TỒN KHO" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border x:Name="StockBorder" Background="#15FFFFFF" CornerRadius="8" Padding="12,5" HorizontalAlignment="Left">
+                                            <TextBlock x:Name="StockText" Text="{Binding SoLuongTon}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Value="True">
+                                                <DataTrigger.Binding>
+                                                    <MultiBinding Converter="{StaticResource LessThanOrEqualConverter}">
+                                                        <Binding Path="SoLuongTon"/>
+                                                        <Binding Path="DinhMucToiThieu"/>
+                                                    </MultiBinding>
+                                                </DataTrigger.Binding>
+                                                <Setter TargetName="StockBorder" Property="Background" Value="#40EF4444"/>
+                                                <Setter TargetName="StockText" Property="Foreground" Value="#F87171"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SoLuongTon}" Value="0">
+                                                <Setter TargetName="StockBorder" Property="Background" Value="#60EF4444"/>
+                                                <Setter TargetName="StockText" Property="Text" Value="HẾT HÀNG"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="GIÁ VỐN" Binding="{Binding GiaVon, StringFormat='{}{0:N0} đ'}" Width="150" FontWeight="SemiBold"/>
+                            <DataGridTextColumn Header="GIÁ VỐN" Binding="{Binding GiaVon, StringFormat='{}{0:N0} đ'}" Width="130" FontWeight="SemiBold"/>
 
-                        <DataGridTemplateColumn Header="HÀNH ĐỘNG" Width="180">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource DataGridActionButtonStyle}" 
-                                                Background="#203B82F6" Margin="0,0,8,0" Padding="12,0" Height="32" ToolTip="Chỉnh sửa">
-                                            <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" 
-                                                  Fill="#60A5FA" Width="14" Height="14" Stretch="Uniform"/>
-                                        </Button>
+                            <DataGridTemplateColumn Header="THAO TÁC" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource DataGridActionButtonStyle}" 
+                                                    Background="#203B82F6" Margin="0,0,8,0" Padding="12,0" Height="32" ToolTip="Chỉnh sửa">
+                                                <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" 
+                                                      Fill="#60A5FA" Width="14" Height="14" Stretch="Uniform"/>
+                                            </Button>
 
-                                        <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource DataGridActionButtonStyle}" 
-                                                Background="#20EF4444" Padding="12,0" Height="32" ToolTip="Xóa bỏ">
-                                            <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" 
-                                                  Fill="#F87171" Width="14" Height="14" Stretch="Uniform"/>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
+                                            <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource DataGridActionButtonStyle}" 
+                                                    Background="#20EF4444" Padding="12,0" Height="32" ToolTip="Xóa bỏ">
+                                                <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" 
+                                                      Fill="#F87171" Width="14" Height="14" Stretch="Uniform"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <!-- Thành phần Loading dùng chung -->
+                <local:LoadingOverlay IsLoading="{Binding IsLoading}" 
+                                     Message="Đang đồng bộ kho hàng..." 
+                                     CornerRadius="20"/>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
