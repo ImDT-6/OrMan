@@ -229,6 +229,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converter\IntToVisibilityConverter.cs" />
     <Compile Include="Converter\LanguageHelper.cs" />
     <Compile Include="Converter\IndexConverter.cs" />
     <Compile Include="Converter\LessThanOrEqualConverter.cs" />

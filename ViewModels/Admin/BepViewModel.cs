@@ -10,51 +10,60 @@ using System.Windows.Threading;
 using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
-using Microsoft.EntityFrameworkCore; // Cần để dùng .Include
+using Microsoft.EntityFrameworkCore;
 
 namespace OrMan.ViewModels.Admin
 {
-    // [CẢI TIẾN] Class chứa dữ liệu đã được xử lý sẵn cho UI
     public class BepOrderItem
     {
         public int SoBan { get; set; }
         public ChiTietHoaDon ChiTiet { get; set; }
-
-        // 1. Tên món đã tách bỏ phần "(Cấp ...)"
         public string TenMonGoc { get; set; }
-
-        // 2. Phần cấp độ cay tách riêng (nếu có)
         public string BadgeCapDo { get; set; }
         public bool CoCapDo => !string.IsNullOrEmpty(BadgeCapDo);
-
-        // 3. Thời gian chờ (Ví dụ: "5 phút", "12 phút")
         public string ThoiGianChoHienThi { get; set; }
-
-        // 4. Màu sắc cảnh báo (Green -> Yellow -> Red)
         public string MauSacCanhBao { get; set; }
+        public int TrangThai { get; set; }
     }
 
     public class BepViewModel : INotifyPropertyChanged
     {
         private DispatcherTimer _timer;
+        private string _searchText = "";
+        private bool _isHistoryMode = false;
+        private ObservableCollection<BepOrderItem> _danhSachHienThi;
 
-        private ObservableCollection<BepOrderItem> _danhSachCanLam;
-        public ObservableCollection<BepOrderItem> DanhSachCanLam
+        public ObservableCollection<BepOrderItem> DanhSachHienThi
         {
-            get => _danhSachCanLam;
-            set { _danhSachCanLam = value; OnPropertyChanged(); }
+            get => _danhSachHienThi;
+            set { _danhSachHienThi = value; OnPropertyChanged(); }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set { _searchText = value; OnPropertyChanged(); LoadDataAsync(); }
+        }
+
+        public bool IsHistoryMode
+        {
+            get => _isHistoryMode;
+            set { _isHistoryMode = value; OnPropertyChanged(); LoadDataAsync(); }
         }
 
         public ICommand XongMonCommand { get; private set; }
+        public ICommand HoanTacCommand { get; private set; }
+        public ICommand XongTatCaCommand { get; private set; } // Lệnh xử lý nhanh
 
         public BepViewModel()
         {
             XongMonCommand = new RelayCommand<BepOrderItem>(XongMon);
+            HoanTacCommand = new RelayCommand<BepOrderItem>(HoanTac);
+            XongTatCaCommand = new RelayCommand<object>(XongTatCa);
 
             LoadDataAsync();
 
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(10); // 10s cập nhật 1 lần
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
             _timer.Tick += (s, e) => LoadDataAsync();
             _timer.Start();
         }
@@ -67,37 +76,38 @@ namespace OrMan.ViewModels.Admin
                 {
                     using (var context = new MenuContext())
                     {
-                        // Lấy dữ liệu thô
-                        var query = from ct in context.ChiTietHoaDons.Include("MonAn")
+                        int targetStatus = IsHistoryMode ? 1 : 0;
+                        var today = DateTime.Today; // Mốc thời gian hôm nay
+
+                        var query = from ct in context.ChiTietHoaDons.Include(x => x.MonAn)
                                     join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
-                                    where !hd.DaThanhToan && ct.TrangThaiCheBien == 0
-                                    orderby hd.NgayTao
+                                    // [QUAN TRỌNG] Chỉ lấy đơn từ hôm nay trở đi để tránh lag và đơn cũ
+                                    where ct.TrangThaiCheBien == targetStatus && hd.NgayTao >= today
                                     select new { ct, hd };
 
-                        var rawList = query.ToList();
+                        if (!string.IsNullOrEmpty(SearchText))
+                        {
+                            string s = SearchText.ToLower();
+                            query = query.Where(x => x.ct.TenMonHienThi.ToLower().Contains(s) || x.hd.SoBan.ToString().Contains(s));
+                        }
 
-                        // [CẢI TIẾN UX] Xử lý dữ liệu ngay tại đây để View chỉ việc hiện
-                        return rawList.Select(item => {
-                            // 1. Tính thời gian chờ
-                            var thoiGianGoi = item.ct.ThoiGianGoiMon ?? item.hd.NgayTao;
-                            var phutCho = (DateTime.Now - thoiGianGoi).TotalMinutes;
+                        if (IsHistoryMode)
+                            query = query.OrderByDescending(x => x.ct.Id); // Lịch sử: Mới nhất lên đầu
+                        else
+                            query = query.OrderBy(x => x.hd.NgayTao); // Đang chờ: Cũ nhất làm trước
 
-                            // 2. Xác định màu sắc khẩn cấp
-                            string mauSac = "#22C55E"; // Xanh (Mặc định)
-                            if (phutCho > 20) mauSac = "#EF4444";      // Đỏ (Khẩn cấp)
-                            else if (phutCho > 10) mauSac = "#F59E0B"; // Vàng (Cảnh báo)
+                        return query.ToList().Select(item => {
+                            var thoiGian = item.ct.ThoiGianGoiMon ?? item.hd.NgayTao;
+                            var phutCho = (DateTime.Now - thoiGian).TotalMinutes;
 
-                            // 3. Tách Cấp độ cay từ tên món
-                            // Giả sử tên là "Mỳ Cay (Cấp 1)" -> Tách thành "Mỳ Cay" và "Cấp 1"
-                            string tenDayDu = item.ct.TenMonHienThi ?? "";
-                            string tenGoc = tenDayDu;
+                            string tenFull = item.ct.TenMonHienThi ?? "";
+                            string tenGoc = tenFull;
                             string badge = null;
-
-                            int indexMoNgoac = tenDayDu.LastIndexOf("(Cấp");
-                            if (indexMoNgoac > 0)
+                            int idx = tenFull.LastIndexOf("(Cấp");
+                            if (idx > 0)
                             {
-                                tenGoc = tenDayDu.Substring(0, indexMoNgoac).Trim();
-                                badge = tenDayDu.Substring(indexMoNgoac).Replace("(", "").Replace(")", ""); // Lấy chữ "Cấp X"
+                                tenGoc = tenFull.Substring(0, idx).Trim();
+                                badge = tenFull.Substring(idx).Replace("(", "").Replace(")", "");
                             }
 
                             return new BepOrderItem
@@ -106,73 +116,84 @@ namespace OrMan.ViewModels.Admin
                                 ChiTiet = item.ct,
                                 TenMonGoc = tenGoc,
                                 BadgeCapDo = badge,
-                                ThoiGianChoHienThi = $"{(int)phutCho} phút",
-                                MauSacCanhBao = mauSac
+                                ThoiGianChoHienThi = IsHistoryMode ? $"{item.hd.NgayTao:HH:mm}" : $"{(int)phutCho} phút",
+                                MauSacCanhBao = IsHistoryMode ? "#475569" : (phutCho > 20 ? "#EF4444" : (phutCho > 10 ? "#F59E0B" : "#22C55E")),
+                                TrangThai = item.ct.TrangThaiCheBien
                             };
                         }).ToList();
                     }
                 });
 
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    DanhSachCanLam = new ObservableCollection<BepOrderItem>(data);
-                });
+                Application.Current.Dispatcher.Invoke(() => DanhSachHienThi = new ObservableCollection<BepOrderItem>(data));
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Lỗi LoadData Bếp: " + ex.Message);
-            }
+            catch { }
         }
 
-        private void XongMon(BepOrderItem item)
+        private void XongMon(BepOrderItem item) => UpdateTrangThai(item, 1, -1);
+        private void HoanTac(BepOrderItem item) => UpdateTrangThai(item, 0, 1);
+
+        // Hàm dọn dẹp nhanh các đơn đang hiển thị
+        private void XongTatCa(object obj)
         {
-            if (item == null || item.ChiTiet == null) return;
-            // (Logic XongMon giữ nguyên như cũ, chỉ cần đổi tham số đầu vào là BepOrderItem)
-            // ... Bạn copy lại phần logic trừ kho đã sửa ở câu trả lời trước vào đây ...
-            Task.Run(() =>
-            {
+            if (DanhSachHienThi == null || DanhSachHienThi.Count == 0 || IsHistoryMode) return;
+
+            Task.Run(() => {
+                try
+                {
+                    using (var context = new MenuContext())
+                    {
+                        var ids = DanhSachHienThi.Select(x => x.ChiTiet.Id).ToList();
+                        var details = context.ChiTietHoaDons.Where(x => ids.Contains(x.Id)).ToList();
+
+                        foreach (var ct in details)
+                        {
+                            ct.TrangThaiCheBien = 1;
+                            // Logic trừ kho (nếu cần xử lý hàng loạt)
+                            var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
+                            foreach (var f in congThucs)
+                            {
+                                var nl = context.NguyenLieus.Find(f.NguyenLieuId);
+                                if (nl != null) nl.SoLuongTon -= (f.SoLuongCan * ct.SoLuong);
+                            }
+                        }
+                        context.SaveChanges();
+                        Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
+                    }
+                }
+                catch { }
+            });
+        }
+
+        private void UpdateTrangThai(BepOrderItem item, int status, int inventoryMultiplier)
+        {
+            if (item?.ChiTiet == null) return;
+            Task.Run(() => {
                 try
                 {
                     using (var context = new MenuContext())
                     {
                         var ct = context.ChiTietHoaDons.Find(item.ChiTiet.Id);
-                        if (ct != null && ct.TrangThaiCheBien == 0)
+                        if (ct != null)
                         {
-                            ct.TrangThaiCheBien = 1;
-
-                            // --- LOGIC TRỪ KHO ---
+                            ct.TrangThaiCheBien = status;
                             var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
-                            foreach (var congThuc in congThucs)
+                            foreach (var f in congThucs)
                             {
-                                var nguyenLieu = context.NguyenLieus.Find(congThuc.NguyenLieuId);
-                                if (nguyenLieu != null)
-                                {
-                                    double soLuongTru = congThuc.SoLuongCan * ct.SoLuong;
-                                    nguyenLieu.SoLuongTon -= soLuongTru;
-                                }
+                                var nl = context.NguyenLieus.Find(f.NguyenLieuId);
+                                if (nl != null) nl.SoLuongTon += (f.SoLuongCan * ct.SoLuong * inventoryMultiplier);
                             }
-                            // ---------------------
-
                             context.SaveChanges();
                             Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                        MessageBox.Show("Lỗi: " + ex.Message));
-                }
+                catch { }
             });
         }
 
-        public void Cleanup()
-        {
-            if (_timer != null) { _timer.Stop(); _timer = null; }
-        }
+        public void Cleanup() { _timer?.Stop(); }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -299,7 +299,7 @@
                         SelectionChanged="MenuTabControl_SelectionChanged"
                         Loaded="MenuTabControl_Loaded">
 
-                <TabItem Header="🍜 MÌ CAY &amp; LẨU" Tag="Mì Cay">
+                <TabItem Header="🍜 MÌ CAY &amp; TOPPING" Tag="Mì Cay">
                     <ListBox x:Name="ListBoxMiCay" 
                              ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
@@ -307,7 +307,7 @@
                     <!-- ^ Sửa số 10 ở trên: Tăng lên để cách xa Tab hơn, giảm xuống để gần hơn -->
                 </TabItem>
 
-                <TabItem Header="🥟 ĐỒ CHIÊN &amp; TOPPING" Tag="Đồ Chiên">
+                <TabItem Header="🥟 MÓN KHÁC" Tag="Đồ Chiên">
                     <ListBox x:Name="ListBoxDoChien" 
                              ItemsSource="{Binding DanhSachHienThi}"
                              ItemTemplate="{StaticResource FoodCardTemplate}" 
