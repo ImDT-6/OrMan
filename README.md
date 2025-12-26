@@ -72,7 +72,7 @@ Muốn chạy thử **OrMan** trên máy của bạn? Làm theo mấy bước đ
 - Tải file setup
 - Chạy file setup, sau đó sẽ xuất hiện shortcut ở màn hình chính
 - Click chuột phải 2 cái vào shortcut và nhìn thấy cửa số đăng nhập hiện lên là thành công
-- 
+
 ## 👥 Tác giả (Authors)
 
 Đồ án được thực hiện bởi:
