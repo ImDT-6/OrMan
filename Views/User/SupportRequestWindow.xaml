@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Dịch Vụ Khách Hàng" 
+        Title="{DynamicResource Str_SupportTitle}" 
         Width="480" 
         SizeToContent="Height" 
         WindowStartupLocation="CenterScreen" WindowStyle="None"
@@ -114,12 +114,14 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Margin="0,0,0,25">
-                <TextBlock Text="BẠN CẦN GIÚP GÌ?" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center">
+                <TextBlock Text="{DynamicResource Str_SupportHeader}" 
+                           FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center">
                     <TextBlock.Effect>
                         <DropShadowEffect Color="#F59E0B" BlurRadius="15" Opacity="0.4"/>
                     </TextBlock.Effect>
                 </TextBlock>
-                <TextBlock Text="Vui lòng chọn hoặc nhập yêu cầu bên dưới" Foreground="{StaticResource TextSecondary}" FontSize="14" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock Text="{DynamicResource Str_SupportSubHeader}" 
+                           Foreground="{StaticResource TextSecondary}" FontSize="14" HorizontalAlignment="Center" Margin="0,5,0,0"/>
             </StackPanel>
 
             <Border Grid.Row="1" Background="{StaticResource GlassBackground}" CornerRadius="18" Padding="25" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1">
@@ -127,7 +129,8 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                         <TextBlock Text="💬" FontSize="20" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBlock Text="Gửi lời nhắn tới nhân viên" Foreground="White" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource Str_Label_SendMessage}" 
+                                   Foreground="White" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <ComboBox x:Name="cboMessage" 
@@ -135,17 +138,17 @@
                               Style="{StaticResource DarkComboBoxStyle}"
                               Height="45"
                               Margin="0,0,0,15"
-                              Text="Xin thêm nước lọc">
-                        <ComboBoxItem Content="Mật khẩu wifi"/>
-                        <ComboBoxItem Content="Xin thêm nước lọc"/>
-                        <ComboBoxItem Content="Xin thêm chén bát"/>
-                        <ComboBoxItem Content="Xin thêm đá lạnh"/>
-                        <ComboBoxItem Content="Cần tư vấn menu"/>
-                        <ComboBoxItem Content="Xin khăn giấy"/>
-                        <ComboBoxItem Content="Gọi quản lý"/>
+                              SelectedIndex="1">
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Wifi}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Water}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Bowls}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Ice}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Advice}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Napkins}"/>
+                        <ComboBoxItem Content="{DynamicResource Str_Req_Manager}"/>
                     </ComboBox>
 
-                    <Button Content="Gửi Yêu Cầu Hỗ Trợ" 
+                    <Button Content="{DynamicResource Str_Btn_SendRequest}" 
                             Click="BtnSupport_Click" 
                             Style="{StaticResource GlassButtonStyle}" 
                             Background="#203B82F6" 
@@ -155,16 +158,17 @@
                     <Border Height="1" Background="{StaticResource GlassBorder}" Margin="10,25,10,30" Opacity="0.4"/>
 
 
-                    <TextBlock Text="Chọn hình thức thanh toán:" Foreground="White" FontWeight="Bold" FontSize="15" Margin="0,0,0,15"/>
+                    <TextBlock Text="{DynamicResource Str_Label_PaymentMethod}" 
+                               Foreground="White" FontWeight="Bold" FontSize="15" Margin="0,0,0,15"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
-                        <RadioButton x:Name="radTienMat" Content="💵 Tiền mặt" IsChecked="True" Style="{StaticResource ChipStyle}"/>
-                        <RadioButton x:Name="radCK" Content="📱 Chuyển khoản" Style="{StaticResource ChipStyle}"/>
-                        <RadioButton x:Name="radThe" Content="💳 Thẻ" Style="{StaticResource ChipStyle}"/>
+                        <RadioButton x:Name="radTienMat" Content="{DynamicResource Str_Pay_Cash_Icon}" IsChecked="True" Style="{StaticResource ChipStyle}"/>
+                        <RadioButton x:Name="radCK" Content="{DynamicResource Str_Pay_Transfer_Icon}" Style="{StaticResource ChipStyle}"/>
+                        <RadioButton x:Name="radThe" Content="{DynamicResource Str_Pay_Card_Icon}" Style="{StaticResource ChipStyle}"/>
                     </StackPanel>
 
                     <Button x:Name="BtnCheckout" 
-                            Content="GỬI YÊU CẦU THANH TOÁN" 
+                            Content="{DynamicResource Str_Btn_RequestCheckout}" 
                             Click="BtnCheckout_Click" 
                             Style="{StaticResource GlassButtonStyle}" 
                             Background="{StaticResource WarningYellow}" 
@@ -174,14 +178,15 @@
                         </Button.Effect>
                     </Button>
 
-                    <TextBlock Text="*Nhân viên sẽ mang phiếu tạm tính ra bàn" Foreground="{StaticResource TextSecondary}" FontSize="11" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                    <TextBlock Text="{DynamicResource Str_Note_Bill}" 
+                               Foreground="{StaticResource TextSecondary}" FontSize="11" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,12,0,0"/>
 
                 </StackPanel>
             </Border>
 
             <StackPanel Grid.Row="2" Margin="0,20,0,0">
                 <Border Height="1" Background="{StaticResource GlassBorder}" Margin="20,0,20,15" Opacity="0.3"/>
-                <Button Content="Đóng" Click="BtnCancel_Click" 
+                <Button Content="{DynamicResource Str_Btn_Close}" Click="BtnCancel_Click" 
                         Style="{StaticResource GlassDismissButtonStyle}" 
                         Background="#15FFFFFF" Foreground="White" Height="40" Width="140" FontWeight="SemiBold" FontSize="14"/>
             </StackPanel>

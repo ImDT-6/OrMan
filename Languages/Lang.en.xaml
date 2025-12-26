@@ -163,4 +163,42 @@
     <sys:String x:Key="Str_Msg_SpinLost">Better luck next time!</sys:String>
     <sys:String x:Key="Str_Msg_SpinWon_Format">CONGRATULATIONS! You won: {0}&#x0a;&#x0a;Voucher has been saved to your inventory.</sys:String>
     <sys:String x:Key="Str_CurrentPoints_Format">Current Points: {0:N0}</sys:String>
+
+    <sys:String x:Key="Str_Msg_DefaultSupport">Need support</sys:String>
+    <sys:String x:Key="Str_Pay_Cash">Cash</sys:String>
+    <sys:String x:Key="Str_Pay_Transfer">Bank Transfer</sys:String>
+    <sys:String x:Key="Str_Pay_Card">Card</sys:String>
+
+    <sys:String x:Key="Str_SupportTitle">Customer Service</sys:String>
+    <sys:String x:Key="Str_SupportHeader">HOW CAN WE HELP?</sys:String>
+    <sys:String x:Key="Str_SupportSubHeader">Please select or type your request below</sys:String>
+    <sys:String x:Key="Str_Label_SendMessage">Send a message to staff</sys:String>
+    <sys:String x:Key="Str_Btn_SendRequest">Send Support Request</sys:String>
+    <sys:String x:Key="Str_Label_PaymentMethod">Select payment method:</sys:String>
+    <sys:String x:Key="Str_Btn_RequestCheckout">REQUEST CHECKOUT</sys:String>
+    <sys:String x:Key="Str_Note_Bill">*Staff will bring the bill to your table</sys:String>
+    <sys:String x:Key="Str_Btn_Close">Close</sys:String>
+
+    <sys:String x:Key="Str_Req_Wifi">Wifi password</sys:String>
+    <sys:String x:Key="Str_Req_Water">More water please</sys:String>
+    <sys:String x:Key="Str_Req_Bowls">Extra bowls/plates</sys:String>
+    <sys:String x:Key="Str_Req_Ice">More ice please</sys:String>
+    <sys:String x:Key="Str_Req_Advice">Menu consultation</sys:String>
+    <sys:String x:Key="Str_Req_Napkins">Napkins please</sys:String>
+    <sys:String x:Key="Str_Req_Manager">Call Manager</sys:String>
+
+    <sys:String x:Key="Str_Pay_Cash_Icon">💵 Cash</sys:String>
+    <sys:String x:Key="Str_Pay_Transfer_Icon">📱 Bank Transfer</sys:String>
+    <sys:String x:Key="Str_Pay_Card_Icon">💳 Card</sys:String>
+
+   
+    <sys:String x:Key="Str_Msg_RemoveItem">Do you want to remove '{0}' from cart?</sys:String>
+    <sys:String x:Key="Str_Title_DeleteConfirm">Confirm Delete</sys:String>
+    <sys:String x:Key="Str_Msg_OrderSentBeforeCheckout">Please send order to kitchen first.</sys:String>
+    <sys:String x:Key="Str_Msg_TableEmpty">Table is empty. Please order items first.</sys:String>
+    <sys:String x:Key="Str_Msg_PaymentRequested">Payment request ({0}) sent for Table {1}!</sys:String>
+    <sys:String x:Key="Str_Msg_SupportSent">Message sent: "{0}"&#x0a;Staff is coming!</sys:String>
+    <sys:String x:Key="Str_Msg_SelectTableFirst">Please select your table number first!</sys:String>
+    <sys:String x:Key="Str_Title_NoTable">Table Required</sys:String>
+    <sys:String x:Key="Str_Msg_DiamondUpgrade">Congratulations! You've been upgraded to DIAMOND member!</sys:String>
 </ResourceDictionary>

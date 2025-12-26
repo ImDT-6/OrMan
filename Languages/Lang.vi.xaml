@@ -160,5 +160,44 @@
     <sys:String x:Key="Str_Msg_SpinLost">Rất tiếc! Chúc bạn may mắn lần sau.</sys:String>
     <sys:String x:Key="Str_Msg_SpinWon_Format">CHÚC MỪNG! Bạn trúng: {0}&#x0a;&#x0a;Voucher đã được lưu vào Kho quà của bạn.</sys:String>
     <sys:String x:Key="Str_CurrentPoints_Format">Điểm tích lũy: {0:N0}</sys:String>
+
+    <sys:String x:Key="Str_Msg_DefaultSupport">Cần hỗ trợ</sys:String>
+    <sys:String x:Key="Str_Pay_Cash">Tiền mặt</sys:String>
+    <sys:String x:Key="Str_Pay_Transfer">Chuyển khoản</sys:String>
+    <sys:String x:Key="Str_Pay_Card">Thẻ</sys:String>
+
+    <sys:String x:Key="Str_SupportTitle">Dịch Vụ Khách Hàng</sys:String>
+    <sys:String x:Key="Str_SupportHeader">BẠN CẦN GIÚP GÌ?</sys:String>
+    <sys:String x:Key="Str_SupportSubHeader">Vui lòng chọn hoặc nhập yêu cầu bên dưới</sys:String>
+    <sys:String x:Key="Str_Label_SendMessage">Gửi lời nhắn tới nhân viên</sys:String>
+    <sys:String x:Key="Str_Btn_SendRequest">Gửi Yêu Cầu Hỗ Trợ</sys:String>
+    <sys:String x:Key="Str_Label_PaymentMethod">Chọn hình thức thanh toán:</sys:String>
+    <sys:String x:Key="Str_Btn_RequestCheckout">GỬI YÊU CẦU THANH TOÁN</sys:String>
+    <sys:String x:Key="Str_Note_Bill">*Nhân viên sẽ mang phiếu tạm tính ra bàn</sys:String>
+    <sys:String x:Key="Str_Btn_Close">Đóng</sys:String>
+
+    <sys:String x:Key="Str_Req_Wifi">Mật khẩu wifi</sys:String>
+    <sys:String x:Key="Str_Req_Water">Xin thêm nước lọc</sys:String>
+    <sys:String x:Key="Str_Req_Bowls">Xin thêm chén bát</sys:String>
+    <sys:String x:Key="Str_Req_Ice">Xin thêm đá lạnh</sys:String>
+    <sys:String x:Key="Str_Req_Advice">Cần tư vấn menu</sys:String>
+    <sys:String x:Key="Str_Req_Napkins">Xin khăn giấy</sys:String>
+    <sys:String x:Key="Str_Req_Manager">Gọi quản lý</sys:String>
+
+    <sys:String x:Key="Str_Pay_Cash_Icon">💵 Tiền mặt</sys:String>
+    <sys:String x:Key="Str_Pay_Transfer_Icon">📱 Chuyển khoản</sys:String>
+    <sys:String x:Key="Str_Pay_Card_Icon">💳 Thẻ</sys:String>
+
+   
+    
+    <sys:String x:Key="Str_Msg_RemoveItem">Bạn có muốn xóa món '{0}' khỏi giỏ hàng?</sys:String>
+    <sys:String x:Key="Str_Title_DeleteConfirm">Xác nhận xóa</sys:String>
+    <sys:String x:Key="Str_Msg_OrderSentBeforeCheckout">Bạn chưa gửi đơn bếp. Vui lòng bấm 'Gửi Đơn' trước.</sys:String>
+    <sys:String x:Key="Str_Msg_TableEmpty">Bàn chưa có món nào. Vui lòng gọi món trước.</sys:String>
+    <sys:String x:Key="Str_Msg_PaymentRequested">Đã gửi yêu cầu THANH TOÁN ({0}) cho Bàn {1}!</sys:String>
+    <sys:String x:Key="Str_Msg_SupportSent">Đã gửi lời nhắn: "{0}"&#x0a;Nhân viên sẽ đến ngay!</sys:String>
+    <sys:String x:Key="Str_Msg_SelectTableFirst">Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!</sys:String>
+    <sys:String x:Key="Str_Title_NoTable">Chưa chọn bàn</sys:String>
+    <sys:String x:Key="Str_Msg_DiamondUpgrade">Chúc mừng! Quý khách đã thăng hạng KIM CƯƠNG!</sys:String>
 </ResourceDictionary>
     

@@ -21,23 +21,22 @@ namespace OrMan.ViewModels.User
         private readonly ThucDonRepository _repo;
         private readonly BanAnRepository _banRepo;
         private ObservableCollection<MonAn> _allMonAn;
-        public decimal GiamGiaTamTinh { get; set; } = 0; // Biến này sẽ được set từ Giỏ hàng
+        public decimal GiamGiaTamTinh { get; set; } = 0;
         private bool _isNutGoiHoTroEnabled = true;
-        private int _secondsCountdown = 0; // Biến lưu số giây còn lại
+        private int _secondsCountdown = 0;
 
-        // Hàm lấy chuỗi từ Resource (Nếu không tìm thấy thì trả về key)
+        // Hàm lấy chuỗi từ Resource 
         private string GetRes(string key)
         {
             return Application.Current.TryFindResource(key) as string ?? key;
         }
 
-        // Hàm làm mới giao diện (Gọi từ View khi đổi ngôn ngữ)
         public void RefreshLanguage()
         {
             OnPropertyChanged(nameof(TextNutHoTro));
-          
-            // Refresh thêm các property khác nếu cần
+            // Trigger UI update if needed
         }
+
         public bool IsNutGoiHoTroEnabled
         {
             get => _isNutGoiHoTroEnabled;
@@ -55,12 +54,10 @@ namespace OrMan.ViewModels.User
             {
                 if (IsNutGoiHoTroEnabled)
                 {
-                    // Trả về: "Gọi phục vụ" hoặc "Call Staff"
                     return GetRes("Str_CallStaff");
                 }
                 else
                 {
-                    // Lấy mẫu: "Đợi {0}s..." hoặc "Wait {0}s..."
                     string template = GetRes("Str_WaitMoment");
                     try
                     {
@@ -68,7 +65,7 @@ namespace OrMan.ViewModels.User
                     }
                     catch
                     {
-                        return template; // Phòng trường hợp file ngôn ngữ thiếu {0}
+                        return template;
                     }
                 }
             }
@@ -134,16 +131,6 @@ namespace OrMan.ViewModels.User
             ChonBanCommand = new RelayCommand<object>(OpenChonBanWindow);
         }
 
-        private void ReloadMenuRealTime()
-        {
-            var newData = _repo.GetAvailableMenu();
-            if (newData.Count != (_allMonAn?.Count ?? 0))
-            {
-                _allMonAn = newData;
-                FilterMenu(_currentCategoryTag);
-            }
-        }
-
         public void AddToCart(MonAn mon, int sl, int capDo, string ghiChu)
         {
             var itemDaCo = GioHang.FirstOrDefault(x => x.MonAn.MaMon == mon.MaMon
@@ -182,8 +169,13 @@ namespace OrMan.ViewModels.User
                 }
                 else
                 {
-                    var result = MessageBox.Show($"Bạn có muốn xóa món '{item.TenHienThi}' khỏi giỏ hàng?",
-                                                 "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    // [UPDATED] Localized Confirmation
+                    string msg = string.Format(GetRes("Str_Msg_RemoveItem"), item.TenHienThi);
+                    var result = MessageBox.Show(msg,
+                                                 GetRes("Str_Title_DeleteConfirm"),
+                                                 MessageBoxButton.YesNo,
+                                                 MessageBoxImage.Question);
+
                     if (result == MessageBoxResult.Yes)
                     {
                         XoaMonKhoiGio(item);
@@ -304,42 +296,50 @@ namespace OrMan.ViewModels.User
                     if (activeOrder == null)
                     {
                         if (GioHang.Count > 0)
-                            MessageBox.Show("Bạn chưa gửi đơn bếp. Vui lòng bấm 'Gửi Đơn' trước.", "Chưa có đơn", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            // [UPDATED] Localized Message
+                            MessageBox.Show(GetRes("Str_Msg_OrderSentBeforeCheckout"),
+                                            GetRes("Str_Title_Notice"), MessageBoxButton.OK, MessageBoxImage.Warning);
                         else
-                            MessageBox.Show("Bàn chưa có món nào. Vui lòng gọi món trước.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            // [UPDATED] Localized Message
+                            MessageBox.Show(GetRes("Str_Msg_TableEmpty"),
+                                            GetRes("Str_Title_Notice"), MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     else
                     {
                         string method = requestWindow.SelectedPaymentMethod;
                         _banRepo.RequestPayment(CurrentTable, method);
-                        MessageBox.Show($"Đã gửi yêu cầu THANH TOÁN ({method}) cho Bàn {CurrentTable}!",
-                                        "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // [UPDATED] Localized Message with Format
+                        string msg = string.Format(GetRes("Str_Msg_PaymentRequested"), method, CurrentTable);
+                        MessageBox.Show(msg, GetRes("Str_Title_Success"), MessageBoxButton.OK, MessageBoxImage.Information);
+
                         daGuiThanhCong = true;
                     }
                 }
                 else if (requestWindow.SelectedRequest == RequestType.Support)
                 {
-                    string msg = requestWindow.SupportMessage;
-                    _banRepo.SendSupportRequest(CurrentTable, msg);
-                    MessageBox.Show($"Đã gửi lời nhắn: \"{msg}\"\nNhân viên sẽ đến ngay!", "Đã gửi", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string msgText = requestWindow.SupportMessage;
+                    _banRepo.SendSupportRequest(CurrentTable, msgText);
+
+                    // [UPDATED] Localized Message
+                    string msg = string.Format(GetRes("Str_Msg_SupportSent"), msgText);
+                    MessageBox.Show(msg, GetRes("Str_Title_Success"), MessageBoxButton.OK, MessageBoxImage.Information);
+
                     daGuiThanhCong = true;
                 }
 
                 if (daGuiThanhCong)
                 {
-                    IsNutGoiHoTroEnabled = false; // Disable nút
+                    IsNutGoiHoTroEnabled = false;
 
-                    // Vòng lặp đếm ngược 10 giây
                     for (int i = 5; i > 0; i--)
                     {
                         _secondsCountdown = i;
-                        // Báo cho giao diện cập nhật lại chữ (ví dụ: Đợi 9s...)
                         OnPropertyChanged(nameof(TextNutHoTro));
-                        await Task.Delay(1000); // Đợi 1 giây
+                        await Task.Delay(1000);
                     }
 
-                    IsNutGoiHoTroEnabled = true; // Bật lại nút
-                                                 // Tự động cập nhật về chữ "Gọi phục vụ" nhờ Setter của IsNutGoiHoTroEnabled
+                    IsNutGoiHoTroEnabled = true;
                 }
             }
         }
@@ -349,7 +349,10 @@ namespace OrMan.ViewModels.User
             if (GioHang.Count == 0) return false;
             if (CurrentTable <= 0)
             {
-                MessageBox.Show("Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!", "Chưa chọn bàn", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // [UPDATED] Localized Message
+                MessageBox.Show(GetRes("Str_Msg_SelectTableFirst"),
+                                GetRes("Str_Title_NoTable"), MessageBoxButton.OK, MessageBoxImage.Warning);
+
                 OpenChonBanWindow(null);
                 if (CurrentTable <= 0) return false;
             }
@@ -376,7 +379,9 @@ namespace OrMan.ViewModels.User
 
                             if (khachDB.HangThanhVien == "Kim Cương" && CurrentCustomer.HangThanhVien != "Kim Cương")
                             {
-                                MessageBox.Show("Chúc mừng! Quý khách đã thăng hạng KIM CƯƠNG!", "Thông báo");
+                                // [UPDATED] Localized Message
+                                MessageBox.Show(GetRes("Str_Msg_DiamondUpgrade"),
+                                                GetRes("Str_Title_Notice"));
                             }
                         }
                     }
@@ -401,21 +406,16 @@ namespace OrMan.ViewModels.User
             UpdateCartInfo();
         }
 
-        // [QUAN TRỌNG] Đã cập nhật: Lưu kèm số Bàn vào thông tin người gửi
         public void GuiDanhGia(int soSao, string tags, string noiDung)
         {
             using (var context = new MenuContext())
             {
-                // 1. Xác định tên bàn
                 string tenBan = CurrentTable > 0 ? $"Bàn {CurrentTable:00}" : "Khách vãng lai";
 
-                // 2. Xác định SĐT khách (nếu có)
                 string sdtKhach = (CurrentCustomer != null && !string.IsNullOrEmpty(CurrentCustomer.SoDienThoai))
                                   ? CurrentCustomer.SoDienThoai
                                   : null;
 
-                // 3. Tạo chuỗi định danh hiển thị trên Dashboard Admin
-                // Ví dụ: "Bàn 05 - 0909123456" hoặc "Bàn 02 (Ẩn danh)"
                 string dinhDanhNguoiGui;
                 if (sdtKhach != null)
                 {
@@ -431,7 +431,7 @@ namespace OrMan.ViewModels.User
                     SoSao = soSao,
                     CacTag = tags,
                     NoiDung = noiDung,
-                    SoDienThoai = dinhDanhNguoiGui, // Lưu chuỗi đã format
+                    SoDienThoai = dinhDanhNguoiGui,
                     NgayTao = DateTime.Now
                 };
                 context.DanhGias.Add(danhGia);
@@ -450,7 +450,6 @@ namespace OrMan.ViewModels.User
 
         public void Cleanup()
         {
-            // Hàm Cleanup để đồng bộ interface
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

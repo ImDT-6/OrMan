@@ -10,7 +10,9 @@ namespace OrMan.Views.User
         // Properties để lưu kết quả trả về
         public RequestType SelectedRequest { get; private set; } = RequestType.None;
         public string SupportMessage { get; private set; } = "";
-        public string SelectedPaymentMethod { get; private set; } = "Tiền mặt";
+
+        // [ĐÃ SỬA] Không gán cứng "Tiền mặt" ở đây nữa, sẽ gán khi click nút
+        public string SelectedPaymentMethod { get; private set; } = "";
 
         private bool _hasActiveOrder = false;
 
@@ -22,26 +24,33 @@ namespace OrMan.Views.User
             // Xử lý giao diện: Nếu khách mới vào (chưa có đơn), ẩn phần thanh toán
             if (!_hasActiveOrder)
             {
-                // Ẩn nút thanh toán
                 if (BtnCheckout != null) BtnCheckout.Visibility = Visibility.Collapsed;
-
-                // Ẩn các lựa chọn phương thức
                 if (radTienMat != null) radTienMat.Visibility = Visibility.Collapsed;
                 if (radCK != null) radCK.Visibility = Visibility.Collapsed;
                 if (radThe != null) radThe.Visibility = Visibility.Collapsed;
             }
+
+            // [MỚI] Gán mặc định phương thức thanh toán là Tiền mặt (theo ngôn ngữ hiện tại)
+            SelectedPaymentMethod = GetRes("Str_Pay_Cash");
+        }
+
+        // [Hàm hỗ trợ] Lấy chuỗi từ Resource
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
         }
 
         private void BtnSupport_Click(object sender, RoutedEventArgs e)
         {
             SelectedRequest = RequestType.Support;
 
-            // Lấy nội dung từ ComboBox (Text là phần người dùng nhập hoặc chọn)
+            // Lấy nội dung từ ComboBox
             SupportMessage = cboMessage.Text;
 
             if (string.IsNullOrWhiteSpace(SupportMessage))
             {
-                SupportMessage = "Cần hỗ trợ"; // Nội dung mặc định nếu để trống
+                // [ĐÃ SỬA] Lấy nội dung mặc định từ Resource
+                SupportMessage = GetRes("Str_Msg_DefaultSupport");
             }
 
             this.DialogResult = true;
@@ -52,13 +61,13 @@ namespace OrMan.Views.User
         {
             SelectedRequest = RequestType.Checkout;
 
-            // Xác định phương thức thanh toán khách chọn
+            // [ĐÃ SỬA] Xác định phương thức thanh toán theo Resource đa ngôn ngữ
             if (radTienMat.IsChecked == true)
-                SelectedPaymentMethod = "Tiền mặt";
+                SelectedPaymentMethod = GetRes("Str_Pay_Cash");
             else if (radCK.IsChecked == true)
-                SelectedPaymentMethod = "Chuyển khoản";
+                SelectedPaymentMethod = GetRes("Str_Pay_Transfer");
             else if (radThe.IsChecked == true)
-                SelectedPaymentMethod = "Thẻ";
+                SelectedPaymentMethod = GetRes("Str_Pay_Card");
 
             this.DialogResult = true;
             this.Close();
