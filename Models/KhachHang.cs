@@ -1,4 +1,4 @@
-﻿using System; // Nhớ thêm dòng này
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,7 +22,8 @@ namespace OrMan.Models
         [StringLength(20)]
         public string HangThanhVien { get; set; } = "Khách Hàng Mới";
 
-        // --- [MỚI] Thêm ngày tham gia để tính thành viên mới ---
+        // [MỚI] Thêm thuộc tính này để theo dõi ngày đăng ký
+        // Dùng để hiển thị lên DataGrid và tính toán số lượng thành viên mới
         public DateTime NgayThamGia { get; set; } = DateTime.Now;
 
         public void CapNhatHang()

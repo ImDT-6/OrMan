@@ -13,7 +13,7 @@ namespace OrMan.Services
                 // 1. Đảm bảo DB đã được tạo
                 context.Database.EnsureCreated();
 
-                // 2. Cột YeuCauThanhToan
+                // 2. Cột YeuCauThanhToan (Cho Bàn Ăn)
                 try
                 {
                     string sqlBanAn = @"
@@ -25,7 +25,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 3. Cột YeuCauHoTro (Tạo mới nếu chưa có)
+                // 3. Cột YeuCauHoTro
                 try
                 {
                     string sqlHoTro = @"
@@ -37,7 +37,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 4. Cột IsSoldOut
+                // 4. Cột IsSoldOut (Cho Món Ăn)
                 try
                 {
                     string sqlMonAn = @"
@@ -49,7 +49,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // [MỚI] Thêm cột HinhThucThanhToan nếu chưa có
+                // 5. Cột HinhThucThanhToan
                 try
                 {
                     string sql = @"
@@ -61,7 +61,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 5. [MỚI] Tự động tạo bảng KhachHang nếu chưa có
+                // 6. Tạo bảng KhachHang (Nếu chưa có)
                 try
                 {
                     string sqlTaoBangKhach = @"
@@ -72,22 +72,19 @@ namespace OrMan.Services
                                 [SoDienThoai] [nvarchar](20) NOT NULL,
                                 [HoTen] [nvarchar](100) NULL,
                                 [DiemTichLuy] [int] NOT NULL DEFAULT 0,
-                                [HangKhachHang  ] [nvarchar](20) DEFAULT N'Khách Hàng Mới',
+                                [HangThanhVien] [nvarchar](20) DEFAULT N'Khách Hàng Mới',
+                                [NgayThamGia] [datetime] NOT NULL DEFAULT GETDATE(), -- Có sẵn cột này khi tạo mới
                                 CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([KhachHangID] ASC)
                             );
-
-                            -- Tạo thêm Index cho SĐT để tìm nhanh hơn
+                            -- Index cho SĐT
                             CREATE UNIQUE NONCLUSTERED INDEX [IX_KhachHang_SoDienThoai] ON [dbo].[KhachHang] ([SoDienThoai] ASC);
                         END";
 
                     context.Database.ExecuteSqlRaw(sqlTaoBangKhach);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Lỗi tạo bảng KhachHang: " + ex.Message);
-                }
+                catch { }
 
-                // 6. [MỚI] Tạo bảng Nguyên Liệu
+                // 7. Tạo bảng Nguyên Liệu
                 try
                 {
                     string sqlNguyenLieu = @"
@@ -106,7 +103,7 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 7. [MỚI] Tạo bảng Công Thức
+                // 8. Tạo bảng Công Thức
                 try
                 {
                     string sqlCongThuc = @"
@@ -123,34 +120,32 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 8. [MỚI - SỬA LỖI] Thêm cột TrangThaiCheBien
-                // Tách riêng Try-Catch này ra, không lồng cái khác vào trong Catch
+                // 9. Cột TrangThaiCheBien (Cho Bếp)
                 try
                 {
                     string sqlBep = @"
-                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDons'))
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
                         BEGIN
-                            ALTER TABLE ChiTietHoaDons ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+                            ALTER TABLE ChiTietHoaDon ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
                         END";
                     context.Database.ExecuteSqlRaw(sqlBep);
                 }
                 catch
                 {
-                    // Nếu lỗi (thường do tên bảng không có 's'), thử phương án dự phòng
+                    // Fallback nếu tên bảng có 's'
                     try
                     {
                         string sqlBepBackup = @"
-                            IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
+                            IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'TrangThaiCheBien' AND Object_ID = Object_ID(N'ChiTietHoaDons'))
                             BEGIN
-                                ALTER TABLE ChiTietHoaDon ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
+                                ALTER TABLE ChiTietHoaDons ADD TrangThaiCheBien INT NOT NULL DEFAULT 0;
                             END";
                         context.Database.ExecuteSqlRaw(sqlBepBackup);
                     }
                     catch { }
                 }
 
-                // 9. [MỚI] Thêm cột TenGoi cho bảng BanAn
-                // (Đã đưa ra ngoài Try-Catch của mục 8)
+                // 10. Các cập nhật khác (TenGoi, ThoiGianGoiMon, DanhGia...)
                 try
                 {
                     string sqlTenGoi = @"
@@ -162,13 +157,8 @@ namespace OrMan.Services
                 }
                 catch { }
 
-                // 10. [QUAN TRỌNG] Mở rộng cột YeuCauHoTro lên tối đa
-                // (Đã đưa ra ngoài Try-Catch của mục 8)
                 try
                 {
-                    // Câu lệnh này ép kiểu dữ liệu từ cũ (ví dụ 255) lên NVARCHAR(MAX)
-                    // Nếu cột chưa có thì lệnh ALTER sẽ lỗi nhẹ nhưng không sao vì lệnh CREATE ở mục 3 đã tạo rồi.
-                    // Mục đích chính là để UPDATE những DB cũ đang bị giới hạn 255 ký tự.
                     string sqlExpand = "ALTER TABLE BanAn ALTER COLUMN YeuCauHoTro NVARCHAR(MAX) NULL";
                     context.Database.ExecuteSqlRaw(sqlExpand);
                 }
@@ -177,77 +167,73 @@ namespace OrMan.Services
                 try
                 {
                     string sqlTime = @"
-        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'ThoiGianGoiMon' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
-        BEGIN
-            ALTER TABLE ChiTietHoaDon ADD ThoiGianGoiMon DATETIME NULL;
-        END";
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'ThoiGianGoiMon' AND Object_ID = Object_ID(N'ChiTietHoaDon'))
+                        BEGIN
+                            ALTER TABLE ChiTietHoaDon ADD ThoiGianGoiMon DATETIME NULL;
+                        END";
                     context.Database.ExecuteSqlRaw(sqlTime);
-
-                    // Cập nhật dữ liệu cũ để không bị null (lấy theo giờ hóa đơn)
-                    context.Database.ExecuteSqlRaw("UPDATE ChiTietHoaDon SET ThoiGianGoiMon = (SELECT NgayTao FROM HoaDon WHERE HoaDon.MaHoaDon = ChiTietHoaDon.MaHoaDon) WHERE ThoiGianGoiMon IS NULL");
                 }
                 catch { }
-                // Tạo bảng DanhGia
+
                 try
                 {
-                    string sql = @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DanhGia]'))
-                   CREATE TABLE [dbo].[DanhGia](
-                       [Id] int IDENTITY(1,1) PRIMARY KEY,
-                       [SoSao] int NOT NULL,
-                       [CacTag] nvarchar(500),
-                       [NoiDung] nvarchar(MAX),
-                       [SoDienThoai] nvarchar(20),
-                       [NgayTao] datetime DEFAULT GETDATE()
-                   );";
-                    context.Database.ExecuteSqlRaw(sql);
+                    string sqlDanhGia = @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DanhGia]'))
+                       CREATE TABLE [dbo].[DanhGia](
+                           [Id] int IDENTITY(1,1) PRIMARY KEY,
+                           [SoSao] int NOT NULL,
+                           [CacTag] nvarchar(500),
+                           [NoiDung] nvarchar(MAX),
+                           [SoDienThoai] nvarchar(20),
+                           [NgayTao] datetime DEFAULT GETDATE()
+                       );";
+                    context.Database.ExecuteSqlRaw(sqlDanhGia);
                 }
                 catch { }
 
-                // 11. [MỚI - QUAN TRỌNG] Tạo bảng Voucher/Kho Quà của khách
+                // 11. Bảng Voucher
                 try
                 {
                     string sqlVoucher = @"
-        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[VoucherCuaKhach]') AND type in (N'U'))
-        BEGIN
-            CREATE TABLE [dbo].[VoucherCuaKhach](
-                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [KhachHangID] [int] NOT NULL,
-                [TenPhanThuong] [nvarchar](100) NOT NULL,
-                [NgayTrungThuong] [datetime] NOT NULL DEFAULT GETDATE(),
-                [DaSuDung] [bit] NOT NULL DEFAULT 0,
-                [NgaySuDung] [datetime] NULL,
-                [LoaiVoucher] [int] NOT NULL DEFAULT 0, 
-                [GiaTri] [float] NOT NULL DEFAULT 0
-            );
-            
-            -- Tạo Index cho KhachHangID để sau này load danh sách voucher của khách cho nhanh
-            CREATE NONCLUSTERED INDEX [IX_VoucherCuaKhach_KhachHangID] ON [dbo].[VoucherCuaKhach] ([KhachHangID] ASC);
-        END";
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[VoucherCuaKhach]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[VoucherCuaKhach](
+                                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                                [KhachHangID] [int] NOT NULL,
+                                [TenPhanThuong] [nvarchar](100) NOT NULL,
+                                [NgayTrungThuong] [datetime] NOT NULL DEFAULT GETDATE(),
+                                [DaSuDung] [bit] NOT NULL DEFAULT 0,
+                                [NgaySuDung] [datetime] NULL,
+                                [LoaiVoucher] [int] NOT NULL DEFAULT 0, 
+                                [GiaTri] [float] NOT NULL DEFAULT 0
+                            );
+                            CREATE NONCLUSTERED INDEX [IX_VoucherCuaKhach_KhachHangID] ON [dbo].[VoucherCuaKhach] ([KhachHangID] ASC);
+                        END";
                     context.Database.ExecuteSqlRaw(sqlVoucher);
                 }
-                catch (Exception ex)
-                {
-                    // Ghi log lỗi nếu cần thiết để debug
-                    Console.WriteLine("Lỗi tạo bảng VoucherCuaKhach: " + ex.Message);
-                }
+                catch { }
+
                 try
                 {
                     string sqlGiamGia = @"
-        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'GiamGia' AND Object_ID = Object_ID(N'HoaDon'))
-        BEGIN
-            ALTER TABLE HoaDon ADD GiamGia DECIMAL(18,0) NOT NULL DEFAULT 0;
-        END";
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'GiamGia' AND Object_ID = Object_ID(N'HoaDon'))
+                        BEGIN
+                            ALTER TABLE HoaDon ADD GiamGia DECIMAL(18,0) NOT NULL DEFAULT 0;
+                        END";
                     context.Database.ExecuteSqlRaw(sqlGiamGia);
                 }
                 catch { }
-                // [MỚI] Thêm cột NgayThamGia cho bảng KhachHang (Cập nhật cho Model mới)
+
+                // ============================================================
+                // 12. [MỚI - QUAN TRỌNG] Thêm cột NgayThamGia cho bảng KhachHang
+                // Script này sẽ chạy nếu Database đã tồn tại nhưng chưa có cột này
+                // ============================================================
                 try
                 {
                     string sqlNgayThamGia = @"
-        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'NgayThamGia' AND Object_ID = Object_ID(N'KhachHang'))
-        BEGIN
-            ALTER TABLE KhachHang ADD NgayThamGia DATETIME NOT NULL DEFAULT GETDATE();
-        END";
+                        IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'NgayThamGia' AND Object_ID = Object_ID(N'KhachHang'))
+                        BEGIN
+                            ALTER TABLE KhachHang ADD NgayThamGia DATETIME NOT NULL DEFAULT GETDATE();
+                        END";
                     context.Database.ExecuteSqlRaw(sqlNgayThamGia);
                 }
                 catch { }
