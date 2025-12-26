@@ -53,7 +53,13 @@ namespace OrMan.Views.User
 
             if (string.IsNullOrEmpty(phone) || phone.Length != 10 || !phone.StartsWith("0") || !isNumeric)
             {
-                ShowError("Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (VD: 09xx...)!");
+              
+                string errorMsg = Application.Current.TryFindResource("Str_Msg_InvalidPhone") as string
+                                  ?? "Số điện thoại không hợp lệ!";
+
+                ShowError(errorMsg);
+
+
                 txtPhone.SelectAll();
                 txtPhone.Focus();
                 return;

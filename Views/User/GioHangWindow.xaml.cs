@@ -38,6 +38,12 @@ namespace OrMan.Views.User
             CalculateTotal();
         }
 
+        // --- Helper to get Resource String ---
+        private string GetRes(string key)
+        {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         // --- 1. LOGIC TẢI VÀ PHÂN LOẠI VOUCHER ---
         private void LoadVouchers()
         {
@@ -63,7 +69,9 @@ namespace OrMan.Views.User
                         })
                         .ToList();
 
-                    discountVouchers.Insert(0, new VoucherItem { Id = 0, TenHienThi = "--- Chọn mã giảm giá ---", Data = null });
+                    // [UPDATED] Get placeholder text from Resource
+                    string placeholder = GetRes("Str_SelectVoucher_Placeholder");
+                    discountVouchers.Insert(0, new VoucherItem { Id = 0, TenHienThi = placeholder, Data = null });
 
                     if (cboVoucher != null)
                     {
@@ -94,15 +102,29 @@ namespace OrMan.Views.User
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải voucher: " + ex.Message);
+                // [UPDATED] Localized Error Message
+                string errTemplate = GetRes("Str_Err_LoadVoucher");
+                MessageBox.Show(string.Format(errTemplate, ex.Message));
             }
         }
 
         private string FormatVoucherName(VoucherCuaKhach v, int count)
         {
             string ten = v.TenPhanThuong;
-            if (v.LoaiVoucher == 1) ten += $" (Giảm {v.GiaTri:N0}đ)";
-            else if (v.LoaiVoucher == 2) ten += $" (Giảm {v.GiaTri}%)";
+
+            // [UPDATED] Localized Discount Description
+            if (v.LoaiVoucher == 1)
+            {
+                // "Giảm {0:N0}đ" or "Off {0:N0}đ"
+                string format = GetRes("Str_Discount_Money");
+                ten += $" ({string.Format(format, v.GiaTri)})";
+            }
+            else if (v.LoaiVoucher == 2)
+            {
+                // "Giảm {0}%" or "Off {0}%"
+                string format = GetRes("Str_Discount_Percent");
+                ten += $" ({string.Format(format, v.GiaTri)})";
+            }
 
             if (count > 1) ten += $" (x{count})";
             return ten;
@@ -152,13 +174,17 @@ namespace OrMan.Views.User
                         monAn = newMon;
                     }
 
-                    _vm.AddToCart(monAn, 1, 0, " (Quà tặng)");
+                    // [UPDATED] Localized Gift Note " (Quà tặng)" or " (Gift)"
+                    string giftNote = GetRes("Str_Gift_Note");
+                    _vm.AddToCart(monAn, 1, 0, giftNote);
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi thêm quà: " + ex.Message);
+                // [UPDATED] Localized Error
+                string errTemplate = GetRes("Str_Err_AddGift");
+                MessageBox.Show(string.Format(errTemplate, ex.Message));
                 return false;
             }
         }
@@ -209,8 +235,18 @@ namespace OrMan.Views.User
         {
             decimal totalCart = _vm.TongTienCart;
 
+            // [UPDATED] Check for Gift Note using Localized string or generic check
+            // Note: Since the note is saved in CartItem, we need to check both EN and VI strings if user switched lang mid-session
+            // OR better: check if Price is 0 (assuming gifts are 0 cost)
+            // But adhering to your logic:
+            string giftNoteKey = "Str_Gift_Note";
+            // NOTE: To be safe with language switching, checking price is safer, but let's stick to Note string for now.
+            // Ideally, the 'Note' in CartItem should store a Code, not display text. 
+            // For now, we fetch the CURRENT language's Gift Note.
+            string currentGiftNote = GetRes(giftNoteKey);
+
             decimal giftValue = _vm.GioHang
-                .Where(x => x.GhiChu != null && x.GhiChu.Contains("(Quà tặng)"))
+                .Where(x => x.GhiChu != null && (x.GhiChu.Contains("(Quà tặng)") || x.GhiChu.Contains("(Gift)"))) // Check both to be safe
                 .Sum(x => x.ThanhTien);
 
             decimal billableAmount = totalCart - giftValue;
@@ -227,12 +263,15 @@ namespace OrMan.Views.User
             decimal totalDiscountDisplay = voucherDiscount + giftValue;
             if (totalDiscountDisplay > totalCart) totalDiscountDisplay = totalCart;
 
+            // [UPDATED] Localized Currency Suffix
+            string currencySuffix = GetRes("Str_Currency_Suffix"); // " VNĐ" or " VND"
+
             if (txtGiamGia != null)
-                txtGiamGia.Text = $"-{totalDiscountDisplay:N0} VNĐ";
+                txtGiamGia.Text = $"-{totalDiscountDisplay:N0}{currencySuffix}";
 
             _finalTotal = totalCart - totalDiscountDisplay;
             if (txtThanhTien != null)
-                txtThanhTien.Text = $"{_finalTotal:N0} VNĐ";
+                txtThanhTien.Text = $"{_finalTotal:N0}{currencySuffix}";
         }
 
         // --- 4. GỬI ĐƠN ---
@@ -240,7 +279,8 @@ namespace OrMan.Views.User
         {
             if (_vm.GioHang.Count == 0)
             {
-                MessageBox.Show("Giỏ hàng đang trống!");
+                // [UPDATED] Localized Message
+                MessageBox.Show(GetRes("Str_Msg_CartEmpty"));
                 return;
             }
 
@@ -277,7 +317,7 @@ namespace OrMan.Views.User
             if (item != null)
             {
                 // Lưu lại thông tin trước khi giảm (phòng trường hợp món bị xóa mất)
-                bool isGift = item.GhiChu != null && item.GhiChu.Contains("(Quà tặng)");
+                bool isGift = item.GhiChu != null && (item.GhiChu.Contains("(Quà tặng)") || item.GhiChu.Contains("(Gift)"));
                 string tenMon = item.MonAn.TenMon;
 
                 _vm.GiamSoLuongMon(item);
@@ -309,11 +349,17 @@ namespace OrMan.Views.User
             var itemToDelete = btn.DataContext as CartItem;
             if (itemToDelete != null)
             {
-                var result = MessageBox.Show($"Bỏ món '{itemToDelete.TenHienThi}'?", "Xác nhận", MessageBoxButton.YesNo);
+                // [UPDATED] Localized Confirmation
+                string msgTemplate = GetRes("Str_Msg_ConfirmRemoveItem");
+                string title = GetRes("Str_Title_Confirm");
+
+                var result = MessageBox.Show(string.Format(msgTemplate, itemToDelete.TenHienThi),
+                                             title, MessageBoxButton.YesNo);
+
                 if (result == MessageBoxResult.Yes)
                 {
                     // [QUAN TRỌNG] Nếu xóa món quà, trả lại voucher
-                    if (itemToDelete.GhiChu != null && itemToDelete.GhiChu.Contains("(Quà tặng)"))
+                    if (itemToDelete.GhiChu != null && (itemToDelete.GhiChu.Contains("(Quà tặng)") || itemToDelete.GhiChu.Contains("(Gift)")))
                     {
                         RestoreGiftVoucher(itemToDelete.MonAn.TenMon);
                     }

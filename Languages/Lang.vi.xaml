@@ -37,7 +37,6 @@
 
     <sys:String x:Key="Str_Msg_CartEmpty">Giỏ hàng đang trống! Vui lòng chọn món trước.</sys:String>
     <sys:String x:Key="Str_Msg_OrderSuccess">Đã gửi đơn xuống bếp thành công!&#x0a;Vui lòng đợi trong giây lát.</sys:String>
-    <sys:String x:Key="Str_Msg_ConfirmLogout">Bạn muốn kết thúc phiên gọi món?</sys:String>
     <sys:String x:Key="Str_Msg_SelectTable">Vui lòng chọn số bàn bạn đang ngồi trước khi gửi đơn!</sys:String>
     <sys:String x:Key="Str_Msg_ProductSoldOut">Món '{0}' hiện đang tạm hết hàng.&#x0a;Vui lòng chọn món khác nhé!</sys:String>
     <sys:String x:Key="Str_Logo_Title">MÌ CAY</sys:String>
@@ -51,7 +50,6 @@
     <sys:String x:Key="Str_Loyalty_Title">TÍCH ĐIỂM KHÁCH HÀNG</sys:String>
     <sys:String x:Key="Str_Loyalty_Subtitle">Nhập số điện thoại để tích điểm &amp; nhận ưu đãi</sys:String>
     <sys:String x:Key="Str_Btn_CheckRegister">TRA CỨU / ĐĂNG KÝ</sys:String>
-    <sys:String x:Key="Str_Msg_InvalidPhone">Vui lòng nhập số điện thoại hợp lệ!</sys:String>
     <sys:String x:Key="Str_Hello_Prefix">Xin chào:</sys:String>
     <sys:String x:Key="Str_Points_Suffix"> điểm</sys:String>
     <sys:String x:Key="Str_Btn_Done">HOÀN TẤT</sys:String>
@@ -99,6 +97,68 @@
     <sys:String x:Key="Str_Notes">Ghi chú</sys:String>
     <sys:String x:Key="Str_Quantity">Số lượng</sys:String>
     <sys:String x:Key="Str_Btn_AddToCart">Thêm vào giỏ - {0:N0} đ</sys:String>
+    <sys:String x:Key="Str_Close">Đóng</sys:String>
+    <sys:String x:Key="Str_Level">Cấp</sys:String>
+    <sys:String x:Key="Str_Msg_InvalidPhone">Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (VD: 09xx...)!</sys:String>
+    <sys:String x:Key="Str_YourCart">GIỎ HÀNG CỦA BẠN</sys:String>
+    <sys:String x:Key="Str_Voucher">Mã giảm giá:</sys:String>
+    <sys:String x:Key="Str_Use">Dùng</sys:String>
+    <sys:String x:Key="Str_Discount">Giảm giá:</sys:String>
+    <sys:String x:Key="Str_TotalAmount">THÀNH TIỀN:</sys:String>
+    <sys:String x:Key="Str_SendOrder">GỬI ĐƠN ĐẾN BẾP</sys:String>
+    <sys:String x:Key="Str_Gift">Quà tặng có thể đổi (Miễn phí)</sys:String>
 
+   
+
+    <sys:String x:Key="Str_SelectVoucher_Placeholder">--- Chọn mã giảm giá ---</sys:String>
+    <sys:String x:Key="Str_Discount_Money">Giảm {0:N0}đ</sys:String>
+    <sys:String x:Key="Str_Discount_Percent">Giảm {0}%</sys:String>
+    <sys:String x:Key="Str_Err_LoadVoucher">Lỗi tải voucher: {0}</sys:String>
+    <sys:String x:Key="Str_Err_AddGift">Lỗi thêm quà: {0}</sys:String>
+    <sys:String x:Key="Str_Gift_Note">(Quà tặng)</sys:String>
+  
+    <sys:String x:Key="Str_Msg_ConfirmRemoveItem">Bỏ món '{0}'?</sys:String>
+  
+    <sys:String x:Key="Str_Currency_Suffix">VNĐ</sys:String>
+
+    <sys:String x:Key="Str_Remaining">Còn lại:</sys:String>
+    <sys:String x:Key="Str_Turns">lượt</sys:String>
+    <sys:String x:Key="Str_Tooltip_Remove">Xóa món này</sys:String>
+
+    <sys:String x:Key="Str_Msg_TouchToRate">Chạm vào sao để đánh giá</sys:String>
+    <sys:String x:Key="Str_Msg_RateFirst">Vui lòng chọn số sao trước khi gửi!</sys:String>
+    <sys:String x:Key="Str_Title_NotRated">Chưa đánh giá</sys:String>
+    <sys:String x:Key="Str_Msg_ThankYouReview">Cảm ơn quý khách đã đóng góp ý kiến!</sys:String>
+    <sys:String x:Key="Str_Title_Sent">Đã gửi</sys:String>
+    <sys:String x:Key="Str_Error_Prefix">Lỗi:</sys:String>
+
+    <sys:String x:Key="Str_Title_ReqTable">Yêu cầu chọn bàn</sys:String>
+    <sys:String x:Key="Str_Msg_ReqTable_Points">Vui lòng chọn bàn trước khi tích điểm!</sys:String>
+    <sys:String x:Key="Str_Msg_ReqTable_Review">Vui lòng chọn bàn trước khi đánh giá!</sys:String>
+    <sys:String x:Key="Str_Title_MemberReq">Yêu cầu thành viên</sys:String>
+    <sys:String x:Key="Str_Msg_LuckyWheel_ReqMember">Vui lòng nhập số điện thoại tích điểm trước khi tham gia quay thưởng!</sys:String>
+
+    <sys:String x:Key="Str_Title_ConfirmAccount">Xác nhận tài khoản</sys:String>
+    <sys:String x:Key="Str_Msg_ConfirmUser_Format">Xin chào: {0}&#x0a;Điểm hiện tại: {1:N0}&#x0a;&#x0a;Đây có phải là bạn không?</sys:String>
+
+    
+    
+    <sys:String x:Key="Str_Title_Loyalty">Khách hàng thân thiết</sys:String>
+
+
+    
+    <sys:String x:Key="Str_Msg_ConfirmLogout">Bạn có chắc chắn muốn đăng xuất?</sys:String>
+
+    <sys:String x:Key="Str_Msg_JustSoldOut">Món '{0}' vừa mới HẾT HÀNG!</sys:String>
+    <sys:String x:Key="Str_Msg_ItemSoldOut">Món {0} đã hết hàng!</sys:String>
+    <sys:String x:Key="Str_Msg_NotEnoughPoints">Bạn không đủ điểm để quay!</sys:String>
+    <sys:String x:Key="Str_Btn_Spinning">Đang quay...</sys:String>
+    <sys:String x:Key="Str_Btn_SpinNow_Format">QUAY NGAY ({0} điểm)</sys:String>
+
+    <sys:String x:Key="Str_Title_Result">Kết quả</sys:String>
+    <sys:String x:Key="Str_Title_Win">TRÚNG THƯỞNG</sys:String>
+    <sys:String x:Key="Str_Msg_SpinLost">Rất tiếc! Chúc bạn may mắn lần sau.</sys:String>
+    <sys:String x:Key="Str_Msg_SpinWon_Format">CHÚC MỪNG! Bạn trúng: {0}&#x0a;&#x0a;Voucher đã được lưu vào Kho quà của bạn.</sys:String>
+    <sys:String x:Key="Str_CurrentPoints_Format">Điểm tích lũy: {0:N0}</sys:String>
 </ResourceDictionary>
     
