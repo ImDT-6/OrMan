@@ -92,7 +92,7 @@ namespace OrMan.Views.Admin
             }
             else
             {
-                // Tạo món phụ (Đồ chiên hoặc Nước)
+                // Tạo món phụ (Đồ Chiên hoặc Nước)
                 MonAnResult = new MonPhu(txtMaMon.Text, txtTenMon.Text, giaBan, txtDonVi.Text, loaiTag)
                 {
                     HinhAnhUrl = txtHinhAnh.Text

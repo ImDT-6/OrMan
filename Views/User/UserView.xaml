@@ -148,7 +148,7 @@
                             </RadioButton>
 
                             <!-- Ăn Vặt: Icon Khoai Tây Chiên (French Fries) -->
-                            <RadioButton Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ chiên">
+                            <RadioButton Style="{StaticResource CategoryTabStyle}" Click="Filter_Click" Tag="Đồ Chiên">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <!-- [CẬP NHẬT] Đổi sang icon Khoai Tây Chiên -->
                                     <Path Data="M17,11H19V3H17V11M13,11H15V1H13V11M9,11H11V3H9V11M5,11H7V3H5V11M2,13V21C2,22.1 2.9,23 4,23H20C21.1,23 22,22.1 22,21V13H2Z" 

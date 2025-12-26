@@ -317,10 +317,9 @@
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Phân loại" Style="{StaticResource InputLabel}"/>
                             <ComboBox x:Name="cboLoaiMon" Style="{StaticResource ModernComboBox}">
-                                <ComboBoxItem Content="🔥 Mì Cay &amp; Lẩu" Tag="Mì Cay" IsSelected="True"/>
-                                <ComboBoxItem Content="🥟 Đồ Chiên &amp; Topping" Tag="Đồ Chiên"/>
+                                <ComboBoxItem Content="🔥 Mì Cay &amp; Topping" Tag="Mì Cay" IsSelected="True"/>
+                                <ComboBoxItem Content="🥟 Món khác" Tag="Đồ Chiên"/>
                                 <ComboBoxItem Content="🥤 Nước Uống" Tag="Nước Uống"/>
-                                <ComboBoxItem Content="🍚 Cơm Trộn" Tag="Cơm"/>
                             </ComboBox>
                         </StackPanel>
                     </Grid>
