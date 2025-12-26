@@ -15,7 +15,7 @@
             <Style x:Key="GlassDatePickerTextBoxStyle" TargetType="{x:Type DatePickerTextBox}">
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="SelectionBrush" Value="#8B5CF6"/>
+                <Setter Property="SelectionBrush" Value="#3B82F6"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
                 <Setter Property="Padding" Value="10,0,0,0"/>
@@ -85,11 +85,11 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#408B5CF6"/>
+                                    <Setter TargetName="Border" Property="Background" Value="#403B82F6"/>
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                                 <Trigger Property="HasSelectedDays" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#8B5CF6"/>
+                                    <Setter TargetName="Border" Property="Background" Value="#3B82F6"/>
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -114,15 +114,15 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#408B5CF6"/>
+                                    <Setter TargetName="Border" Property="Background" Value="#403B82F6"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#8B5CF6"/>
+                                    <Setter TargetName="Border" Property="Background" Value="#3B82F6"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Trigger>
                                 <Trigger Property="IsToday" Value="True">
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="#8B5CF6"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#3B82F6"/>
                                     <Setter TargetName="Border" Property="BorderThickness" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsBlackedOut" Value="True">
@@ -393,7 +393,7 @@
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,40,0">
                     <TextBlock Text="DOANH THU" FontSize="28" FontWeight="Bold" Foreground="White">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/>
+                            <DropShadowEffect Color="#3B82F6" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/>
                         </TextBlock.Effect>
                     </TextBlock>
                     <TextBlock Text="Theo dõi hiệu quả kinh doanh" Foreground="{StaticResource TextSecondary}" FontSize="13" Margin="0,4,0,0"/>
@@ -474,9 +474,9 @@
                 <!-- Segmented Control -->
                 <Border Grid.Column="0" Height="40" Background="#15FFFFFF" CornerRadius="12" Padding="4">
                     <Grid>
-                        <Border x:Name="ActiveIndicator" HorizontalAlignment="Left" Width="90" Background="{DynamicResource AccentGradient}" CornerRadius="10">
+                        <Border x:Name="ActiveIndicator" HorizontalAlignment="Left" Width="90" Background="#3B82F6" CornerRadius="10">
                             <Border.Effect>
-                                <DropShadowEffect Color="#8B5CF6" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
+                                <DropShadowEffect Color="#3B82F6" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
                             </Border.Effect>
                             <Border.RenderTransform>
                                 <TranslateTransform x:Name="IndicatorTransform" X="0"/>
@@ -505,7 +505,7 @@
                     </Border>
                     <Button Content="Xem Thống kê" Click="BtnLocCustom_Click" Style="{StaticResource GlassButtonStyle}" Background="{DynamicResource AccentGradient}" Foreground="White" Height="36" Width="110" FontSize="13" FontWeight="Bold" BorderThickness="0">
                         <Button.Effect>
-                            <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.5"/>
+                            <DropShadowEffect Color="#3B82F6" BlurRadius="15" ShadowDepth="0" Opacity="0.5"/>
                         </Button.Effect>
                     </Button>
                 </StackPanel>

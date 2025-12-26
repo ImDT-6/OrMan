@@ -232,13 +232,10 @@
                                 <Border x:Name="FilterIndicator" HorizontalAlignment="Left" VerticalAlignment="Stretch"
                                         CornerRadius="12" Width="0" Opacity="0">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#3B82F6" Offset="0"/>
-                                            <GradientStop Color="#2563EB" Offset="1"/>
-                                        </LinearGradientBrush>
+                                        <SolidColorBrush Color="#3B82F6"/>
                                     </Border.Background>
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#3B82F6" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+                                        <DropShadowEffect Color="#06B6D4" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
                                     </Border.Effect>
                                     <Border.RenderTransform>
                                         <TranslateTransform x:Name="FilterIndicatorTransform" X="0"/>
