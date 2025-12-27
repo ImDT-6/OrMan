@@ -62,16 +62,17 @@ Muốn chạy thử **OrMan** trên máy của bạn? Làm theo mấy bước đ
 
 ### Yêu cầu (Prerequisites)
 
-* ✅ Visual Studio 2019/2022 (có workload *.NET desktop development*).
+* ✅ Visual Studio 2019/2022 (có workload *.NET desktop development* và toolset Data storage and processing ).
 * ✅ SQL Server (hoặc LocalDB).
 * ✅ Visual C++ Redistributable 2015-2022
   
 ### Các bước thực hiện
 
-- Tải Visual C++ Redistributable 2015-2022
-- Tải file setup
-- Chạy file setup, sau đó sẽ xuất hiện shortcut ở màn hình chính
-- Click chuột phải 2 cái vào shortcut và nhìn thấy cửa số đăng nhập hiện lên là thành công
+- Tải và cài đặt Visual studio cùng với workload *.NET desktop development và toolset Data storage and processing
+- Tải và cài đặt Visual C++ Redistributable 2015-2022
+- Tải và chạy file setup MiCay.msi
+- Sau khi chạy file setup ở màn hình chính sẽ hiện một shortcut mới
+- Click chuột phải 2 lần vào shortcut và nhìn thấy cửa số đăng nhập hiện lên là thành công
 
 ## 👥 Tác giả (Authors)
 
