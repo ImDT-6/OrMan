@@ -11,6 +11,8 @@ using OrMan.Data;
 using OrMan.Helpers;
 using OrMan.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace OrMan.ViewModels.Admin
 {
@@ -42,7 +44,7 @@ namespace OrMan.ViewModels.Admin
         public string SearchText
         {
             get => _searchText;
-            set { _searchText = value; OnPropertyChanged(); LoadDataAsync(); }
+            set { _searchText = value; OnPropertyChanged(); DebouncedLoad(); }
         }
 
         public bool IsHistoryMode
@@ -53,13 +55,18 @@ namespace OrMan.ViewModels.Admin
 
         public ICommand XongMonCommand { get; private set; }
         public ICommand HoanTacCommand { get; private set; }
-        public ICommand XongTatCaCommand { get; private set; } // Lệnh xử lý nhanh
+        public ICommand XongTatCaCommand { get; private set; }
+
+        private readonly object _loadLock = new object();
+        private DateTime _lastRequested = DateTime.MinValue;
 
         public BepViewModel()
         {
             XongMonCommand = new RelayCommand<BepOrderItem>(XongMon);
             HoanTacCommand = new RelayCommand<BepOrderItem>(HoanTac);
             XongTatCaCommand = new RelayCommand<object>(XongTatCa);
+
+            DanhSachHienThi = new ObservableCollection<BepOrderItem>();
 
             LoadDataAsync();
 
@@ -68,37 +75,56 @@ namespace OrMan.ViewModels.Admin
             _timer.Start();
         }
 
+        // Debounce quick typing changes
+        private async void DebouncedLoad()
+        {
+            lock (_loadLock)
+            {
+                _lastRequested = DateTime.Now;
+            }
+
+            await Task.Delay(300);
+            DateTime t;
+            lock (_loadLock) { t = _lastRequested; }
+            if ((DateTime.Now - t).TotalMilliseconds >= 300)
+            {
+                LoadDataAsync();
+            }
+        }
+
         private async void LoadDataAsync()
         {
             try
             {
+                var st = SearchText; // local copy
                 var data = await Task.Run(() =>
                 {
                     using (var context = new MenuContext())
                     {
                         int targetStatus = IsHistoryMode ? 1 : 0;
-                        var today = DateTime.Today; // Mốc thời gian hôm nay
+                        var today = DateTime.Today;
 
-                        var query = from ct in context.ChiTietHoaDons.Include(x => x.MonAn)
-                                    join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
-                                    // [QUAN TRỌNG] Chỉ lấy đơn từ hôm nay trở đi để tránh lag và đơn cũ
-                                    where ct.TrangThaiCheBien == targetStatus && hd.NgayTao >= today
-                                    select new { ct, hd };
+                        var q = from ct in context.ChiTietHoaDons.Include(x => x.MonAn)
+                                join hd in context.HoaDons on ct.MaHoaDon equals hd.MaHoaDon
+                                where ct.TrangThaiCheBien == targetStatus && hd.NgayTao >= today
+                                select new { ct, hd };
 
-                        if (!string.IsNullOrEmpty(SearchText))
+                        if (!string.IsNullOrEmpty(st))
                         {
-                            string s = SearchText.ToLower();
-                            query = query.Where(x => x.ct.TenMonHienThi.ToLower().Contains(s) || x.hd.SoBan.ToString().Contains(s));
+                            string sLower = st.ToLower();
+                            q = q.Where(x => x.ct.TenMonHienThi.ToLower().Contains(sLower) || x.hd.SoBan.ToString().Contains(sLower));
                         }
 
-                        if (IsHistoryMode)
-                            query = query.OrderByDescending(x => x.ct.Id); // Lịch sử: Mới nhất lên đầu
-                        else
-                            query = query.OrderBy(x => x.hd.NgayTao); // Đang chờ: Cũ nhất làm trước
+                        q = IsHistoryMode ? q.OrderByDescending(x => x.ct.Id) : q.OrderBy(x => x.hd.NgayTao);
 
-                        return query.ToList().Select(item => {
+                        var list = q.AsNoTracking().ToList();
+
+                        var now = DateTime.Now;
+                        var result = new List<BepOrderItem>(list.Count);
+                        foreach (var item in list)
+                        {
                             var thoiGian = item.ct.ThoiGianGoiMon ?? item.hd.NgayTao;
-                            var phutCho = (DateTime.Now - thoiGian).TotalMinutes;
+                            var phutCho = (now - thoiGian).TotalMinutes;
 
                             string tenFull = item.ct.TenMonHienThi ?? "";
                             string tenGoc = tenFull;
@@ -110,7 +136,7 @@ namespace OrMan.ViewModels.Admin
                                 badge = tenFull.Substring(idx).Replace("(", "").Replace(")", "");
                             }
 
-                            return new BepOrderItem
+                            result.Add(new BepOrderItem
                             {
                                 SoBan = item.hd.SoBan,
                                 ChiTiet = item.ct,
@@ -119,25 +145,34 @@ namespace OrMan.ViewModels.Admin
                                 ThoiGianChoHienThi = IsHistoryMode ? $"{item.hd.NgayTao:HH:mm}" : $"{(int)phutCho} phút",
                                 MauSacCanhBao = IsHistoryMode ? "#475569" : (phutCho > 20 ? "#EF4444" : (phutCho > 10 ? "#F59E0B" : "#22C55E")),
                                 TrangThai = item.ct.TrangThaiCheBien
-                            };
-                        }).ToList();
+                            });
+                        }
+
+                        return result;
                     }
                 });
 
-                Application.Current.Dispatcher.Invoke(() => DanhSachHienThi = new ObservableCollection<BepOrderItem>(data));
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DanhSachHienThi.Clear();
+                    foreach (var it in data) DanhSachHienThi.Add(it);
+                });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("LoadDataAsync error: " + ex.Message);
+            }
         }
 
         private void XongMon(BepOrderItem item) => UpdateTrangThai(item, 1, -1);
         private void HoanTac(BepOrderItem item) => UpdateTrangThai(item, 0, 1);
 
-        // Hàm dọn dẹp nhanh các đơn đang hiển thị
         private void XongTatCa(object obj)
         {
             if (DanhSachHienThi == null || DanhSachHienThi.Count == 0 || IsHistoryMode) return;
 
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     using (var context = new MenuContext())
@@ -145,29 +180,41 @@ namespace OrMan.ViewModels.Admin
                         var ids = DanhSachHienThi.Select(x => x.ChiTiet.Id).ToList();
                         var details = context.ChiTietHoaDons.Where(x => ids.Contains(x.Id)).ToList();
 
+                        // preload all công thức cho các món trong details
+                        var maMons = details.Select(d => d.MaMon).Distinct().ToList();
+                        var congThucs = context.CongThucs.Where(c => maMons.Contains(c.MaMon)).ToList();
+                        var nguyenIds = congThucs.Select(c => c.NguyenLieuId).Distinct().ToList();
+                        var nguyenDict = context.NguyenLieus.Where(n => nguyenIds.Contains(n.Id)).ToDictionary(n => n.Id);
+
                         foreach (var ct in details)
                         {
                             ct.TrangThaiCheBien = 1;
-                            // Logic trừ kho (nếu cần xử lý hàng loạt)
-                            var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
-                            foreach (var f in congThucs)
+                            var congThucsFor = congThucs.Where(c => c.MaMon == ct.MaMon);
+                            foreach (var f in congThucsFor)
                             {
-                                var nl = context.NguyenLieus.Find(f.NguyenLieuId);
-                                if (nl != null) nl.SoLuongTon -= (f.SoLuongCan * ct.SoLuong);
+                                if (nguyenDict.TryGetValue(f.NguyenLieuId, out var nl))
+                                {
+                                    nl.SoLuongTon -= (f.SoLuongCan * ct.SoLuong);
+                                }
                             }
                         }
+
                         context.SaveChanges();
                         Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("XongTatCa error: " + ex.Message);
+                }
             });
         }
 
         private void UpdateTrangThai(BepOrderItem item, int status, int inventoryMultiplier)
         {
             if (item?.ChiTiet == null) return;
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     using (var context = new MenuContext())
@@ -176,18 +223,28 @@ namespace OrMan.ViewModels.Admin
                         if (ct != null)
                         {
                             ct.TrangThaiCheBien = status;
+
                             var congThucs = context.CongThucs.Where(x => x.MaMon == ct.MaMon).ToList();
+                            var nguyenIds = congThucs.Select(x => x.NguyenLieuId).Distinct().ToList();
+                            var nguyenDict = context.NguyenLieus.Where(n => nguyenIds.Contains(n.Id)).ToDictionary(n => n.Id);
+
                             foreach (var f in congThucs)
                             {
-                                var nl = context.NguyenLieus.Find(f.NguyenLieuId);
-                                if (nl != null) nl.SoLuongTon += (f.SoLuongCan * ct.SoLuong * inventoryMultiplier);
+                                if (nguyenDict.TryGetValue(f.NguyenLieuId, out var nl))
+                                {
+                                    nl.SoLuongTon += (f.SoLuongCan * ct.SoLuong * inventoryMultiplier);
+                                }
                             }
+
                             context.SaveChanges();
                             Application.Current.Dispatcher.Invoke(() => LoadDataAsync());
                         }
                     }
+                }                               
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("UpdateTrangThai error: " + ex.Message);
                 }
-                catch { }
             });
         }
 

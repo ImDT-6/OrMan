@@ -163,9 +163,12 @@ namespace OrMan.ViewModels
 
                 if (!string.IsNullOrEmpty(TuKhoaTimKiem))
                 {
-                    string k = TuKhoaTimKiem.ToLower();
-                    query = query.Where(x => x.MaHoaDon.ToLower().Contains(k) ||
-                                             (x.NguoiTao != null && x.NguoiTao.ToLower().Contains(k)));
+                    string k = TuKhoaTimKiem.Trim().ToLower();
+                    query = query.Where(x =>
+                        (x.MaHoaDon != null && x.MaHoaDon.ToLower().Contains(k)) ||
+                        (x.NguoiTao != null && x.NguoiTao.ToLower().Contains(k)) ||
+                        x.SoBan.ToString().Contains(k) // Thêm tìm theo số bàn
+                    );
                 }
 
                 var resultList = new ObservableCollection<HoaDon>(query.OrderByDescending(h => h.NgayTao));

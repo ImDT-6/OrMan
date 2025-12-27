@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Orman.Models
+namespace OrMan.Models
 {
     public class PhanThuong
     {
@@ -13,3 +9,4 @@ namespace Orman.Models
         public string MauSac { get; set; } // Màu nền của ô
     }
 }
+    

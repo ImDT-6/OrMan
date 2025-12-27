@@ -511,7 +511,7 @@
                 </StackPanel>
 
                 <!-- Search Box -->
-                <TextBox Grid.Column="4" Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SearchTextBoxStyle}" Tag="{StaticResource IconSearch}" Width="200" HorizontalAlignment="Right" Margin="0,0,15,0"/>
+                <TextBox Grid.Column="4" Text="{Binding TuKhoaTimKiem, UpdateSourceTrigger=PropertyChanged, Delay=300}" Style="{StaticResource SearchTextBoxStyle}" Tag="{StaticResource IconSearch}" Width="200" HorizontalAlignment="Right" Margin="0,0,15,0"/>
 
                 <!-- Export Button -->
                 <Button Grid.Column="5" Content="Xuất Excel" Click="BtnXuatExcel_Click" Style="{StaticResource GlassButtonStyle}" Width="100" Height="40" FontSize="13" Background="#20FFFFFF" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1"/>
