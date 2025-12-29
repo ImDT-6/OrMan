@@ -11,6 +11,17 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/InputStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="AutoColorTextBox" TargetType="TextBox" BasedOn="{StaticResource GlassTextBox}">
+                <Setter Property="BorderBrush" Value="Gray"/>
+
+                <Style.Triggers>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="#8B5CF6"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
         </ResourceDictionary>
     </Window.Resources>
 
@@ -25,20 +36,18 @@
                 <TextBlock Text="CẬP NHẬT KHÁCH HÀNG" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,30" HorizontalAlignment="Center"/>
 
                 <TextBox x:Name="txtPhone" 
-                        Style="{StaticResource GlassTextBox}" 
+                        Style="{StaticResource AutoColorTextBox}" 
                         Tag="{StaticResource IconPhone}" 
                         ToolTip="Số điện thoại"
+                        KeyDown="txtPhone_KeyDown"
                         Height="60" Margin="0,0,0,20"
-                        BorderBrush="#8B5CF6"
                         Opacity="1"/>
-
                 <TextBox x:Name="txtName" 
-                         Style="{StaticResource GlassTextBox}" 
+                         Style="{StaticResource AutoColorTextBox}" 
                          Tag="{StaticResource IconUser}"
                          ToolTip="Họ tên khách hàng"
-                         Height="60" Margin="0,0,0,35"
-                         BorderBrush="#8B5CF6"/>
-
+                         KeyDown="txtName_KeyDown"
+                         Height="60" Margin="0,0,0,35"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -56,7 +65,7 @@
                             Background="{DynamicResource AccentGradient}" 
                             Height="50" FontSize="15" FontWeight="Bold">
                         <Button.Effect>
-                            <DropShadowEffect Color="#8B5CF6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                            <DropShadowEffect Color="#3B82F6" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
                         </Button.Effect>
                     </Button>
                 </Grid>
