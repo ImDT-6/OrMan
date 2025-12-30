@@ -1,5 +1,4 @@
-﻿using Orman.Models;
-using OrMan.Data;
+﻿using OrMan.Data;
 using OrMan.Models; // Namespace chứa KhachHang và MenuContext
 using System;
 using System.Collections.Generic;

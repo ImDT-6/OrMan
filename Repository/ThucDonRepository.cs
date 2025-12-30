@@ -5,6 +5,7 @@ using OrMan.Models;
 using System.Collections.Generic;
 using System;
 using Microsoft.EntityFrameworkCore;
+using OrMan.Helpers;
 
 namespace OrMan.Services
 {
@@ -79,7 +80,8 @@ namespace OrMan.Services
 
                 if (hoaDon == null)
                 {
-                    maHD = DateTime.Now.ToString("yyMMddHHmmss");
+                    // Use shared helper to generate order id consistently
+                    maHD = OrderHelper.GenerateOrderId();
                     hoaDon = new HoaDon(maHD, tongTien, "Khách tại bàn", soBan, tienGiamGia);
                     context.HoaDons.Add(hoaDon);
                 }

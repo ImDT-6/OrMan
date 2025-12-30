@@ -41,14 +41,27 @@ namespace OrMan.Views.Admin
 
         private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // 1. Nếu đang nhập liệu (TextBox/PasswordBox) thì không xử lý phím tắt
+            // (Tránh việc đang gõ văn bản bấm lộn nút Esc bị văng ra ngoài)
             if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox)
                 return;
 
+            // --- [MỚI] XỬ LÝ PHÍM ESC ĐỂ ĐĂNG XUẤT ---
+            if (e.Key == Key.Escape)
+            {
+                // Gọi lại hàm xử lý của nút Đăng xuất (hiện thông báo xác nhận)
+                Button_DangXuat_Click(sender, null);
+
+                e.Handled = true; // Đánh dấu đã xử lý để không lan truyền sự kiện tiếp
+                return;
+            }
+            // ------------------------------------------
+
+            // 2. Xử lý điều hướng Menu bằng phím mũi tên (Code cũ)
             if (e.Key == Key.Left || e.Key == Key.Right)
             {
                 var radioButtons = MenuStackPanel.Children.OfType<RadioButton>().ToList();
 
-                // Tìm nút đang được check (IsChecked == true)
                 var currentBtn = radioButtons.FirstOrDefault(r => r.IsChecked == true);
                 if (currentBtn == null) return;
 
@@ -63,10 +76,7 @@ namespace OrMan.Views.Admin
                 var nextBtn = radioButtons[index];
                 nextBtn.IsChecked = true;
 
-                // Gọi hàm xử lý click để chuyển trang
                 MenuButton_Click(nextBtn, null);
-
-                // --- QUAN TRỌNG: Giữ lại Focus cho AdminView sau khi chuyển trang ---
                 this.Focus();
 
                 e.Handled = true;

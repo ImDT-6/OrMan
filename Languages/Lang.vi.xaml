@@ -82,6 +82,12 @@
     <sys:String x:Key="Str_Tag_Noise">Ồn ào</sys:String>
     <sys:String x:Key="Str_Tag_Hot">Nóng nực</sys:String>
 
+    <sys:String x:Key="Str_Tag_GoodFood">Món ăn ngon</sys:String>
+    <sys:String x:Key="Str_Tag_GoodService">Phục vụ tốt</sys:String>
+    <sys:String x:Key="Str_Tag_Clean">Sạch sẽ</sys:String>
+    <sys:String x:Key="Str_Tag_NiceView">Không gian đẹp</sys:String>
+    <sys:String x:Key="Str_Tag_GoodPrice">Giá hợp lý</sys:String>
+
     <sys:String x:Key="Str_Rate_1">Thất vọng 😟</sys:String>
     <sys:String x:Key="Str_Rate_2">Tệ 😐</sys:String>
     <sys:String x:Key="Str_Rate_3">Bình thường 🙂</sys:String>
