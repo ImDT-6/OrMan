@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -43,6 +44,10 @@ namespace OrMan.Views.User
 
             // Gọi filter mặc định để hiển thị món ăn ngay khi load xong
             FilterByTag("Mì Cay");
+
+            // [MỚI] Focus vào màn hình để bắt được phím Esc ngay lập tức
+            this.Focus();
+            Keyboard.Focus(this);
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
@@ -390,6 +395,22 @@ namespace OrMan.Views.User
                 BtnLuckyWheel_Click(sender, e); // Gọi lại để nhập SĐT mới
             }
             // Nếu Cancel thì thôi, không làm gì
+        }
+
+        // [MỚI] Xử lý phím tắt
+        private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Nếu đang nhập liệu (ví dụ tìm kiếm món) thì không logout
+            if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox)
+                return;
+
+            if (e.Key == Key.Escape)
+            {
+                // Gọi lại hàm xử lý của nút Đăng xuất (đã có sẵn hộp thoại xác nhận)
+                BtnDangXuat_Click(sender, null);
+
+                e.Handled = true;
+            }
         }
         private string GetRes(string key)
         {
