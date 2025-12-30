@@ -620,7 +620,7 @@
                 <Border VerticalAlignment="Top" HorizontalAlignment="Center" 
         Background="#80000000" Margin="0,10,0,0" 
         Padding="10,5" CornerRadius="15">
-                    <StackPanel Orientation="Horizontal">
+                    <!--<StackPanel Orientation="Horizontal">
                         <TextBlock Text="Giờ giả lập: " Foreground="White" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding ElementName=TestTimeSlider, Path=Value, StringFormat={}{0:00}h}" 
                    Foreground="#FFEB3B" FontWeight="Bold" Width="30" VerticalAlignment="Center"/>
@@ -629,7 +629,7 @@
                 IsSnapToTickEnabled="True" TickFrequency="1" 
                 VerticalAlignment="Center" Margin="10,0"
                 ValueChanged="TestTimeSlider_ValueChanged"/>
-                    </StackPanel>
+                    </StackPanel>-->
                 </Border>
             </Grid>
         </Border>
